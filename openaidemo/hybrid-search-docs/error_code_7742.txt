@@ -1,0 +1,5 @@
+Incident runbook.
+Checkout workers stop processing payments and emit ERR-7742 in the logs.
+Root cause: stale session keys after a blue/green deploy.
+Flush the payment-session namespace, then restart the worker pool.
+Only apply this runbook when that exact code is present.

@@ -1,0 +1,14 @@
+.vscode
+.venv-1
+.env
+*-shm
+*venv
+.pytest_cache
+uv.lock
+*-wal
+*.bin
+dist
+__pycache__
+chroma*
+checkpoints*
+chat_threads.json

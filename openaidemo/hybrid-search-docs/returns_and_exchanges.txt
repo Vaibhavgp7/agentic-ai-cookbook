@@ -1,0 +1,5 @@
+Retail counter guide for sending items back.
+Unopened goods may be sent back in exchange for a refund.
+Opened accessories may be swapped when they remain resalable.
+Refunds post after the warehouse scans the parcel.
+Delivery fees stay with the store unless the warehouse shipped the wrong item.
