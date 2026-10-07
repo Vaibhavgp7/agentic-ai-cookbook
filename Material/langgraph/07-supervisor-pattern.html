@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Supervisor Pattern Lab: A Review Desk That Decides Its Own Next Step</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+      color: #0f172a;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .note, .exercise, .instructor, .predict {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .instructor {
+      border-left: 4px solid #d97706;
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: rgba(217, 119, 6, 0.35);
+    }
+    .predict {
+      border-left: 4px solid #9333ea;
+      background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+      border-color: rgba(147, 51, 234, 0.35);
+    }
+    .exercise-title, .instructor-title, .predict-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+    }
+    .exercise-title { color: #166534; }
+    .instructor-title { color: #92400e; }
+    .predict-title { color: #6b21a8; }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 0.75rem 0 1.25rem;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 0.45rem 0.6rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #eff6ff;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Supervisor Pattern Lab: A Review Desk That Decides Its Own Next Step</h1>
+
+  <div class="note">
+    <strong>How to use this guide</strong>
+    <ol>
+      <li>Open your code editor (VS Code / Cursor / Jupyter / any IDE) and a terminal.</li>
+      <li>Create a folder for this lab and a Jupyter notebook in it named <code>07b-supervisor-invoice-exception.ipynb</code>.</li>
+      <li>Place this HTML guide side-by-side with your editor.</li>
+      <li>Whenever you see <strong>Your Task</strong>, copy the code into a <strong>new notebook cell</strong> and run it.</li>
+      <li>When you see <strong>Predict First</strong>, pause and write down your guess before running anything. That's where most of the learning happens.</li>
+    </ol>
+  </div>
+
+  <h2>1. The Business Story (No Finance Background Needed)</h2>
+
+  <h3>1.1 How a Company Buys Things</h3>
+  <p>
+    Imagine your company needs 10 widgets from a supplier called Acme. Three documents get created along the way:
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>Document</th>
+        <th>Who creates it</th>
+        <th>What it says</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Purchase Order (PO)</strong></td>
+        <td>Your company</td>
+        <td>“We will buy 10 widgets at $100 each.” This is the agreed deal.</td>
+      </tr>
+      <tr>
+        <td><strong>Goods Receipt</strong></td>
+        <td>Your warehouse</td>
+        <td>“10 widgets actually arrived.”</td>
+      </tr>
+      <tr>
+        <td><strong>Invoice</strong></td>
+        <td>The supplier</td>
+        <td>“Please pay us for 10 widgets at $___ each.” This is the bill.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    The team that pays supplier bills is called <strong>Accounts Payable (AP)</strong>.
+    Their golden rule: <strong>only pay a bill when it agrees with the PO and the goods receipt.</strong>
+  </p>
+
+  <h3>1.2 When Things Don't Agree</h3>
+  <p>
+    Sometimes the invoice price is higher than the PO price. The invoice is put <strong>on hold</strong>, and
+    someone has to investigate. Three more ideas help here:
+  </p>
+  <ul>
+    <li><strong>Price tolerance:</strong> Small differences are fine. Our company allows the invoice price to be up to <strong>5 percent</strong> above the PO.</li>
+    <li><strong>PO amendment:</strong> Sometimes the buyer and supplier officially agree to change the price after the PO was created, for example because raw materials got more expensive. If an amendment exists, the <em>amended</em> price is the real deal.</li>
+    <li><strong>Credit request:</strong> If the supplier overcharged and there is no amendment, AP asks the supplier to reduce the bill by the extra amount.</li>
+  </ul>
+
+  <h3>1.3 What We Are Automating</h3>
+  <p>
+    Today, an AP clerk opens each on-hold invoice and does this by hand:
+  </p>
+  <ol>
+    <li>Pulls up the invoice, the PO, and the goods receipt, and works out the price difference.</li>
+    <li>Checks the difference against the 5 percent rule.</li>
+    <li>If it's over the limit, checks whether the PO price was amended. If it was, redoes the comparison with the new price.</li>
+    <li>Records the decision: <strong>Approved to pay</strong> or <strong>Credit requested</strong>.</li>
+  </ol>
+  <p>
+    Notice step 3: <strong>what the clerk does next depends on what they just found.</strong>
+    That is exactly the kind of work a supervisor agent is good at.
+  </p>
+
+  <h3>1.4 Our Agent Team</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Agent</th>
+        <th>Job</th>
+        <th>Data it can reach</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>Matcher</code></td>
+        <td>Compares invoice vs PO vs receipt and calculates the price gap. Can re-compare using an amended price.</td>
+        <td>Invoices, POs, receipts</td>
+      </tr>
+      <tr>
+        <td><code>PolicyChecker</code></td>
+        <td>Decides whether the gap is within the 5 percent tolerance.</td>
+        <td>Policy rules</td>
+      </tr>
+      <tr>
+        <td><code>ContractChecker</code></td>
+        <td>Checks whether the PO price was officially amended.</td>
+        <td>PO amendments</td>
+      </tr>
+      <tr>
+        <td><code>CaseUpdater</code></td>
+        <td>Records the final decision on the invoice.</td>
+        <td>Invoice status and note (write access)</td>
+      </tr>
+      <tr>
+        <td><strong>Supervisor</strong></td>
+        <td>Reads what each worker reported and decides who acts next, or finishes. Plays the role of a senior clerk.</td>
+        <td>None. It only reads the conversation.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>1.5 Today's Three On-Hold Invoices</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Invoice</th>
+        <th>Supplier and item</th>
+        <th>PO price</th>
+        <th>Invoice price</th>
+        <th>Received</th>
+        <th>PO amendment on file?</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>INV-1044</td>
+        <td>Acme, 10 widgets</td>
+        <td>$100</td>
+        <td>$112</td>
+        <td>10</td>
+        <td>Yes: price changed to $110</td>
+      </tr>
+      <tr>
+        <td>INV-1045</td>
+        <td>Brightline, 5 brackets</td>
+        <td>$50</td>
+        <td>$60</td>
+        <td>5</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td>INV-1046</td>
+        <td>Corex, 20 gears</td>
+        <td>$8.00</td>
+        <td>$8.20</td>
+        <td>20</td>
+        <td>No</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="predict">
+    <div class="predict-title">Predict First</div>
+    <p>
+      Using the clerk's steps in 1.3, write down which agents you think will be called for each invoice, in order.
+      Hint: one invoice needs 3 worker calls, one needs 4, and one needs 6.
+      You will check your answers in section 7.
+    </p>
+  </div>
+
+  <h2>2. Setup</h2>
+
+  <h3>2.1 Install Packages</h3>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>In your terminal (not inside the notebook), run:</p>
+  </div>
+
+  <pre><code>pip install langgraph langchain langchain-openai python-dotenv pandas</code></pre>
+
+  <h3>2.2 Create the <code>.env</code> File</h3>
+  <p>
+    In your lab folder, create a text file named <code>.env</code> containing your OpenAI key on one line:
+  </p>
+
+  <pre><code>OPENAI_API_KEY=your_key_here</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste the code below, and run it. It should print <code>True</code>.</p>
+  </div>
+
+  <pre><code>import os
+from dotenv import load_dotenv
+
+load_dotenv()</code></pre>
+
+  <h2>3. Create the Database</h2>
+  <p>
+    This cell creates <code>ap_exceptions.db</code> with five small tables that hold exactly the data from section 1.5.
+    Running it again wipes and rebuilds everything, which puts all three invoices back <strong>On hold</strong>.
+    Use it whenever you want a fresh start.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste the code below, and run it. You should see <code>Database ready: ap_exceptions.db</code>.</p>
+  </div>
+
+  <pre><code>import sqlite3
+
+def init_database():
+    conn = sqlite3.connect("ap_exceptions.db")
+    c = conn.cursor()
+
+    for table in ["invoices", "purchase_orders", "receipts", "po_amendments", "policy"]:
+        c.execute(f"DROP TABLE IF EXISTS {table}")
+
+    c.execute('''CREATE TABLE invoices
+                 (invoice_id TEXT PRIMARY KEY,
+                  vendor TEXT,
+                  po_id TEXT,
+                  item TEXT,
+                  quantity INTEGER,
+                  unit_price REAL,
+                  status TEXT,
+                  note TEXT)''')
+
+    c.execute('''CREATE TABLE purchase_orders
+                 (po_id TEXT PRIMARY KEY,
+                  vendor TEXT,
+                  item TEXT,
+                  quantity INTEGER,
+                  unit_price REAL)''')
+
+    c.execute('''CREATE TABLE receipts
+                 (po_id TEXT PRIMARY KEY,
+                  quantity_received INTEGER)''')
+
+    c.execute('''CREATE TABLE po_amendments
+                 (po_id TEXT,
+                  new_unit_price REAL,
+                  effective_date TEXT,
+                  reason TEXT)''')
+
+    c.execute('''CREATE TABLE policy
+                 (rule_name TEXT PRIMARY KEY,
+                  max_percent REAL,
+                  description TEXT)''')
+
+    c.executemany("INSERT INTO invoices VALUES (?,?,?,?,?,?,?,?)", [
+        ("INV-1044", "Acme",       "PO-17", "Widget",  10, 112.00, "On hold", ""),
+        ("INV-1045", "Brightline", "PO-18", "Bracket",  5,  60.00, "On hold", ""),
+        ("INV-1046", "Corex",      "PO-19", "Gear",    20,   8.20, "On hold", ""),
+    ])
+
+    c.executemany("INSERT INTO purchase_orders VALUES (?,?,?,?,?)", [
+        ("PO-17", "Acme",       "Widget",  10, 100.00),
+        ("PO-18", "Brightline", "Bracket",  5,  50.00),
+        ("PO-19", "Corex",      "Gear",    20,   8.00),
+    ])
+
+    c.executemany("INSERT INTO receipts VALUES (?,?)", [
+        ("PO-17", 10),
+        ("PO-18", 5),
+        ("PO-19", 20),
+    ])
+
+    # Only PO-17 has an official price change
+    c.execute("INSERT INTO po_amendments VALUES (?,?,?,?)",
+              ("PO-17", 110.00, "2026-09-01", "Steel cost increase agreed with the buyer"))
+
+    c.execute("INSERT INTO policy VALUES (?,?,?)", (
+        "price_tolerance",
+        5.0,
+        "Invoice unit price may be at most 5 percent above the PO unit price. "
+        "Within tolerance: approve payment. Above tolerance: request a credit for the extra amount.",
+    ))
+
+    conn.commit()
+    conn.close()
+    print("Database ready: ap_exceptions.db")
+
+init_database()</code></pre>
+
+  <h2>4. Give Each Agent Its Own Tools</h2>
+  <p>
+    Instead of handing every agent a general SQL tool, each agent gets a few small Python functions that reach
+    <strong>only its own data</strong>. This is how agents are scoped in production: the PolicyChecker literally
+    has no function that can read a PO, so it <em>must</em> rely on what the Matcher reported.
+  </p>
+  <p>
+    The <code>@tool</code> decorator turns a Python function into something an agent can call.
+    The docstring is what the agent reads to decide when to use it, so keep docstrings clear.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>import sqlite3
+from typing import Literal
+from langchain_core.tools import tool
+
+DB_PATH = "ap_exceptions.db"
+
+def run_query(sql, params=()):
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    rows = [dict(row) for row in conn.execute(sql, params).fetchall()]
+    conn.close()
+    return rows
+
+# ---------- Matcher tools ----------
+@tool
+def get_invoice(invoice_id: str) -> dict:
+    """Get one supplier invoice by id, for example INV-1044."""
+    rows = run_query("SELECT * FROM invoices WHERE invoice_id = ?", (invoice_id,))
+    return rows[0] if rows else {"error": f"No invoice {invoice_id}"}
+
+@tool
+def get_purchase_order(po_id: str) -> dict:
+    """Get the original purchase order (agreed item, quantity, unit price) by id, for example PO-17."""
+    rows = run_query("SELECT * FROM purchase_orders WHERE po_id = ?", (po_id,))
+    return rows[0] if rows else {"error": f"No purchase order {po_id}"}
+
+@tool
+def get_receipt(po_id: str) -> dict:
+    """Get how many units the warehouse actually received for a purchase order."""
+    rows = run_query("SELECT * FROM receipts WHERE po_id = ?", (po_id,))
+    return rows[0] if rows else {"error": f"No receipt for {po_id}"}
+
+@tool
+def compare_prices(invoice_unit_price: float, po_unit_price: float, quantity: int) -> dict:
+    """Calculate how far the invoice unit price is above the PO unit price."""
+    unit_difference = invoice_unit_price - po_unit_price
+    return {
+        "unit_difference": round(unit_difference, 2),
+        "total_difference": round(unit_difference * quantity, 2),
+        "percent_over": round(unit_difference / po_unit_price * 100, 2),
+    }
+
+# ---------- PolicyChecker tool ----------
+@tool
+def get_price_tolerance() -> dict:
+    """Get the company's price tolerance rule (max_percent)."""
+    return run_query("SELECT * FROM policy WHERE rule_name = 'price_tolerance'")[0]
+
+# ---------- ContractChecker tool ----------
+@tool
+def get_po_amendments(po_id: str) -> dict:
+    """List official price amendments for a purchase order. An empty list means the price was never changed."""
+    rows = run_query(
+        "SELECT * FROM po_amendments WHERE po_id = ? ORDER BY effective_date", (po_id,)
+    )
+    return {"po_id": po_id, "amendments": rows}
+
+# ---------- CaseUpdater tool ----------
+@tool
+def update_case(
+    invoice_id: str,
+    status: Literal["Approved to pay", "Credit requested"],
+    note: str,
+) -> dict:
+    """Record the final decision on an invoice and return the updated row."""
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(
+        "UPDATE invoices SET status = ?, note = ? WHERE invoice_id = ?",
+        (status, note, invoice_id),
+    )
+    conn.commit()
+    conn.close()
+    rows = run_query(
+        "SELECT invoice_id, status, note FROM invoices WHERE invoice_id = ?", (invoice_id,)
+    )
+    return rows[0] if rows else {"error": f"No invoice {invoice_id}"}
+
+matcher_tools = [get_invoice, get_purchase_order, get_receipt, compare_prices]
+policy_tools = [get_price_tolerance]
+contract_tools = [get_po_amendments]
+case_tools = [update_case]
+
+print("Tools ready.")</code></pre>
+
+  <p>
+    <strong>Two details worth noticing:</strong> <code>compare_prices</code> does the arithmetic in Python so the LLM
+    doesn't have to, and <code>update_case</code> only accepts the two allowed statuses. Letting code do the
+    precise, risky parts and letting the LLM do the reasoning is a good habit for real agent systems.
+  </p>
+
+  <h2>5. Create the Four Worker Agents</h2>
+  <p>
+    Each worker is a ReAct agent built with <code>create_agent</code>: it reasons, calls its tools, reads the results, and answers.
+    Every worker must end with one line starting with <code>CONCLUSION:</code> followed by a clear keyword
+    such as <code>WITHIN TOLERANCE</code> or <code>AMENDMENT FOUND</code>.
+    Those keywords are the signals the supervisor reads to make its decisions.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>from langchain.agents import create_agent
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(model="gpt-4.1-mini", temperature=0)
+
+COMMON_RULES = """
+Never ask for confirmation. Work autonomously.
+Keep your answer short: a few lines of findings, then the CONCLUSION line.
+"""
+
+matcher_agent = create_agent(
+    model=llm,
+    tools=matcher_tools,
+    system_prompt="""You are the Matcher on an accounts-payable review desk.
+You compare a supplier invoice with its purchase order (PO) and goods receipt.
+
+Steps:
+1. get_invoice for the invoice in the request. Note its po_id.
+2. get_purchase_order and get_receipt for that po_id.
+3. Check that invoice quantity, PO quantity, and received quantity agree.
+4. Call compare_prices with the invoice unit price, the PO unit price, and the invoice quantity.
+
+RE-MATCH RULE: If the conversation contains a ContractChecker message with AMENDMENT FOUND for this PO,
+use the amended unit price as the PO unit price in compare_prices, and use RE-MATCH in your conclusion.
+
+End with exactly one line in one of these forms:
+CONCLUSION: MATCH INV-1044 (PO PO-17). Quantity matches. Invoice 112 vs PO 100: 12.0 percent over, 120.0 total.
+CONCLUSION: RE-MATCH INV-1044 (PO PO-17) using amended price 110. Quantity matches. Invoice 112 vs PO 110: 1.82 percent over, 20.0 total.
+""" + COMMON_RULES,
+)
+
+policy_agent = create_agent(
+    model=llm,
+    tools=policy_tools,
+    system_prompt="""You are the PolicyChecker on an accounts-payable review desk.
+You decide whether a price gap is acceptable under company policy.
+
+Use the MOST RECENT Matcher conclusion in the conversation (MATCH or RE-MATCH).
+Call get_price_tolerance to read max_percent. Compare percent_over with max_percent.
+You cannot see invoices, POs, or amendments. Never invent numbers.
+
+End with exactly one line in one of these forms:
+CONCLUSION: WITHIN TOLERANCE. 1.82 percent is within the 5 percent limit. Approve payment.
+CONCLUSION: EXCEEDS TOLERANCE. 12.0 percent is above the 5 percent limit. Extra charge is 120.0.
+
+If the user only asks about the policy itself, report it and end with:
+CONCLUSION: POLICY. Invoice price may be at most 5 percent above the PO.
+""" + COMMON_RULES,
+)
+
+contract_agent = create_agent(
+    model=llm,
+    tools=contract_tools,
+    system_prompt="""You are the ContractChecker on an accounts-payable review desk.
+You check whether a purchase order's price was officially amended.
+
+Find the PO id in the Matcher's conclusion or in the user's request.
+Call get_po_amendments for it. If there are several amendments, the latest effective_date wins.
+
+End with exactly one line in one of these forms:
+CONCLUSION: AMENDMENT FOUND. PO-17 unit price changed to 110 on 2026-09-01 (reason).
+CONCLUSION: NO AMENDMENT. PO-18 price is unchanged.
+""" + COMMON_RULES,
+)
+
+case_agent = create_agent(
+    model=llm,
+    tools=case_tools,
+    system_prompt="""You are the CaseUpdater on an accounts-payable review desk.
+You record the final decision on the invoice from the user's request.
+
+Read the MOST RECENT PolicyChecker conclusion:
+- WITHIN TOLERANCE  -> status "Approved to pay"
+- EXCEEDS TOLERANCE -> status "Credit requested"
+Write a one-sentence note with the percent over, the 5 percent limit, and the credit amount if any.
+If an amended PO price was used, mention the amendment in the note.
+Call update_case once. Do not recalculate anything.
+
+End with exactly one line. The status in that line must be the same status you passed to update_case:
+CONCLUSION: CASE UPDATED. INV-1044 is now Approved to pay.
+CONCLUSION: CASE UPDATED. INV-1045 is now Credit requested.
+""" + COMMON_RULES,
+)
+
+print("Workers ready.")</code></pre>
+
+  <h2>6. Create the Supervisor</h2>
+  <p>
+    The warehouse lab gave its supervisor a fixed sequence. This supervisor gets a <strong>playbook instead</strong>:
+    rules like “if the price is over the limit and nobody has checked the contract, check the contract.”
+    Which rule applies depends on <strong>what the workers have found so far</strong>, so different data leads to different paths.
+  </p>
+  <p>
+    The supervisor also returns a short <code>reason</code> with every decision. You will see it printed,
+    so you can follow its thinking hop by hop.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from pydantic import BaseModel, Field
+
+supervisor_prompt = """
+You are the supervisor of an accounts-payable review desk. You do not do the work yourself.
+After each worker reports, read the whole conversation and decide who should act next.
+
+Your workers:
+- Matcher: compares invoice vs PO vs receipt. Can re-match using an amended PO price.
+- PolicyChecker: decides whether a price gap is within the allowed tolerance.
+- ContractChecker: checks whether the PO price was officially amended.
+- CaseUpdater: records the final decision on the invoice.
+
+STEP 1: Look at the user's FIRST message and classify it:
+- RESOLVE: the user asks to resolve, review, or process an invoice.
+- QUESTION: the user asks for one fact (for example "Has PO-17 been amended?" or "What is our price tolerance?").
+
+STEP 2 for RESOLVE requests: follow this playbook. Base every decision on the latest findings:
+- No Matcher conclusion yet -> Matcher.
+- The most recent worker message is from Matcher -> PolicyChecker (new numbers need a policy verdict).
+- PolicyChecker says WITHIN TOLERANCE -> CaseUpdater.
+- PolicyChecker says EXCEEDS TOLERANCE:
+    - ContractChecker has not run yet -> ContractChecker (maybe the PO price was changed).
+    - ContractChecker already ran -> CaseUpdater (nothing else can explain the gap).
+- ContractChecker says AMENDMENT FOUND -> Matcher (re-match against the amended price).
+- ContractChecker says NO AMENDMENT -> CaseUpdater.
+- CaseUpdater says CASE UPDATED -> FINISH.
+
+STEP 2 for QUESTION requests: the playbook above does NOT apply.
+- No worker has answered yet -> the one worker who owns that fact
+  (amendments -> ContractChecker, tolerance or policy -> PolicyChecker, invoice or PO details -> Matcher).
+- That worker has posted its CONCLUSION -> FINISH. Do not re-match, apply policy, or update any case.
+- You cannot answer questions yourself, so never FINISH before a worker has answered.
+
+Safety limits: ContractChecker at most once per request. CaseUpdater at most once per request.
+"""
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", supervisor_prompt),
+    MessagesPlaceholder(variable_name="messages"),
+    ("system", "Based on the findings so far, who should act next? Or should we FINISH?"),
+])
+
+class Route(BaseModel):
+    request_type: Literal["RESOLVE", "QUESTION"] = Field(description="Classification of the user's first message.")
+    reason: str = Field(description="One short sentence: what the latest finding is and why this is the next step.")
+    next: Literal["Matcher", "PolicyChecker", "ContractChecker", "CaseUpdater", "FINISH"]
+
+supervisor_chain = prompt | llm.with_structured_output(Route)
+
+def supervisor_node(state):
+    route = supervisor_chain.invoke({"messages": state["messages"]})
+    print(f"\n>>> SUPERVISOR [{route.request_type}] -> {route.next}   (reason: {route.reason})")
+    return {"next": route.next}</code></pre>
+
+  <p>
+    <strong>Why these choices:</strong>
+  </p>
+  <ul>
+    <li><code>Literal[...]</code> means the model can only answer with a real worker name or <code>FINISH</code>, so routing can't break on a typo.</li>
+    <li><code>request_type</code> makes the supervisor decide first whether this is a full resolve job or a one-fact question. Without it, a simple question like “Has PO-17 been amended?” can accidentally trigger the whole playbook.</li>
+    <li><code>reason</code> comes <em>before</em> <code>next</code>, which nudges the model to explain first and decide second.</li>
+    <li>The safety limits stop the supervisor from looping if a worker gives an unclear answer.</li>
+  </ul>
+
+  <h2>7. Build and Run the Graph</h2>
+
+  <h3>7.1 Wire the Graph</h3>
+  <p>
+    Same shape as the warehouse lab: start at the supervisor, route on <code>state["next"]</code>,
+    and send every worker back to the supervisor. <code>agent_node</code> labels each worker's reply with its name,
+    so the supervisor knows who said what.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>import operator
+from typing_extensions import TypedDict, Annotated
+from langchain_core.messages import HumanMessage
+from langgraph.graph import StateGraph, END
+
+class AgentState(TypedDict):
+    messages: Annotated[list, operator.add]
+    next: str
+
+def agent_node(agent, name):
+    """Wrap a worker so it runs on the shared conversation and labels its reply."""
+    def node(state):
+        result = agent.invoke({"messages": state["messages"]})
+        content = result["messages"][-1].content
+        print(f"\n[{name}]\n{content}")
+        return {"messages": [HumanMessage(content=f"{name}: {content}", name=name)]}
+    return node
+
+workflow = StateGraph(AgentState)
+workflow.add_node("supervisor", supervisor_node)
+workflow.add_node("Matcher", agent_node(matcher_agent, "Matcher"))
+workflow.add_node("PolicyChecker", agent_node(policy_agent, "PolicyChecker"))
+workflow.add_node("ContractChecker", agent_node(contract_agent, "ContractChecker"))
+workflow.add_node("CaseUpdater", agent_node(case_agent, "CaseUpdater"))
+
+workflow.set_entry_point("supervisor")
+workflow.add_conditional_edges(
+    "supervisor",
+    lambda state: state["next"],
+    {
+        "Matcher": "Matcher",
+        "PolicyChecker": "PolicyChecker",
+        "ContractChecker": "ContractChecker",
+        "CaseUpdater": "CaseUpdater",
+        "FINISH": END,
+    },
+)
+for worker in ["Matcher", "PolicyChecker", "ContractChecker", "CaseUpdater"]:
+    workflow.add_edge(worker, "supervisor")
+
+graph = workflow.compile()</code></pre>
+
+  <h3>7.2 Draw the Graph</h3>
+  <p>
+    This needs a network connection. If it fails, skip it. The graph is already compiled.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>from IPython.display import Image
+Image(graph.get_graph().draw_mermaid_png())</code></pre>
+
+  <div class="note">
+    <strong>Look closely at the picture.</strong> There is no arrow from Matcher to PolicyChecker, or from ContractChecker to Matcher.
+    Every worker only goes back to the supervisor. Any path you see in the next steps is decided by the supervisor at run time, not drawn into the graph.
+  </div>
+
+  <h3>7.3 A Helper to Resolve One Invoice</h3>
+  <p>
+    Every invoice gets the <strong>same sentence</strong>. At the end, the helper prints the path the supervisor chose.
+    <code>recursion_limit</code> is a hard stop in case anything loops.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>def resolve(invoice_id):
+    query = f"Resolve on-hold invoice {invoice_id}."
+    print("=" * 70)
+    print("REQUEST:", query)
+    print("=" * 70)
+
+    result = graph.invoke(
+        {"messages": [HumanMessage(content=query)]},
+        config={"recursion_limit": 25},
+    )
+
+    path = [m.name for m in result["messages"] if m.name]
+    print("\nPATH TAKEN:", " -> ".join(path + ["FINISH"]))
+    print(f"Worker calls: {len(path)}")
+    return path</code></pre>
+
+  <h3>7.4 Run the Simple Case: INV-1046</h3>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste the code below, and run it. Read each supervisor <code>reason</code> line as it prints.</p>
+  </div>
+
+  <pre><code>path_1046 = resolve("INV-1046")</code></pre>
+
+  <p>
+    <strong>Expected:</strong> <code>Matcher -> PolicyChecker -> CaseUpdater -> FINISH</code>.
+    The gap is 2.5 percent, which is within the 5 percent limit, so the supervisor goes straight to CaseUpdater.
+    <strong>It never calls the ContractChecker</strong>, because there was nothing to explain.
+  </p>
+
+  <h3>7.5 Run the Overcharge Case: INV-1045</h3>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>path_1045 = resolve("INV-1045")</code></pre>
+
+  <p>
+    <strong>Expected:</strong> <code>Matcher -> PolicyChecker -> ContractChecker -> CaseUpdater -> FINISH</code>.
+    The gap is 20 percent, so the supervisor checks the contract. No amendment is found, so it goes to CaseUpdater,
+    which records <strong>Credit requested</strong> for $50.
+  </p>
+
+  <h3>7.6 Run the Interesting Case: INV-1044</h3>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste the code below, and run it. Watch what happens right after the ContractChecker reports.</p>
+  </div>
+
+  <pre><code>path_1044 = resolve("INV-1044")</code></pre>
+
+  <p>
+    <strong>Expected:</strong>
+    <code>Matcher -> PolicyChecker -> ContractChecker -> Matcher -> PolicyChecker -> CaseUpdater -> FINISH</code>.
+    The supervisor sends work <strong>back</strong> to the Matcher and the PolicyChecker, because the ContractChecker found
+    an amended price of $110. Against $110, the $112 invoice is only 1.82 percent over, so it's <strong>Approved to pay</strong>.
+  </p>
+
+  <h3>7.7 Compare the Three Paths</h3>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste the code below, and run it. Then check your predictions from section 1.5.</p>
+  </div>
+
+  <pre><code>import sqlite3
+import pandas as pd
+
+def show_tables(*tables):
+    conn = sqlite3.connect("ap_exceptions.db")
+    for table in tables:
+        print(table.upper())
+        display(pd.read_sql(f"SELECT * FROM {table}", conn))
+    conn.close()
+
+for invoice_id, path in [("INV-1046", path_1046), ("INV-1045", path_1045), ("INV-1044", path_1044)]:
+    print(f"{invoice_id}: {' -> '.join(path)} -> FINISH")
+
+show_tables("invoices")</code></pre>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Invoice</th>
+        <th>Path</th>
+        <th>Why</th>
+        <th>Final status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>INV-1046</td>
+        <td>Matcher, PolicyChecker, CaseUpdater</td>
+        <td>2.5 percent is within the limit</td>
+        <td>Approved to pay</td>
+      </tr>
+      <tr>
+        <td>INV-1045</td>
+        <td>Matcher, PolicyChecker, ContractChecker, CaseUpdater</td>
+        <td>20 percent is over the limit, and there is no amendment</td>
+        <td>Credit requested ($50)</td>
+      </tr>
+      <tr>
+        <td>INV-1044</td>
+        <td>Matcher, PolicyChecker, ContractChecker, <strong>Matcher, PolicyChecker</strong>, CaseUpdater</td>
+        <td>12 percent is over the limit, but an amendment changes the real price</td>
+        <td>Approved to pay</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>Want to run them again?</strong> Re-run the database cell in section 3 first. It puts all three invoices back On hold.
+  </div>
+
+  <h3>7.8 One-Fact Questions</h3>
+  <p>
+    The supervisor can also recognize when a question needs only one specialist.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>for question in ["Has PO-17 had a price amendment?", "What is our price tolerance?"]:
+    print("=" * 70)
+    print("QUESTION:", question)
+    result = graph.invoke(
+        {"messages": [HumanMessage(content=question)]},
+        config={"recursion_limit": 10},
+    )
+    path = [m.name for m in result["messages"] if m.name]
+    print("\nPATH TAKEN:", " -> ".join(path + ["FINISH"]))</code></pre>
+
+  <p>
+    <strong>Expected:</strong> the first question goes to ContractChecker only, and the second goes to PolicyChecker only.
+    Neither one touches an invoice.
+  </p>
+
+  <h2>8. Walk Through INV-1044, Hop by Hop</h2>
+  <p>
+    This is the run to show your friends. Here is what the supervisor knew at each point, and why it chose what it chose.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>Hop</th>
+        <th>What the supervisor sees</th>
+        <th>Its decision</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Only the request. No findings yet.</td>
+        <td>Matcher</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Matcher: 112 vs 100, 12 percent over.</td>
+        <td>PolicyChecker</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>PolicyChecker: EXCEEDS TOLERANCE. Contract not checked yet.</td>
+        <td>ContractChecker</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>ContractChecker: AMENDMENT FOUND, new price 110. The earlier numbers are now out of date.</td>
+        <td><strong>Matcher again</strong></td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>Matcher: RE-MATCH, 112 vs 110, 1.82 percent over.</td>
+        <td><strong>PolicyChecker again</strong></td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>PolicyChecker: WITHIN TOLERANCE.</td>
+        <td>CaseUpdater</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td>CaseUpdater: CASE UPDATED, Approved to pay.</td>
+        <td>FINISH</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    Compare hop 3 here with hop 3 for INV-1046. Same position in the flow, but a different finding came in,
+    so the supervisor made a different choice. That's dynamic routing.
+  </p>
+
+  <h2>9. Key Takeaways</h2>
+  <ul>
+    <li><strong>The graph only says who <em>can</em> talk to whom.</strong> The supervisor decides who <em>does</em>, one hop at a time.</li>
+    <li><strong>Same request, different paths.</strong> The path depends on the data each worker uncovers, not on the wording of the request.</li>
+    <li><strong>Revisiting a worker is normal.</strong> When new information makes an earlier result stale, a good supervisor sends the work back.</li>
+    <li><strong>Scoped tools keep workers honest.</strong> Each worker can reach only its own data, so the handoffs through the conversation are real.</li>
+    <li><strong>Guardrails matter.</strong> The <code>Literal</code> route, the safety limits in the prompt, and <code>recursion_limit</code> keep a thinking supervisor from wandering.</li>
+  </ul>
+
+  <div class="instructor">
+    <div class="instructor-title">Try this on your own</div>
+    <ol>
+      <li>Change the PO-17 amendment to <code>105.00</code> and reset the database. Predict INV-1044's path and final status, then run it. (Hint: 112 vs 105 is still more than 5 percent over.)</li>
+      <li>Add an amendment for PO-18 at <code>58.00</code>. Which invoice's path changes, and how?</li>
+      <li>
+        Ask the graph a free-form question like <code>"Why is INV-1045 on hold?"</code> and watch the <code>[QUESTION]</code> / <code>[RESOLVE]</code> tag on each hop.
+        When I tested it, the supervisor started in QUESTION mode, then drifted into RESOLVE mode and <strong>updated the invoice</strong>, even though you only asked why.
+        A question should never change data. How would you stop that? (Ideas: store <code>request_type</code> in the state on the first hop and never let it change,
+        or block routing to CaseUpdater unless the request is RESOLVE.)
+      </li>
+    </ol>
+  </div>
+
+</main>
+</body>
+</html>

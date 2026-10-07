@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dynamic Parallelization with Send API – Fraud Detection Lab (Agent Version)</title>
+  <style>
+    :root {
+      --bg: radial-gradient(circle at 12% 10%, #e8f5f8 0, #f7fbff 40%, #fdf5ed 100%);
+      --card: #ffffff;
+      --ink: #0f172a;
+      --accent: #0f766e;
+      --accent-2: #f97316;
+      --muted: #475569;
+      --border: rgba(15, 118, 110, 0.16);
+      --shadow: 0 18px 48px rgba(15, 23, 42, 0.09), 0 0 0 1px rgba(15, 118, 110, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "DM Sans", "Space Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    main {
+      max-width: 1040px;
+      margin: 2.4rem auto 3.2rem;
+      padding: 2.8rem 2.2rem 3.2rem;
+      background-color: var(--card);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(15, 23, 42, 0.04);
+    }
+    h1 {
+      font-size: 2.25rem;
+      margin: 0 0 1.3rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: var(--ink);
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(15,118,110,0.12), rgba(249,115,22,0.12));
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 118, 110, 0.25);
+    }
+    h2 {
+      font-size: 1.55rem;
+      margin-top: 2.35rem;
+      margin-bottom: 0.55rem;
+      border-bottom: 2px solid rgba(15, 118, 110, 0.18);
+      padding-bottom: 0.35rem;
+      color: var(--ink);
+    }
+    h3 {
+      font-size: 1.22rem;
+      margin-top: 1.6rem;
+      color: var(--ink);
+    }
+    p {
+      margin: 0.45rem 0 0.85rem;
+      color: var(--muted);
+    }
+    code {
+      font-family: "Fira Code", "DM Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+      background-color: rgba(15, 118, 110, 0.08);
+      padding: 0.14rem 0.32rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #0b4f4a;
+    }
+    pre {
+      background: #0b1728;
+      color: #e7eef7;
+      padding: 1.05rem 1.15rem;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-size: 0.93rem;
+      margin: 0.8rem 0 1.55rem;
+      border: 1px solid rgba(15, 23, 42, 0.45);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.18);
+      position: relative;
+    }
+    pre code { background: none; padding: 0; color: inherit; }
+    ol, ul { padding-left: 1.4rem; }
+    li { margin: 0.28rem 0; color: var(--muted); }
+    .note, .exercise {
+      padding: 0.95rem 1.15rem;
+      margin: 1.05rem 0 1.55rem;
+      border-radius: 11px;
+      font-size: 0.98rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid var(--accent);
+      background: linear-gradient(135deg, rgba(15,118,110,0.08), rgba(232,245,248,0.75));
+      border-color: rgba(15, 118, 110, 0.45);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07), 0 0 0 1px rgba(12, 74, 110, 0.12);
+    }
+    .exercise {
+      border-left: 4px solid var(--accent-2);
+      background: linear-gradient(135deg, rgba(249,115,22,0.08), rgba(253,244,234,0.9));
+      border-color: rgba(249, 115, 22, 0.4);
+    }
+    .exercise-title {
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      font-size: 0.82rem;
+      color: #c2410c;
+    }
+    .concept-box {
+      background: linear-gradient(135deg, #fff7e6, #f0fdf9);
+      border-left: 4px solid #e0a100;
+      padding: 1.05rem 1.2rem;
+      margin: 1.5rem 0;
+      border-radius: 11px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+    }
+    .concept-box h4 {
+      margin-top: 0;
+      color: #92400e;
+      font-size: 1.08rem;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255, 255, 255, 0.14);
+      color: #e7eef7;
+      border: 1px solid rgba(231, 238, 247, 0.4);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, border 0.15s ease;
+    }
+    .copy-btn:hover {
+      background: rgba(231, 238, 247, 0.18);
+      border-color: rgba(231, 238, 247, 0.65);
+    }
+    .copy-btn.copied {
+      background: rgba(15, 118, 110, 0.24);
+      border-color: rgba(15, 118, 110, 0.55);
+      color: #d1fae5;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Dynamic Parallelization with Send API – Fraud Detection Lab (Agent Version)</h1>
+
+  <h2>1. Scenario Overview</h2>
+  <p><strong>Create a notebook.</strong> In Jupyter, VS Code, or Colab, create a new notebook (for example <code>dynamic-parallel-send.ipynb</code>). This lab is fully standalone—no external files required. Each code block below should become its own cell: paste them in order and run top to bottom. SQLite data, LangGraph logic, and checks all live in the notebook.</p>
+  <p>
+    In the LangChain agents lab you built <strong>three sequential specialists</strong> (frequency, value, reason) that share the same SQL toolkit but differ by <code>system_prompt</code>.
+    Here you run the <strong>same three checks in parallel</strong> using LangGraph&apos;s <code>Send</code> API, then aggregate their JSON scores into one decision.
+  </p>
+  <p>As you work, observe how <code>Send</code> spawns parallel workers, how the <code>operator.add</code> reducer merges their outputs, and how <code>is_prime</code> dynamically skips the reason worker.</p>
+
+  <div class="concept-box">
+    <h4>Why this matters</h4>
+    <ul>
+      <li>Parallel fan-out shortens latency: total time is close to the slowest check, not the sum of all three.</li>
+      <li>The number of parallel tasks is data driven (<code>is_prime</code> omits the reason Send).</li>
+      <li>Each worker uses the same scoring rubrics as the LangChain lab—only orchestration changed.</li>
+    </ul>
+  </div>
+
+  <div class="note">
+    <strong>The demo story (same as the LangChain fraud lab)</strong>
+    <ul>
+      <li><code>good_user@example.com</code> — normal customer with a few legitimate returns (e.g. &ldquo;arrived damaged&rdquo;).</li>
+      <li><code>fraudster@example.com</code> — repeat returner with many recent returns, large refunds, and vague reasons like &ldquo;changed my mind&rdquo;.</li>
+    </ul>
+    <p>
+      All three parallel workers investigate the same flagged return when you run the <strong>bad case</strong>:
+      order <code>ORD_BAD_2</code> (webcam ~$1,099), reason <em>&ldquo;changed my mind&rdquo;</em>.
+      Expect individual check scores in the <strong>75–100</strong> range and a combined <code>fraud_score</code> above 60 (escalate).
+    </p>
+  </div>
+
+  <div class="note">
+    <strong>Three specialists — same tools, different focus</strong>
+    <table style="width:100%; border-collapse:collapse; font-size:0.95rem; margin-top:0.5rem;">
+      <thead>
+        <tr style="border-bottom:2px solid rgba(15,118,110,0.25); text-align:left;">
+          <th style="padding:0.4rem 0.5rem;">Worker</th>
+          <th style="padding:0.4rem 0.5rem;">Looks at</th>
+          <th style="padding:0.4rem 0.5rem;">Ignores</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid rgba(148,163,184,0.35);">
+          <td style="padding:0.4rem 0.5rem;"><strong>Frequency</strong></td>
+          <td style="padding:0.4rem 0.5rem;">Non-rejected returns in last 30 days</td>
+          <td style="padding:0.4rem 0.5rem;">Refund amounts, reason text</td>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(148,163,184,0.35);">
+          <td style="padding:0.4rem 0.5rem;"><strong>Value</strong></td>
+          <td style="padding:0.4rem 0.5rem;">Current return value + past refunds &gt; $500</td>
+          <td style="padding:0.4rem 0.5rem;">Return count alone, reason wording</td>
+        </tr>
+        <tr>
+          <td style="padding:0.4rem 0.5rem;"><strong>Reason</strong></td>
+          <td style="padding:0.4rem 0.5rem;">Vague keywords + repeated phrases</td>
+          <td style="padding:0.4rem 0.5rem;">Dollar totals, return velocity</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>2. Prepare the Dataset</h2>
+  <p>Build and seed SQLite inline. Re-running recreates the schema and data. Orders, line items, and returns are spelled out in full lists below—each logical good or bad order appears three times (<code>_dup2</code> / <code>_dup3</code> siblings) so volume is higher while bare IDs like <code>ORD_GOOD_1</code> still exist for later cells.</p>
+  <div class="exercise">
+    <div class="exercise-title">DB init + seed</div>
+<pre><code>DB_PATH = "./fraud_demo.sqlite3"
+
+import sqlite3
+from datetime import datetime, timedelta
+
+
+def init_database(path: str = DB_PATH):
+    conn = sqlite3.connect(path)
+    cur = conn.cursor()
+
+    cur.executescript(
+        """
+        DROP TABLE IF EXISTS users;
+        DROP TABLE IF EXISTS orders;
+        DROP TABLE IF EXISTS order_items;
+        DROP TABLE IF EXISTS returns;
+        """
+    )
+
+    cur.executescript(
+        """
+        CREATE TABLE users (
+            email TEXT PRIMARY KEY,
+            full_name TEXT NOT NULL
+        );
+
+        CREATE TABLE orders (
+            order_id TEXT PRIMARY KEY,
+            user_email TEXT NOT NULL,
+            order_date TEXT NOT NULL,
+            status TEXT NOT NULL,
+            total_amount REAL NOT NULL,
+            FOREIGN KEY(user_email) REFERENCES users(email)
+        );
+
+        CREATE TABLE order_items (
+            order_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id TEXT NOT NULL,
+            product_id TEXT NOT NULL,
+            quantity INTEGER NOT NULL,
+            unit_price REAL NOT NULL,
+            FOREIGN KEY(order_id) REFERENCES orders(order_id)
+        );
+
+        CREATE TABLE returns (
+            return_id TEXT PRIMARY KEY,
+            order_id TEXT NOT NULL,
+            user_email TEXT NOT NULL,
+            return_date TEXT NOT NULL,
+            reason TEXT NOT NULL,
+            status TEXT NOT NULL,
+            refund_amount REAL,
+            FOREIGN KEY(order_id) REFERENCES orders(order_id),
+            FOREIGN KEY(user_email) REFERENCES users(email)
+        );
+        """
+    )
+
+    users = [
+        ("good_user@example.com", "Good User"),
+        ("fraudster@example.com", "Frequent Returner"),
+    ]
+    cur.executemany("INSERT INTO users VALUES (?, ?)", users)
+
+    now = datetime.now()
+
+    def d(days: int) -> str:
+        return (now - timedelta(days=days)).strftime("%Y-%m-%d")
+
+    # Good user orders ×3 IDs each (manual rows)
+    orders = [
+      ("ORD_GOOD_1", "good_user@example.com", d(5), "DELIVERED", 1299.99),
+      ("ORD_GOOD_1_dup2", "good_user@example.com", d(5), "DELIVERED", 1299.99),
+      ("ORD_GOOD_1_dup3", "good_user@example.com", d(5), "DELIVERED", 1299.99),
+      ("ORD_GOOD_2", "good_user@example.com", d(20), "DELIVERED", 249.99),
+      ("ORD_GOOD_2_dup2", "good_user@example.com", d(20), "DELIVERED", 249.99),
+      ("ORD_GOOD_2_dup3", "good_user@example.com", d(20), "DELIVERED", 249.99),
+      ("ORD_GOOD_3", "good_user@example.com", d(12), "DELIVERED", 120.00),
+      ("ORD_GOOD_3_dup2", "good_user@example.com", d(12), "DELIVERED", 120.00),
+      ("ORD_GOOD_3_dup3", "good_user@example.com", d(12), "DELIVERED", 120.00),
+      ("ORD_GOOD_4", "good_user@example.com", d(32), "DELIVERED", 349.00),
+      ("ORD_GOOD_4_dup2", "good_user@example.com", d(32), "DELIVERED", 349.00),
+      ("ORD_GOOD_4_dup3", "good_user@example.com", d(32), "DELIVERED", 349.00),
+      # Fraudster orders ×3 IDs each (manual rows)
+      ("ORD_BAD_1", "fraudster@example.com", d(1), "DELIVERED", 899.99),
+      ("ORD_BAD_1_dup2", "fraudster@example.com", d(1), "DELIVERED", 899.99),
+      ("ORD_BAD_1_dup3", "fraudster@example.com", d(1), "DELIVERED", 899.99),
+      ("ORD_BAD_2", "fraudster@example.com", d(25), "DELIVERED", 1099.00),
+      ("ORD_BAD_2_dup2", "fraudster@example.com", d(25), "DELIVERED", 1099.00),
+      ("ORD_BAD_2_dup3", "fraudster@example.com", d(25), "DELIVERED", 1099.00),
+      ("ORD_BAD_3", "fraudster@example.com", d(3), "DELIVERED", 1299.99),
+      ("ORD_BAD_3_dup2", "fraudster@example.com", d(3), "DELIVERED", 1299.99),
+      ("ORD_BAD_3_dup3", "fraudster@example.com", d(3), "DELIVERED", 1299.99),
+      ("ORD_BAD_4", "fraudster@example.com", d(8), "DELIVERED", 450.00),
+      ("ORD_BAD_4_dup2", "fraudster@example.com", d(8), "DELIVERED", 450.00),
+      ("ORD_BAD_4_dup3", "fraudster@example.com", d(8), "DELIVERED", 450.00),
+      ("ORD_BAD_5", "fraudster@example.com", d(2), "DELIVERED", 2200.00),
+      ("ORD_BAD_5_dup2", "fraudster@example.com", d(2), "DELIVERED", 2200.00),
+      ("ORD_BAD_5_dup3", "fraudster@example.com", d(2), "DELIVERED", 2200.00),
+    ]
+    cur.executemany("INSERT INTO orders VALUES (?, ?, ?, ?, ?)", orders)
+
+    items = [
+      (None, "ORD_GOOD_1", "SKU_LAPTOP", 1, 1299.99),
+      (None, "ORD_GOOD_1_dup2", "SKU_LAPTOP", 1, 1299.99),
+      (None, "ORD_GOOD_1_dup3", "SKU_LAPTOP", 1, 1299.99),
+      (None, "ORD_GOOD_2", "SKU_MOUSE", 1, 249.99),
+      (None, "ORD_GOOD_2_dup2", "SKU_MOUSE", 1, 249.99),
+      (None, "ORD_GOOD_2_dup3", "SKU_MOUSE", 1, 249.99),
+      (None, "ORD_GOOD_3", "SKU_CABLE", 2, 60.00),
+      (None, "ORD_GOOD_3_dup2", "SKU_CABLE", 2, 60.00),
+      (None, "ORD_GOOD_3_dup3", "SKU_CABLE", 2, 60.00),
+      (None, "ORD_GOOD_4", "SKU_BACKPACK", 1, 349.00),
+      (None, "ORD_GOOD_4_dup2", "SKU_BACKPACK", 1, 349.00),
+      (None, "ORD_GOOD_4_dup3", "SKU_BACKPACK", 1, 349.00),
+      (None, "ORD_BAD_1", "SKU_MONITOR", 1, 899.99),
+      (None, "ORD_BAD_1_dup2", "SKU_MONITOR", 1, 899.99),
+      (None, "ORD_BAD_1_dup3", "SKU_MONITOR", 1, 899.99),
+      (None, "ORD_BAD_2", "SKU_WEBCAM", 1, 1099.00),
+      (None, "ORD_BAD_2_dup2", "SKU_WEBCAM", 1, 1099.00),
+      (None, "ORD_BAD_2_dup3", "SKU_WEBCAM", 1, 1099.00),
+      (None, "ORD_BAD_3", "SKU_DESK", 1, 1299.99),
+      (None, "ORD_BAD_3_dup2", "SKU_DESK", 1, 1299.99),
+      (None, "ORD_BAD_3_dup3", "SKU_DESK", 1, 1299.99),
+      (None, "ORD_BAD_4", "SKU_HEADSET", 2, 225.00),
+      (None, "ORD_BAD_4_dup2", "SKU_HEADSET", 2, 225.00),
+      (None, "ORD_BAD_4_dup3", "SKU_HEADSET", 2, 225.00),
+      (None, "ORD_BAD_5", "SKU_GAMING_PC", 1, 2200.00),
+      (None, "ORD_BAD_5_dup2", "SKU_GAMING_PC", 1, 2200.00),
+      (None, "ORD_BAD_5_dup3", "SKU_GAMING_PC", 1, 2200.00),
+    ]
+    cur.executemany(
+        "INSERT INTO order_items VALUES (?, ?, ?, ?, ?)",
+        items,
+    )
+
+    returns_data = [
+      ("RET_BAD_PREV_1", "ORD_BAD_1", "fraudster@example.com", d(3), "changed my mind", "APPROVED", 350.00),
+      ("RET_BAD_PREV_1_dup2", "ORD_BAD_1_dup2", "fraudster@example.com", d(3), "changed my mind", "APPROVED", 350.00),
+      ("RET_BAD_PREV_1_dup3", "ORD_BAD_1_dup3", "fraudster@example.com", d(3), "changed my mind", "APPROVED", 350.00),
+      ("RET_BAD_PREV_2", "ORD_BAD_1", "fraudster@example.com", d(10), "ordered by mistake", "APPROVED", 520.00),
+      ("RET_BAD_PREV_2_dup2", "ORD_BAD_1_dup2", "fraudster@example.com", d(10), "ordered by mistake", "APPROVED", 520.00),
+      ("RET_BAD_PREV_2_dup3", "ORD_BAD_1_dup3", "fraudster@example.com", d(10), "ordered by mistake", "APPROVED", 520.00),
+      ("RET_BAD_PREV_3", "ORD_BAD_2", "fraudster@example.com", d(15), "don't need", "APPROVED", 650.00),
+      ("RET_BAD_PREV_3_dup2", "ORD_BAD_2_dup2", "fraudster@example.com", d(15), "don't need", "APPROVED", 650.00),
+      ("RET_BAD_PREV_3_dup3", "ORD_BAD_2_dup3", "fraudster@example.com", d(15), "don't need", "APPROVED", 650.00),
+      ("RET_BAD_PREV_4", "ORD_BAD_3", "fraudster@example.com", d(5), "no reason", "APPROVED", 1200.00),
+      ("RET_BAD_PREV_4_dup2", "ORD_BAD_3_dup2", "fraudster@example.com", d(5), "no reason", "APPROVED", 1200.00),
+      ("RET_BAD_PREV_4_dup3", "ORD_BAD_3_dup3", "fraudster@example.com", d(5), "no reason", "APPROVED", 1200.00),
+      ("RET_BAD_PREV_5", "ORD_BAD_3", "fraudster@example.com", d(1), "ordered by mistake", "APPROVED", 1299.99),
+      ("RET_BAD_PREV_5_dup2", "ORD_BAD_3_dup2", "fraudster@example.com", d(1), "ordered by mistake", "APPROVED", 1299.99),
+      ("RET_BAD_PREV_5_dup3", "ORD_BAD_3_dup3", "fraudster@example.com", d(1), "ordered by mistake", "APPROVED", 1299.99),
+      ("RET_BAD_PREV_6", "ORD_BAD_5", "fraudster@example.com", d(1), "changed my mind", "APPROVED", 1800.00),
+      ("RET_BAD_PREV_6_dup2", "ORD_BAD_5_dup2", "fraudster@example.com", d(1), "changed my mind", "APPROVED", 1800.00),
+      ("RET_BAD_PREV_6_dup3", "ORD_BAD_5_dup3", "fraudster@example.com", d(1), "changed my mind", "APPROVED", 1800.00),
+      ("RET_GOOD_PREV_1", "ORD_GOOD_1", "good_user@example.com", d(40), "arrived damaged", "APPROVED", 249.99),
+      ("RET_GOOD_PREV_1_dup2", "ORD_GOOD_1_dup2", "good_user@example.com", d(40), "arrived damaged", "APPROVED", 249.99),
+      ("RET_GOOD_PREV_1_dup3", "ORD_GOOD_1_dup3", "good_user@example.com", d(40), "arrived damaged", "APPROVED", 249.99),
+      ("RET_GOOD_PREV_2", "ORD_GOOD_3", "good_user@example.com", d(6), "size too small", "APPROVED", 120.00),
+      ("RET_GOOD_PREV_2_dup2", "ORD_GOOD_3_dup2", "good_user@example.com", d(6), "size too small", "APPROVED", 120.00),
+      ("RET_GOOD_PREV_2_dup3", "ORD_GOOD_3_dup3", "good_user@example.com", d(6), "size too small", "APPROVED", 120.00),
+    ]
+    cur.executemany("INSERT INTO returns VALUES (?, ?, ?, ?, ?, ?, ?)", returns_data)
+
+    conn.commit()
+    conn.close()
+
+
+init_database()
+print("Database ready at", DB_PATH)
+</code></pre>
+  </div>
+
+  <h2>3. Install dependencies</h2>
+  <p>One-time install in a fresh environment. Ensure <code>OPENAI_API_KEY</code> is set (for example in a <code>.env</code> file).</p>
+  <pre><code>%pip install --quiet langgraph langchain langchain-community langchain-openai python-dotenv</code></pre>
+
+  <h2>4. Imports and shared helpers</h2>
+  <p>Paste into a new cell. Each specialist agent is prompted to reply with <strong>JSON only</strong>, so workers can use plain <code>json.loads</code>.</p>
+<pre><code>import operator
+import json
+import threading
+from typing import Annotated, NotRequired, TypedDict
+
+from dotenv import load_dotenv
+from langgraph.graph import StateGraph, END, START
+from langgraph.types import Send
+from langchain_openai import ChatOpenAI
+from langchain_community.utilities import SQLDatabase
+from langchain_community.agent_toolkits import SQLDatabaseToolkit
+from langchain.agents import create_agent
+
+load_dotenv()
+
+DB_PATH = "./fraud_demo.sqlite3"
+
+
+def log_thread(label: str):
+    print(f"[thread] {label}:", threading.current_thread().name)
+
+
+def run_check(agent, user_message: str) -> dict:
+    resp = agent.invoke({"messages": [{"role": "user", "content": user_message}]})
+    messages = resp.get("messages", []) if isinstance(resp, dict) else []
+    text = messages[-1].content if messages else str(resp)
+    return json.loads(text.strip())
+</code></pre>
+
+  <h2>5. State schema and three SQL specialist agents</h2>
+  <p>
+    Create the shared graph state and three read-only SQL agents—one per fraud signal.
+    Each agent shares <code>shared_sql_instructions</code> but has its own role block (same rubrics as the LangChain lab).
+  </p>
+  <p>
+    <code>is_prime</code> is optional: if omitted, it behaves like <code>False</code>.
+    Set <code>"is_prime": True</code> for trusted shoppers; <code>spawn_fraud_checks</code> then omits the reason worker
+    so only frequency and value run (the aggregator averages whichever checks completed).
+  </p>
+<pre><code>class FraudDetectionState(TypedDict):
+    order_id: str
+    user_email: str
+    return_reason: str
+    return_items: list[dict]
+    fraud_checks: Annotated[list[dict], operator.add]
+    fraud_score: NotRequired[float]
+    fraud_details: NotRequired[dict]
+    return_id: NotRequired[str]
+    is_prime: NotRequired[bool]
+
+
+shared_sql_instructions = """
+SQL RULES (apply to every query):
+- Use only the provided SQL tools.
+- ALWAYS list tables, then inspect schema for tables you touch.
+- Add LIMIT when listing rows unless the question says otherwise.
+- Use the SQL query checker tool before executing a query.
+- NEVER run INSERT, UPDATE, DELETE, DROP, or other DML.
+
+RESPONSE FORMAT (critical):
+- Your final message must be ONLY one JSON object — no prose, no markdown fences, no text before or after.
+- Put the human-readable summary in the "reason" field.
+"""
+
+frequency_role = """
+ROLE:
+Return-frequency risk analyst on an e-commerce fraud team.
+
+GOAL:
+When given a shopper email, count their non-rejected returns in the last 30 days
+and assign a frequency risk_score (0–100) using the rubric below.
+
+BACKSTORY:
+You investigate whether a customer is returning items too often — a common sign
+of policy abuse. You query a read-only SQLite database with tables: users, orders,
+order_items, returns. You focus ONLY on return counts and timing. Ignore refund
+dollar amounts and return-reason text; other specialists on the team handle those.
+
+WORKFLOW:
+1. Query the returns table — count rows where:
+   - user_email matches the shopper
+   - return_date is within the last 30 days
+   - status is NOT 'REJECTED'
+2. Map return_count to risk_score
+   (pick one integer inside the band; use the higher end at the top of the range):
+   - 0 returns       → 0–10   (low)
+   - 1–2 returns     → 10–25  (normal)
+   - 3–5 returns     → 25–50  (monitor)
+   - 6–9 returns     → 50–75  (elevated)
+   - 10+ returns     → 75–100 (high — likely abuse)
+
+OUTPUT FORMAT:
+Respond with ONLY one JSON object. Example:
+{"check_type": "frequency", "risk_score": 0, "reason": "short summary here",
+ "details": {"return_count": 0, "period_days": 30}}
+"""
+
+value_role = """
+ROLE:
+High-value refund risk analyst on an e-commerce fraud team.
+
+GOAL:
+When given a return ticket (shopper email, order_id, items being returned),
+estimate the refund value and assign a value risk_score (0–100) based on
+return size and the shopper's history of large refunds.
+
+BACKSTORY:
+You investigate whether a return is financially risky — expensive items combined
+with a pattern of large past refunds often signal friendly fraud. You query a
+read-only SQLite database with tables: users, orders, order_items, returns.
+You focus ONLY on dollar amounts. Ignore return frequency counts and return-reason
+wording; other specialists on the team handle those signals.
+
+WORKFLOW:
+1. Compute return_value_approx:
+   - Look up order_items for the given order_id and SKUs
+   - Sum (unit_price × quantity) for each item being returned
+2. Count high_refund_returns:
+   - Query returns where user_email matches the shopper
+   - refund_amount > 500
+   - status is NOT 'REJECTED'
+3. Map to risk_score using this rubric:
+   a) Base score from return_value_approx (pick one integer in the band):
+      - under $200      → 10–25
+      - $200–$499       → 25–45
+      - $500–$999       → 45–65
+      - $1,000 or more  → 65–80
+   b) History bump from high_refund_returns (add to base, cap at 100):
+      - 0 past high refunds  → +0
+      - 1–2                  → +5 to +15
+      - 3–5                  → +15 to +25
+      - 6 or more            → +25 to +35
+   risk_score = min(100, base_score + history_bump)
+
+OUTPUT FORMAT:
+Respond with ONLY one JSON object. Example:
+{"check_type": "value", "risk_score": 0, "reason": "short summary here",
+ "details": {"return_value_approx": 0.0, "high_refund_returns": 0}}
+"""
+
+reason_role = """
+ROLE:
+Return-reason wording analyst on an e-commerce fraud team.
+
+GOAL:
+When given a shopper email and the exact return_reason text they typed,
+detect vague or suspicious wording, check for repeated phrases in history,
+and assign a reason risk_score (0–100) using the rubric below.
+
+BACKSTORY:
+You investigate the free-text excuse customers give when returning items.
+Vague phrases like "changed my mind" or "ordered by mistake" are common in
+friendly fraud, especially when reused across multiple returns. You query a
+read-only SQLite database with tables: users, orders, order_items, returns.
+You focus ONLY on reason text and repetition. Ignore return counts and refund
+dollar amounts; other specialists on the team handle those signals.
+
+WORKFLOW:
+1. Set keywords_flagged to true if the reason contains ANY of:
+   - "changed my mind", "don't need", "don't want"
+   - "ordered by mistake", "no reason"
+   - OR the reason is shorter than 15 characters
+   Otherwise set keywords_flagged to false.
+2. Count similar_past_returns:
+   - Query returns where user_email matches the shopper
+   - status is NOT 'REJECTED'
+   - reason text is similar (same phrase or flagged keywords)
+3. Map to risk_score (pick one integer inside the band):
+   - keywords_flagged=false, similar_past_returns=0    → 0–20
+   - keywords_flagged=false, similar_past_returns=1–2  → 20–40
+   - keywords_flagged=true,  similar_past_returns=0    → 30–50
+   - keywords_flagged=true,  similar_past_returns=1–2  → 50–70
+   - keywords_flagged=true,  similar_past_returns=3+     → 70–100
+
+OUTPUT FORMAT:
+Respond with ONLY one JSON object. Example:
+{"check_type": "reason", "risk_score": 0, "reason": "short summary here",
+ "details": {"similar_past_returns": 0, "keywords_flagged": false}}
+"""
+
+database = SQLDatabase.from_uri(f"sqlite:///{DB_PATH}")
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+toolkit = SQLDatabaseToolkit(db=database, llm=llm)
+tools = toolkit.get_tools()
+
+frequency_agent = create_agent(
+    model=llm,
+    tools=tools,
+    system_prompt=shared_sql_instructions + frequency_role,
+)
+value_agent = create_agent(
+    model=llm,
+    tools=tools,
+    system_prompt=shared_sql_instructions + value_role,
+)
+reason_agent = create_agent(
+    model=llm,
+    tools=tools,
+    system_prompt=shared_sql_instructions + reason_role,
+)
+
+print("Three SQL specialist agents ready.")
+</code></pre>
+
+  <h2>6. Worker nodes (run in parallel via Send)</h2>
+  <p>
+    Each worker invokes its matching specialist agent with a return-ticket user message—the same format as the LangChain lab.
+    Results append to <code>fraud_checks</code> via the <code>operator.add</code> reducer.
+  </p>
+
+  <h3>6.1 Frequency worker</h3>
+  <p><strong>Rubric:</strong> 0 returns → 0–10; 1–2 → 10–25; 3–5 → 25–50; 6–9 → 50–75; 10+ → 75–100.</p>
+<pre><code>def check_return_frequency(state: FraudDetectionState):
+    log_thread("check_return_frequency")
+    user_message = f"""Return ticket — frequency risk check
+Shopper email: {state['user_email']}
+
+How many non-rejected returns has this shopper made in the last 30 days?
+Respond with JSON only."""
+    data = run_check(frequency_agent, user_message)
+    return {"fraud_checks": [data]}
+</code></pre>
+
+  <h3>6.2 Value worker</h3>
+  <p><strong>Rubric:</strong> base score from return value + history bump for past refunds &gt; $500; cap at 100.</p>
+<pre><code>def check_order_value_patterns(state: FraudDetectionState):
+    log_thread("check_order_value_patterns")
+    item = state["return_items"][0]
+    user_message = f"""Return ticket — value risk check
+Shopper email: {state['user_email']}
+Order ID: {state['order_id']}
+Items being returned: {item['quantity']} × {item['product_id']}
+
+Please estimate the refund value for this return and count how many past returns
+this shopper had with refunds over $500.
+Respond with JSON only."""
+    data = run_check(value_agent, user_message)
+    return {"fraud_checks": [data]}
+</code></pre>
+
+  <h3>6.3 Reason worker</h3>
+  <p>Runs only when <code>spawn_fraud_checks</code> queues it (non-prime journeys). <strong>Rubric:</strong> keyword flag × similar past returns matrix (see Section 5).</p>
+<pre><code>def check_return_reason_patterns(state: FraudDetectionState):
+    log_thread("check_return_reason_patterns")
+    user_message = f"""Return ticket — reason wording check
+Shopper email: {state['user_email']}
+Return reason (exact text customer typed): "{state['return_reason']}"
+
+Does this reason contain suspicious keywords? Has this shopper used similar wording on past returns?
+Respond with JSON only."""
+    data = run_check(reason_agent, user_message)
+    return {"fraud_checks": [data]}
+</code></pre>
+
+  <h2>7. Router and aggregator</h2>
+  <p>
+    <code>spawn_fraud_checks</code> uses <code>Send</code> to dispatch parallel workers dynamically.
+    The aggregator is intentionally simple for demos: <strong>average the worker scores</strong>, then apply a basic threshold.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Router + aggregator</div>
+<pre><code>def spawn_fraud_checks(state: FraudDetectionState) -> list[Send]:
+    sends = [
+        Send("check_frequency", state),
+        Send("check_value", state),
+    ]
+    if not state.get("is_prime", False):
+        sends.append(Send("check_reason", state))
+    return sends
+
+
+def aggregate_fraud_scores(state: FraudDetectionState) -> dict:
+    log_thread("aggregate_fraud_scores")
+    fraud_checks = state.get("fraud_checks", [])
+
+    scores = [c["risk_score"] for c in fraud_checks]
+    final_score = sum(scores) / len(scores) if scores else 0
+
+    if final_score >= 60:
+        level, rec = "HIGH", "Escalate to admin"
+    elif final_score >= 30:
+        level, rec = "MEDIUM", "Recommend admin review"
+    else:
+        level, rec = "LOW", "Auto-approve"
+
+    return {
+        "fraud_score": round(final_score, 2),
+        "fraud_details": {
+            "risk_level": level,
+            "recommendation": rec,
+            "checks_completed": len(fraud_checks),
+        },
+    }
+</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <h4>Dynamic paths</h4>
+    <p>Edit <code>spawn_fraud_checks</code> (for example omit or add Sends). Prime shoppers set <code>is_prime</code> so frequency and value still dispatch in parallel without the reason task.</p>
+  </div>
+
+  <h2>8. Build the graph</h2>
+  <p>Create a new code cell and paste this build step.</p>
+  <div class="exercise">
+    <div class="exercise-title">Build graph</div>
+<pre><code>def create_fraud_detection_subgraph():
+    graph = StateGraph(FraudDetectionState)
+    graph.add_node("check_frequency", check_return_frequency)
+    graph.add_node("check_value", check_order_value_patterns)
+    graph.add_node("check_reason", check_return_reason_patterns)
+    graph.add_node("aggregate_fraud_scores", aggregate_fraud_scores)
+    graph.add_conditional_edges(START, spawn_fraud_checks, ["check_frequency", "check_value", "check_reason"])
+    graph.add_edge("check_frequency", "aggregate_fraud_scores")
+    graph.add_edge("check_value", "aggregate_fraud_scores")
+    graph.add_edge("check_reason", "aggregate_fraud_scores")
+    graph.add_edge("aggregate_fraud_scores", END)
+    return graph.compile()
+
+
+fraud_graph = create_fraud_detection_subgraph()
+print("Graph compiled.")
+</code></pre>
+  </div>
+
+  <h3>8.1 Visualize (optional)</h3>
+  <pre><code>from IPython.display import Image
+Image(fraud_graph.get_graph().draw_mermaid_png())</code></pre>
+
+  <h2>9. Execute and observe fan-out</h2>
+  <p>
+    Run the graph against three scenarios. The <strong>bad case</strong> matches the LangChain lab demo ticket
+    (<code>fraudster@example.com</code>, <code>ORD_BAD_2</code>, &ldquo;changed my mind&rdquo;).
+    Omit <code>is_prime</code> unless you want the reason worker skipped.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Run scenarios</div>
+<pre><code>good_case = {
+    "order_id": "ORD_GOOD_1",
+    "user_email": "good_user@example.com",
+    "return_reason": "Product arrived damaged",
+    "return_items": [{"product_id": "SKU_LAPTOP", "quantity": 1}],
+}
+
+bad_case = {
+    "order_id": "ORD_BAD_2",
+    "user_email": "fraudster@example.com",
+    "return_reason": "changed my mind",
+    "return_items": [{"product_id": "SKU_WEBCAM", "quantity": 1}],
+}
+
+prime_case = {
+    "order_id": "ORD_GOOD_2",
+    "user_email": "good_user@example.com",
+    "return_reason": "changed my mind",
+    "return_items": [{"product_id": "SKU_MOUSE", "quantity": 1}],
+    "is_prime": True,
+}
+
+good_result = fraud_graph.invoke(good_case)
+bad_result = fraud_graph.invoke(bad_case)
+prime_result = fraud_graph.invoke(prime_case)
+
+print("GOOD USER RESULT")
+print(json.dumps(good_result, indent=2))
+print("\nBAD USER RESULT")
+print(json.dumps(bad_result, indent=2))
+print("\nPRIME USER (reason check skipped)")
+print(json.dumps(prime_result, indent=2))
+</code></pre>
+  </div>
+
+  <div class="note">
+    <strong>Expected behavior (approximate — LLM scores vary slightly)</strong>
+    <ul>
+      <li><strong>Good user:</strong> low individual scores (few returns, legitimate reason) → <code>fraud_score</code> &lt; 30, auto-approve.</li>
+      <li><strong>Bad user:</strong> frequency ~75–100, value ~85–100, reason ~70–100 → average <code>fraud_score</code> well above 60, escalate.</li>
+      <li><strong>Prime user:</strong> only two <code>fraud_checks</code> entries (frequency + value); aggregator averages those two scores.</li>
+    </ul>
+    <p>Sample individual check JSON (from the LangChain lab):</p>
+    <pre style="margin-top:0.5rem;"><code># frequency: {"check_type": "frequency", "risk_score": 85, "details": {"return_count": 15, "period_days": 30}}
+# value:     {"check_type": "value", "risk_score": 92, "details": {"return_value_approx": 1099.0, "high_refund_returns": 9}}
+# reason:    {"check_type": "reason", "risk_score": 78, "details": {"similar_past_returns": 6, "keywords_flagged": true}}</code></pre>
+  </div>
+
+  <div class="concept-box">
+    <h4>What to look for</h4>
+    <ul>
+      <li>Thread logs show three different worker names when the bad case runs (parallel fan-out).</li>
+      <li><code>fraud_checks</code> merges via <code>operator.add</code> before the aggregator runs once.</li>
+      <li>Prime journeys skip reason; aggregator averages only the checks that ran (2 instead of 3).</li>
+      <li>Specialization came from <strong>system prompts</strong>, not from different Python tools—the same lesson as the LangChain lab, now in parallel.</li>
+    </ul>
+  </div>
+
+  <h2>10. Experiments</h2>
+  <ul>
+    <li>Add a new worker (for example, geo-mismatch) by appending another Send in spawn_fraud_checks.</li>
+    <li>Try <code>max(scores)</code> instead of the average to see how aggregation changes the decision.</li>
+    <li>Print threading.current_thread().name inside workers to see actual parallel execution.</li>
+  </ul>
+
+  <script>
+    document.querySelectorAll('pre').forEach((pre) => {
+      const btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.type = 'button';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', async () => {
+        const code = pre.querySelector('code');
+        const text = code ? code.textContent : pre.textContent;
+        try {
+          await navigator.clipboard.writeText(text);
+          btn.textContent = 'Copied';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 1200);
+        } catch (err) {
+          btn.textContent = 'Error';
+          setTimeout(() => { btn.textContent = 'Copy'; }, 1200);
+        }
+      });
+      pre.appendChild(btn);
+    });
+  </script>
+</main>
+</body>
+</html>

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LangChain 1.0 Introduction – Hands-on Guide</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+      color: #0f172a;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .note, .exercise {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .exercise-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #166534;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>LangChain 1.0 Introduction – Hands-on Guide</h1>
+
+  <div class="note">
+    <strong>How to use this guide</strong>
+    <ol>
+      <li>Open your code editor (VS Code / Cursor / Jupyter / any IDE) and a terminal.</li>
+      <li>Create a new Jupyter notebook file named, for example, <code>01_langchain_introduction.ipynb</code> and run all code in separate notebook cells.</li>
+      <li>Place this HTML guide side‑by‑side with your editor.</li>
+      <li>Whenever you see a section titled <strong>Your Task</strong>, follow the instructions and copy or type the code into a <strong>new cell in your notebook</strong>.</li>
+      <li>Run each new notebook cell step‑by‑step and observe the outputs to understand how LangChain 1.0 works.</li>
+    </ol>
+  </div>
+
+  <h2>1. Getting Started with LangChain 1.0</h2>
+  <p>
+    Welcome to LangChain 1.0! In this hands‑on lab you will install the core packages, configure OpenAI / Azure OpenAI,
+    send messages to a model, and explore powerful concepts like LCEL, output parsers, and structured prompts.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>In your terminal (not inside the notebook), install LangChain 1.0 and the required supporting packages by running the command below.</p>
+  </div>
+
+  <pre><code>pip install "langchain&gt;=1.0" langchain-openai langchain-core python-dotenv</code></pre>
+
+  <h3>1.1 Load Environment Variables</h3>
+  <p>
+    Use <code>python-dotenv</code> to load your API keys (for example, <code>OPENAI_API_KEY</code>) from a
+    <code>.env</code> file in your project folder.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the code below, and then execute the cell.</p>
+  </div>
+
+  <pre><code>from dotenv import load_dotenv
+load_dotenv()</code></pre>
+
+  <h2>2. Azure OpenAI Configuration (Optional)</h2>
+  <p>
+    If you're using Azure OpenAI instead of OpenAI directly, configure your endpoint, key, and deployment name as shown
+    below. Keep this code commented until you actually have Azure credentials.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code block into it, and execute the cell to review the Azure OpenAI configuration example (you can keep it commented until you need it).</p>
+  </div>
+
+  <pre><code># Azure OpenAI Configuration (uncomment if using Azure)
+# azure_openai_api_key = "your-azure-openai-key"
+# azure_openai_endpoint = "https://your-instance.openai.azure.com/"
+# azure_openai_deployment = "gpt-4o-mini"  # Your deployment name
+
+# Example of creating Azure OpenAI LLM
+# from langchain_openai import AzureChatOpenAI
+# llm_azure = AzureChatOpenAI(
+#     api_key=azure_openai_api_key,
+#     azure_endpoint=azure_openai_endpoint,
+#     deployment_name=azure_openai_deployment,
+#     api_version="2024-02-01"
+# )
+
+print("🔧 Azure OpenAI configuration example provided (commented out)")
+print("Uncomment and modify with your Azure OpenAI details if needed")</code></pre>
+
+  <h2>3. Creating LLMs in LangChain 1.0</h2>
+  <p>
+    LangChain 1.0 lets you initialize chat models in more than one way. First you will see the traditional pattern,
+    and then the new unified initialization API.
+  </p>
+
+  <h3>3.1 Method 1 – Traditional Approach (Similar to 0.x)</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to create a traditional <code>ChatOpenAI</code> instance.</p>
+  </div>
+
+  <pre><code>from langchain_openai import ChatOpenAI
+
+# Create an LLM instance - traditional way
+llm_traditional = ChatOpenAI(
+    model="gpt-5-nano",
+    temperature=0.7,
+    max_tokens=100
+)</code></pre>
+
+  <h3>3.2 Method 2 – New Unified Initialization (LangChain 1.0 Feature)</h3>
+  <p>
+    LangChain 1.0 introduces <code>init_chat_model()</code> for unified model initialization across different
+    providers (OpenAI, Azure OpenAI, others). This makes it easier to swap providers without changing your code.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to create an LLM using the unified initialization API.</p>
+  </div>
+
+  <pre><code>from langchain.chat_models import init_chat_model
+
+# Create LLM using the new unified initialization method
+llm_unified = init_chat_model(
+    model="gpt-4.1-mini",
+    model_provider="openai",
+    temperature=0.7,
+    max_tokens=100
+)</code></pre>
+
+  <h2>4. Sending Messages to the LLM</h2>
+  <h3>4.1 Understanding Message Types in LangChain 1.0</h3>
+  <p>
+    LangChain 1.0 keeps the familiar message types – <code>SystemMessage</code>, <code>HumanMessage</code>,
+    and <code>AIMessage</code> – but the overall structure is cleaner and more consistent.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to create different message types and inspect the resulting list.</p>
+  </div>
+
+  <pre><code>from langchain.messages import HumanMessage, SystemMessage, AIMessage
+
+# Create different types of messages
+system_msg = SystemMessage(content="You are a helpful AI assistant that explains concepts clearly.")
+human_msg = HumanMessage(content="Explain what LangChain 1.0 is in simple terms.")
+
+messages = [system_msg, human_msg]
+
+messages</code></pre>
+
+  <h3>4.2 Invoking the LLM – Basic Usage</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to send the messages to <code>llm_unified</code> and print the response details.</p>
+  </div>
+
+  <pre><code># Send messages to the LLM
+response = llm_unified.invoke(messages)
+
+print(" LLM Response:")
+print(f"Type: {type(response).__name__}")
+print(f"Content: {response.content}")
+print(f"Additional info: {response.response_metadata}")</code></pre>
+
+  <h3>4.3 Conversational Style with Role Dictionaries</h3>
+  <p>
+    You can also pass a list of role/content dictionaries, similar to the raw Chat Completions API.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to create a short translation conversation and invoke the model.</p>
+  </div>
+
+  <pre><code>from langchain.messages import HumanMessage, AIMessage, SystemMessage
+
+conversation = [
+    {"role": "system", "content": "You are a helpful assistant that translates English to French."},
+    {"role": "user", "content": "Translate: I love programming."},
+    {"role": "assistant", "content": "J'adore la programmation."},
+    {"role": "user", "content": "Translate: I love building applications."}
+]
+
+response = llm_unified.invoke(conversation)
+print(response)</code></pre>
+
+  <h2>5. LCEL and the Runnable Interface</h2>
+  <p>
+    LangChain 1.0 is built around LCEL (LangChain Expression Language). Almost everything implements the
+    <code>Runnable</code> interface, which exposes a consistent set of methods: <code>invoke()</code>,
+    <code>ainvoke()</code>, <code>batch()</code>, and <code>stream()</code>.
+  </p>
+
+  <h3>5.1 Streaming Responses</h3>
+  <p>
+    Streaming lets you handle partial outputs as they are generated, which is ideal for chat interfaces and
+    long‑running responses.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to stream a response from the model and print each chunk as it arrives.</p>
+  </div>
+
+  <pre><code># Stream the response for real-time output
+print("🔄 Streaming response:")
+print("-" * 50)
+
+stream = llm_unified.stream([
+    SystemMessage(content="You are a concise technical writer."),
+    HumanMessage(content="Write a brief summary of what makes LangChain 1.0 special.")
+])
+
+for chunk in stream:
+    print(chunk.content, end="", flush=True)
+
+print("\n" + "-" * 50)
+print("✅ Streaming complete!")</code></pre>
+
+  <h3>5.2 Batch Processing</h3>
+  <p>
+    With <code>batch()</code>, you can send many inputs at once and process the results efficiently. This is useful for
+    generating multiple explanations or answers in parallel.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to prepare multiple prompts and call <code>batch()</code> to process them together.</p>
+  </div>
+
+  <pre><code># Prepare multiple inputs for batch processing
+batch_inputs = [
+    "Why do parrots have colorful feathers?",
+    "How do airplanes fly?",
+    "What is quantum computing?"
+]
+
+# Process in batch
+batch_results = llm_unified.batch(batch_inputs, config={
+        'max_concurrency': 5
+    })
+
+print("📦 Batch Processing Results:")
+print("=" * 60)
+for i, result in enumerate(batch_results, 1):
+    print(f"\n{i}. {result.content}...")
+    print("-" * 40)</code></pre>
+
+  <h2>6. Output Parsing in LangChain 1.0</h2>
+  <p>
+    Output parsers help you turn raw LLM text into Python objects such as strings, dictionaries, and Pydantic models.
+    This makes it much easier to build reliable downstream logic.
+  </p>
+
+  <h3>6.1 JSON Output Parser</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to ask the model for JSON output and parse it using <code>JsonOutputParser</code>.</p>
+  </div>
+
+  <pre><code>from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
+
+# Create a JSON parser
+parser = JsonOutputParser()
+
+# Get a JSON-style response from the model
+response = llm_unified.invoke([
+    HumanMessage(content="""Tell me about elon musk, history, education, 
+                 work experience, skills and achievements. Give the response in json format.""")
+])
+
+parsed_output = parser.invoke(response)
+
+print("📝 Raw Output:" , response.content)
+print(f"Raw response type: {type(response)}")
+print(f"Parsed output type: {type(parsed_output)}")
+print(f"Parsed content: {parsed_output}")</code></pre>
+
+  <h2>7. Building Chains with LCEL</h2>
+  <p>
+    LCEL uses the pipe operator (<code>|</code>) to chain components together. This lets you define clear data flows
+    from prompts, through LLMs, into parsers and other logic.
+  </p>
+
+  <h3>7.1 Simple Chain – LLM + JSON Parser</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to create a simple chain that calls the LLM and then parses its JSON output.</p>
+  </div>
+
+  <pre><code># Create a simple chain: LLM + JSON Parser
+simple_chain = llm_unified | JsonOutputParser()
+
+# Test the chain
+result = simple_chain.invoke([
+    HumanMessage(content="""Tell me about elon musk, history, education, 
+                 work experience, skills and achievements. Give the response in json format.""")
+])
+
+print(f"Chain result type: {type(result)}")
+print(f"Chain result: {result}")</code></pre>
+
+  <h2>8. Prompt Templates in LangChain 1.0</h2>
+  <p>
+    Prompt templates let you parameterize messages with variables so you can reuse the same structure for many inputs.
+  </p>
+
+  <h3>8.1 Creating and Using <code>ChatPromptTemplate</code></h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to create a chat prompt template, format it, and inspect the resulting messages.</p>
+  </div>
+
+  <pre><code>from langchain_core.prompts import ChatPromptTemplate
+
+# Create a prompt template
+prompt_template = ChatPromptTemplate.from_messages([
+    ("system", "You are an expert in {subject}. Provide clear, concise explanations."),
+    ("human", "Explain {topic} in simple terms.")
+])
+
+# Format the prompt
+formatted_prompt = prompt_template.invoke({
+    "subject": "software development", 
+    "topic": "the differences between LangChain 0.x and 1.0"
+})
+
+print("📋 Formatted Prompt:")
+for message in formatted_prompt.messages:
+    print(f"{message.__class__.__name__}: {message.content}")</code></pre>
+
+  <h3>8.2 Complete Chain – Prompt + LLM + String Parser</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to combine the prompt template, LLM, and a <code>StrOutputParser</code> into one chain.</p>
+  </div>
+
+  <pre><code># Create a complete chain
+complete_chain = prompt_template | llm_unified | StrOutputParser()
+
+# Use the chain
+explanation = complete_chain.invoke({
+    "subject": "AI frameworks",
+    "topic": "LangChain 1.0's unified interface design"
+})
+
+print("Complete Chain Result:")
+print(explanation)</code></pre>
+
+  <h2>9. Structured Data with Pydantic Output Parser</h2>
+  <p>
+    Pydantic models let you specify a strict schema for the data you expect from the model. The
+    <code>PydanticOutputParser</code> uses these models to parse structured responses safely.
+  </p>
+
+  <h3>9.1 Defining Pydantic Models and Format Instructions</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to define Pydantic models for people data and print the format instructions for the parser.</p>
+  </div>
+
+  <pre><code>from typing import List
+from langchain_core.output_parsers import PydanticOutputParser
+from pydantic import BaseModel, Field
+
+
+# Define data models using Pydantic
+class Person(BaseModel):
+    """Information about a person."""
+    name: str = Field(description="The name of the person")
+    height_in_meters: float = Field(description="The height of the person expressed in meters.")
+
+class People(BaseModel):
+    """Identifying information about all people in a text."""
+    people: List[Person]
+
+# Set up a Pydantic parser
+pydantic_parser = PydanticOutputParser(pydantic_object=People)
+
+print("📋 Pydantic Parser Format Instructions:")
+print(pydantic_parser.get_format_instructions())</code></pre>
+
+  <h3>9.2 Using Pydantic Parser with <code>ChatPromptTemplate</code></h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to create a prompt with format instructions, call the chain, and then parse the model output into Pydantic objects.</p>
+  </div>
+
+  <pre><code># Create prompt with format instructions
+structured_prompt = ChatPromptTemplate.from_messages([
+    ("system", "Answer the user query. Wrap the output in `json` tags\n{format_instructions}"),
+    ("human", "{query}")
+]).partial(format_instructions=pydantic_parser.get_format_instructions())
+
+# Create chain with Pydantic parser
+structured_chain = structured_prompt | llm_unified
+
+# Test the structured output
+query = "Siva is 44 years old and 1.7 meters tall. Rishik is 15 years old and 1.8 meters tall."
+result = structured_chain.invoke({"query": query})
+
+print("🔗 Structured Chain Result:")
+print(f"Type: {type(result).__name__}")
+print(f"Content: {result.content}")
+
+
+parsed_people = pydantic_parser.invoke(result)
+print(f"\n✅ Parsed People: {parsed_people}")
+print(f"People type: {type(parsed_people)}")
+print(f"First person: {parsed_people.people[0].name} - {parsed_people.people[0].height_in_meters}m")</code></pre>
+
+  <h2>10. Wrap-Up</h2>
+  <p>
+    In this lab you:
+  </p>
+  <ul>
+    <li>Installed and configured LangChain 1.0.</li>
+    <li>Created chat models using both traditional and unified initialization APIs.</li>
+    <li>Sent messages, streamed responses, and processed batches.</li>
+    <li>Used LCEL to build chains with prompts, models, and output parsers.</li>
+    <li>Parsed structured data with JSON and Pydantic output parsers.</li>
+  </ul>
+  <p>
+    Feel free to modify the prompts, models, and chains to experiment further and adapt these patterns to your own
+    LangChain 1.0 projects.
+  </p>
+
+</main>
+</body>
+</html>
+
+

@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Evaluator-Optimizer Pattern – Suspicious Transaction Report (STR) Drafting</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.05rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+      color: #0f172a;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .note, .exercise, .case {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .case {
+      border-left: 4px solid #b45309;
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: rgba(180, 83, 9, 0.35);
+    }
+    .exercise-title, .case-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+    }
+    .exercise-title { color: #166534; }
+    .case-title { color: #92400e; }
+    .glossary dl {
+      margin: 0.35rem 0 0;
+    }
+    .glossary dt {
+      font-weight: 650;
+      color: #0f172a;
+      margin-top: 0.85rem;
+    }
+    .glossary dd {
+      margin: 0.15rem 0 0.35rem 0;
+    }
+    .flow {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      font-size: 0.82rem;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      line-height: 1.55;
+      margin: 0.75rem 0 1.25rem;
+      white-space: pre;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+    strong {
+      color: #0f172a;
+      font-weight: 600;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin: 0.75rem 0 1.25rem;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 0.45rem 0.55rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Evaluator-Optimizer Pattern – Suspicious Transaction Report (STR) Drafting</h1>
+
+  <div class="note">
+    <p>
+      This lab was prepared for <strong>your LangGraph cohort</strong>.
+      You will apply the evaluator-optimizer pattern to a compliance workflow that banks actually run:
+      drafting a <strong>Suspicious Transaction Report (STR)</strong> for <strong>FIU-IND</strong>.
+    </p>
+    <p>
+      Open (or create) a Jupyter notebook named <code>08-str-drafting.ipynb</code> in the
+      <code>03-langgraph</code> folder. Work cell by cell. A complete notebook with the same steps
+      is also provided so you can execute and test immediately.
+    </p>
+  </div>
+
+  <h2>Why this lab exists</h2>
+  <p>
+    In production, the evaluator-optimizer loop is used where <strong>a weak first draft is dangerous</strong>
+    — not merely “not good enough.”
+  </p>
+  <p>
+    An STR is one of those documents. If the narrative says <em>“layering pattern”</em> but only quotes
+    two transfers, FIU-IND cannot act on it, and your bank’s compliance team will send it back.
+    The evaluator-optimizer pattern is how we keep a generator from shipping an incomplete report.
+  </p>
+
+  <h3>What you will build</h3>
+  <ol>
+    <li>A <strong>Generator (AML Analyst)</strong> that drafts the STR from a flagged case file</li>
+    <li>An <strong>Evaluator (STR Quality Reviewer)</strong> that checks the draft against FIU-IND standards</li>
+    <li>A <strong>feedback loop</strong> that sends the draft back until the report is submission-ready</li>
+  </ol>
+  <p>
+    You will see the loop run <strong>at least once, often twice</strong>. That is intentional.
+    The first draft is written as a hurried first-cut (the way a busy analyst actually starts).
+    The reviewer is strict. You should watch the draft get rejected, then improved.
+  </p>
+
+  <h2>Terminology you need before you code</h2>
+  <p>
+    Read this once. The rest of the lab assumes these words. AML is not a software framework —
+    it is the bank process this graph is automating.
+  </p>
+
+  <div class="note glossary">
+    <strong>Who does what</strong>
+    <dl>
+      <dt>AML — Anti-Money Laundering</dt>
+      <dd>
+        The bank’s process for spotting and reporting activity that looks like criminal money being
+        hidden or moved. In India this sits under the Prevention of Money Laundering Act.
+        Horizon Bank does not prove a crime. It detects <em>suspicion</em> and files a report.
+      </dd>
+      <dt>AML transaction-monitoring system</dt>
+      <dd>
+        Software that watches payments automatically. When a pattern looks wrong
+        (amounts just under ₹10 lakh, money hopping banks in 48 hours, funds returning to a spouse),
+        it raises an <strong>alert</strong>. In this lab the alert id is <code>AML-2026-0819-4471</code>.
+      </dd>
+      <dt>Case file</dt>
+      <dd>
+        The fact pack that comes with the alert: customer KYC, account numbers, the five flagged
+        transfers, counterparties, and system-suggested red flags. The monitoring system produces it;
+        an AML operations desk assigns it to an analyst. In a real bank it would come from the AML
+        platform. In the notebook, <code>CASE_FILE</code> is that pack — hardcoded so both agents
+        see the same facts. The case file is <strong>input</strong>. The STR is <strong>output</strong>.
+      </dd>
+      <dt>AML Analyst (your generator)</dt>
+      <dd>
+        The person (here, an agent) who reads the case file and drafts the STR. They do not file
+        with the government. They write the narrative.
+      </dd>
+      <dt>STR Quality Reviewer (your evaluator)</dt>
+      <dd>
+        Internal compliance. They check the draft before anyone sends it out. If the draft is thin,
+        they send it <strong>back to the analyst</strong> — not to FIU-IND.
+      </dd>
+      <dt>Reporting entity</dt>
+      <dd>
+        The institution that must file if suspicion stands. Here that is Horizon Bank.
+      </dd>
+    </dl>
+  </div>
+
+  <div class="note glossary">
+    <strong>The report and the regulator</strong>
+    <dl>
+      <dt>STR — Suspicious Transaction Report</dt>
+      <dd>
+        The formal narrative the bank files when activity looks suspicious. It is not a police
+        charge sheet and it is not a conviction. FIU-IND cannot act on “we think this is layering.”
+        They need dates, amounts, account numbers, and the full chain.
+      </dd>
+      <dt>FIU-IND — Financial Intelligence Unit – India</dt>
+      <dd>
+        The government body that receives STRs from banks and other reporting entities.
+        They analyse, then may share with enforcement. <strong>Horizon Bank</strong> files the STR
+        with FIU-IND only after internal review is satisfied.
+      </dd>
+    </dl>
+  </div>
+
+  <p>The path from a customer payment to a filing looks like this:</p>
+  <div class="flow">Customer payments
+        ↓
+AML monitoring system  →  raises alert  →  builds case file
+        ↓
+AML Analyst (generator)     →  drafts STR from the case file
+        ↓
+STR Quality Reviewer (evaluator)  →  approve or send back
+        ↓
+Horizon Bank files STR  →  FIU-IND</div>
+
+  <div class="note glossary">
+    <strong>Words inside the case file</strong>
+    <dl>
+      <dt>Flagged transaction</dt>
+      <dd>
+        A payment the monitoring system marked. This case has exactly five
+        (<code>TXN-001</code> through <code>TXN-005</code>). If the STR mentions only two, the case is incomplete.
+      </dd>
+      <dt>Red flag</dt>
+      <dd>
+        A named suspicion pattern, not a feeling. This lab uses three you must see in the final draft:
+      </dd>
+      <dt>Structuring</dt>
+      <dd>
+        Splitting money into amounts just below a reporting threshold — here, several payments around ₹9.7–9.8 lakh.
+      </dd>
+      <dt>Layering</dt>
+      <dd>
+        Moving the same value through several accounts or banks so the origin is hard to see.
+        A layering claim needs the <strong>full 5-leg chain</strong>, not two outbound payments.
+      </dd>
+      <dt>Rapid movement</dt>
+      <dd>
+        Hops in a very short window — here, about 48 hours across four institutions.
+      </dd>
+      <dt>Round-tripping</dt>
+      <dd>
+        Money leaves and comes back to a related party. Here: Vikram Rao → … → <strong>Priya Rao</strong> (his spouse).
+      </dd>
+      <dt>Beneficiary</dt>
+      <dd>
+        Who received the money. For <code>TXN-004</code> that is <strong>Ananya Sethi</strong>, account
+        <code>2200198845</code>, bank, and PAN. First drafts often skip this. The reviewer is told to catch it.
+      </dd>
+      <dt>KYC — Know Your Customer</dt>
+      <dd>
+        Who the bank believes Vikram Rao is: business, turnover, related parties.
+        The case file uses it to show that Ananya Sethi is not a declared related party, which makes the hop more suspicious.
+      </dd>
+      <dt>Grounds of suspicion</dt>
+      <dd>
+        The FIU-IND-style section: facts plus why they look suspicious, without writing “he is a criminal.”
+      </dd>
+      <dt>Recommended action</dt>
+      <dd>
+        What the bank proposes next: file the STR, extra monitoring, a freeze recommendation, and so on.
+        The analyst drafts this. In real life a human still decides.
+      </dd>
+    </dl>
+  </div>
+
+  <div class="note">
+    <strong>How this maps to the two agents</strong>
+    <p>
+      The case file is input. The STR is output. The loop exists because a first-cut STR that says
+      “layering” after citing only two transfers is not something the bank should send to FIU-IND.
+    </p>
+  </div>
+
+  <h2>The business scenario</h2>
+  <div class="case">
+    <div class="case-title">Horizon Bank — AML Alert AML-2026-0819-4471</div>
+    <p>
+      Horizon Bank’s AML transaction-monitoring system has flagged a <strong>chain of 5 transfers</strong>
+      linked to <strong>Mr. Vikram Rao</strong>, proprietor of Rao Agro Exports, Bengaluru.
+      Your generator must draft the STR. Your evaluator must refuse it until the narrative can survive
+      a FIU-IND review.
+    </p>
+    <p><strong>Evaluator must fail the draft if any of these are true:</strong></p>
+    <ul>
+      <li>Not all 5 flagged transactions are accounted for in the narrative</li>
+      <li>The report does not cite specific red flags: <em>structuring</em>, <em>round-tripping</em>, <em>rapid movement / layering</em></li>
+      <li>The language is too vague for FIU-IND (opinions without facts, slang, missing amounts/dates/accounts)</li>
+      <li>Any conclusion is unsupported by the transaction data — especially claiming a “layering pattern” without the full 5-leg chain</li>
+    </ul>
+    <p><strong>Typical loop triggers you should expect to see:</strong></p>
+    <ul>
+      <li><em>“Report mentions ‘layering pattern’ but only cites 2 transactions — need at least the full chain of 5 flagged transfers to substantiate.”</em></li>
+      <li><em>“Missing the beneficiary details for transaction #4.”</em></li>
+    </ul>
+  </div>
+
+  <h2>Step 1: Import libraries and set up the environment</h2>
+  <p>
+    Load <code>.env</code> and create the LLMs. We use two handles — a slightly warmer generator
+    and a colder evaluator — because drafting and reviewing are different jobs.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste this code, and run it.</p>
+  </div>
+
+  <pre><code>import os
+from typing import Literal
+from typing_extensions import TypedDict
+from pydantic import BaseModel, Field
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import SystemMessage, HumanMessage
+from langgraph.graph import StateGraph, START, END
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Drafter: a little temperature so the narrative is readable
+generator_llm = ChatOpenAI(model="gpt-4.1-mini", temperature=0.4)
+
+# Reviewer: near-deterministic, because grading must be consistent
+reviewer_llm = ChatOpenAI(model="gpt-4.1-mini", temperature=0)
+
+print("✅ Environment ready. Generator and reviewer LLMs initialized.")</code></pre>
+
+  <h2>Step 2: Load the flagged case file</h2>
+  <p>
+    In a real bank this data would come from the AML system. Here it is a structured case file
+    so both agents see the <strong>same facts</strong>. The evaluator is not allowed to invent
+    transactions, and the generator is not allowed to ignore any of them.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste this case file, and run it. Read the 5 transfers before you continue — you will need them to judge whether the loop is working.</p>
+  </div>
+
+  <pre><code>CASE_FILE = """
+HORIZON BANK — AML ALERT PACKAGE
+Alert ID       : AML-2026-0819-4471
+Reporting Entity: Horizon Bank Ltd., MG Road Branch, Bengaluru
+Alert date     : 19 August 2026
+Filing destination: Financial Intelligence Unit - India (FIU-IND)
+Report type    : Suspicious Transaction Report (STR)
+
+CUSTOMER / ACCOUNT
+Name           : Mr. Vikram Rao (age 42)
+Customer ID    : CUST-BLR-88210
+Occupation     : Proprietor, Rao Agro Exports (pulses / spices export)
+Account        : CA-33489102 (Current Account)
+Branch         : MG Road, Bengaluru
+KYC            : Last refreshed 04 Jan 2025. Declared turnover ~ ₹1.8 crore / year.
+Related party  : Spouse Mrs. Priya Rao, Savings A/c SA-88912011, same branch.
+
+FLAGGED TRANSACTIONS (exactly 5 — all must appear in the STR narrative)
+
+TXN-001 | 11 Aug 2026 09:14 IST | DEBIT  | ₹9,80,000
+  From : Vikram Rao / Rao Agro Exports, CA-33489102, Horizon Bank, Bengaluru
+  To   : M/s Kaveri Logistics Pvt Ltd, A/c 5012348890, Southern Cooperative Bank, Chennai
+  Mode : NEFT | Narration: "Freight settlement Q2"
+
+TXN-002 | 11 Aug 2026 11:42 IST | DEBIT  | ₹9,75,000
+  From : Vikram Rao / Rao Agro Exports, CA-33489102, Horizon Bank, Bengaluru
+  To   : Greenfield Commodities LLP, A/c 0098123344, Unity Bank, Hyderabad
+  Mode : RTGS | Narration: "Advance for pulses"
+
+TXN-003 | 12 Aug 2026 09:18 IST | DEBIT  | ₹9,70,000
+  From : Kaveri Logistics Pvt Ltd, A/c 5012348890, Southern Cooperative Bank, Chennai
+  To   : Pacific Trade Desk Ltd, A/c 7788210091, Coastal Bank, Mumbai
+  Mode : RTGS | Narration: "Sub-contract haulage"
+  Note : Onward movement of funds originating in TXN-001, next morning.
+
+TXN-004 | 12 Aug 2026 14:47 IST | DEBIT  | ₹9,65,000
+  From : Pacific Trade Desk Ltd, A/c 7788210091, Coastal Bank, Mumbai
+  To   : Ms. Ananya Sethi
+         PAN     : BKXPS8891Q
+         Account : 2200198845
+         Bank    : Nexora Bank, Greater Kailash-II, New Delhi
+         IFSC    : NEXR0002210
+         Address : 14-B, Greater Kailash-II, New Delhi 110048
+  Mode : IMPS | Narration: "Consultation fee"
+  Note : Third hop in ~29 hours. Beneficiary has no known trade relationship with Rao Agro Exports.
+
+TXN-005 | 13 Aug 2026 11:05 IST | CREDIT | ₹9,50,000
+  From : Ms. Ananya Sethi, A/c 2200198845, Nexora Bank, New Delhi
+  To   : Mrs. Priya Rao, SA-88912011, Horizon Bank, Bengaluru (spouse of Vikram Rao)
+  Mode : NEFT | Narration: "Family gift / loan repayment"
+  Note : Funds return to a related party of the originator within ~48 hours of TXN-001.
+
+SYSTEM-SUGGESTED RED FLAGS (cite only if the facts support them)
+  1. Structuring     — TXN-001, TXN-002 (and the ₹9.70 lakh onward hop) sit just below the ₹10 lakh cash/transaction reporting comfort zone; three large outbound legs on 11–12 Aug.
+  2. Rapid movement  — four institutions, five legs, ~48 hours.
+  3. Layering        — originator → Kaveri Logistics → Pacific Trade Desk → Ananya Sethi → Priya Rao.
+  4. Round-tripping  — value originating from Vikram Rao returns to his spouse's account (TXN-005).
+  5. Weak rationale  — "freight" becomes "consultation fee" becomes "family gift" with no supporting invoices on file.
+
+CUSTOMER PROFILE NOTES
+  - No prior STR on this customer.
+  - Export proceeds in the last 6 months do not explain three near-threshold outbound payments on the same day.
+  - Kaveri Logistics and Pacific Trade Desk were onboarded at other banks; Horizon has no KYC on them.
+  - Ananya Sethi is not a declared related party in Vikram Rao's KYC.
+"""
+
+print("Case file loaded.")
+print("Flagged transfers: TXN-001 through TXN-005 (5 legs).")
+print("Watch for: missing TXN-004 beneficiary details, and 'layering' claimed without the full chain.")</code></pre>
+
+  <div class="note">
+    <strong>Why five transfers, not two?</strong>
+    <p>
+      Layering is a <em>chain</em>. If the draft only mentions Vikram Rao paying Kaveri Logistics and
+      Greenfield Commodities, you have structuring — you do <strong>not</strong> yet have layering.
+      The reviewer is trained to catch that exact overclaim. That is the point of this lab.
+    </p>
+  </div>
+
+  <h2>Step 3: Define the state schema</h2>
+  <p>
+    The state carries the case, the current STR draft, the reviewer’s verdict, and the iteration counter.
+    We also keep <code>max_iterations</code> so a stubborn disagreement cannot loop forever.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> and run this schema.</p>
+  </div>
+
+  <pre><code>class State(TypedDict):
+    """Shared state for the STR evaluator-optimizer loop."""
+    case_file: str
+    str_draft: str
+    evaluation_result: str   # "approved" | "needs_improvement"
+    feedback: str
+    iteration_count: int
+    max_iterations: int
+    missing_items: str       # concrete gaps the reviewer found
+
+print("✅ State schema defined.")</code></pre>
+
+  <h2>Step 4: Define the structured evaluation schema</h2>
+  <p>
+    The reviewer must not return a paragraph we have to parse with string matching.
+    Structured output gives the router a reliable <code>grade</code> and gives the generator
+    a checklist it can actually fix.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> and run this.</p>
+  </div>
+
+  <pre><code>class STREvaluation(BaseModel):
+    """FIU-IND quality review of an STR draft."""
+
+    grade: Literal["approved", "needs_improvement"] = Field(
+        description=(
+            "approved = submission-ready for FIU-IND. "
+            "needs_improvement = return to the analyst with specific fixes."
+        )
+    )
+    all_five_transactions_cited: bool = Field(
+        description="True only if TXN-001, TXN-002, TXN-003, TXN-004 and TXN-005 all appear in the narrative."
+    )
+    red_flags_named: bool = Field(
+        description="True only if structuring, round-tripping, and rapid movement/layering are explicitly named."
+    )
+    language_fiu_ready: bool = Field(
+        description="True only if language is precise, factual, and suitable for FIU-IND (dates, amounts, account numbers)."
+    )
+    conclusions_supported: bool = Field(
+        description="True only if every conclusion (especially 'layering') is backed by the cited transfers."
+    )
+    txn4_beneficiary_complete: bool = Field(
+        description="True only if TXN-004 names Ananya Sethi with account number and bank/PAN or equivalent identifiers."
+    )
+    missing_items: str = Field(
+        description=(
+            "Bullet list of concrete gaps. Use FIU-IND reviewer voice. Examples: "
+            "Report mentions 'layering pattern' but only cites 2 transactions — need at least "
+            "the full chain of 5 flagged transfers to substantiate. "
+            "Missing the beneficiary details for transaction #4."
+        )
+    )
+    feedback: str = Field(
+        description="Actionable revision instructions for the AML analyst. Be specific: which TXN, which field, which sentence to change."
+    )
+    strengths: str = Field(
+        description="What the draft already does well — keep these."
+    )
+
+
+evaluator_llm = reviewer_llm.with_structured_output(STREvaluation)
+print("✅ STR evaluation schema and structured reviewer ready.")</code></pre>
+
+  <h2>Step 5: Write the system prompts</h2>
+  <p>
+    Each agent gets a <strong>system prompt</strong> that states role, constraints, and failure modes.
+    Read these prompts slowly. The loop quality depends on them.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> and run the two system prompts.</p>
+  </div>
+
+  <pre><code>GENERATOR_SYSTEM_PROMPT = """You are a Senior AML Analyst at Horizon Bank Ltd., Bengaluru.
+
+Your sole job is to draft Suspicious Transaction Reports (STRs) for submission to
+FIU-IND (Financial Intelligence Unit - India) under the Prevention of Money Laundering Act.
+
+RULES YOU MUST FOLLOW
+1. Use only facts from the case file. Never invent counterparties, amounts, dates, or PANs.
+2. Write in formal compliance English. No slang, no speculation presented as fact.
+3. Preferred phrasing: "grounds of suspicion", "red flags observed", "transaction chain",
+   "recommended action". Avoid "obviously money laundering" or "the customer is a criminal".
+4. When you describe a pattern (structuring, layering, round-tripping, rapid movement),
+   you MUST cite every transfer that forms that pattern. A layering claim needs the full chain.
+5. For every flagged transfer, include: TXN ID, date/time, amount, from account, to account,
+   mode, and narration. For TXN-004 you MUST include beneficiary name, account number, bank,
+   and PAN if present in the case file.
+6. End with: (a) red flags cited, (b) grounds of suspicion, (c) recommended action
+   (file STR with FIU-IND, consider account monitoring / freeze recommendation as appropriate).
+
+FIRST-CUT BEHAVIOUR (iteration 1 only)
+Write a hurried first-cut STR of about 2–3 short paragraphs.
+Focus on the two most obvious outbound payments from Vikram Rao (TXN-001 and TXN-002).
+You may use the word "layering" at a high level.
+Do NOT yet enumerate TXN-003, TXN-004 beneficiary identifiers, or TXN-005.
+Compliance review will send this back — that is expected. Produce a first cut, not a final filing.
+
+REVISION BEHAVIOUR (iteration 2+)
+The quality reviewer has rejected your draft. Fix EVERY item in the feedback.
+Expand the narrative so that all five flagged transfers appear, with identifiers.
+If the reviewer said the layering claim is unsupported, either cite the full 5-leg chain
+or withdraw the word "layering". Do not argue. Revise.
+"""
+
+EVALUATOR_SYSTEM_PROMPT = """You are the STR Quality Reviewer in Horizon Bank's AML Compliance unit.
+
+You review STR drafts BEFORE they are submitted to FIU-IND. You are stricter than a helpful
+colleague. A flattering review that lets a thin report through is a compliance failure.
+
+YOU MUST GRADE "needs_improvement" IF ANY OF THE FOLLOWING IS TRUE
+A. Not all five flagged transactions (TXN-001 through TXN-005) are accounted for in the narrative.
+B. The draft claims "layering" / "layering pattern" but cites fewer than the full chain of 5 transfers.
+   In that case your missing_items MUST include a sentence in this spirit:
+   "Report mentions 'layering pattern' but only cites 2 transactions — need at least the full chain of 5 flagged transfers to substantiate."
+   (Adjust the number if they cited 1, 3, or 4 — but the message stays the same: full chain of 5 required.)
+C. TXN-004 is mentioned without beneficiary details (name Ananya Sethi, account 2200198845, bank/PAN).
+   In that case missing_items MUST include:
+   "Missing the beneficiary details for transaction #4."
+D. Red flags are missing. The draft must explicitly name:
+   - structuring
+   - round-tripping
+   - rapid movement (or layering, if the full chain is cited)
+E. Language is not FIU-IND ready: vague adjectives, missing amounts/dates/account numbers,
+   or conclusions such as "customer is guilty" that the transaction data cannot support.
+F. Any conclusion is unsupported by the cited data.
+
+GRADE "approved" ONLY WHEN ALL OF A–F ARE SATISFIED.
+
+FIRST-PASS POLICY
+On the analyst's first draft (iteration 1), you almost certainly must reject.
+First drafts in this workflow are hurried. Find the real gaps. Do not rubber-stamp.
+
+TONE
+Write missing_items and feedback as a compliance reviewer, not as a teacher.
+Short, specific, operational. Name the TXN IDs.
+"""
+
+print("✅ System prompts loaded for AML Analyst (generator) and STR Quality Reviewer (evaluator).")</code></pre>
+
+  <div class="note">
+    <strong>Why the first-cut instruction exists</strong>
+    <p>
+      If both agents try to be “perfect” on pass one, you will not see the loop — and you will not
+      learn the pattern. Banks also work this way: the analyst dumps a first narrative, compliance
+      marks it up, the analyst files the complete version. We encoded that operating rhythm in the prompts.
+    </p>
+  </div>
+
+  <h2>Step 6: Create the STR generator node</h2>
+  <p>
+    The node reads <code>iteration_count</code>. On the first visit it asks for a first-cut.
+    On later visits it pastes the rejected draft plus the reviewer’s feedback and asks for a revision.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> and run the generator node.</p>
+  </div>
+
+  <pre><code>def str_generator(state: State) -> dict:
+    """Draft or revise the Suspicious Transaction Report."""
+    iteration = state.get("iteration_count", 0)
+    case_file = state["case_file"]
+    feedback = state.get("feedback", "")
+    previous_draft = state.get("str_draft", "")
+
+    if iteration == 0:
+        human = f"""Prepare the FIRST-CUT STR for the following alert.
+
+{case_file}
+
+Remember: this is iteration 1 — a hurried first-cut is required, not a complete filing.
+"""
+        print("✍️  AML Analyst: writing first-cut STR (expected to be incomplete)...")
+    else:
+        human = f"""REVISE the STR. The quality reviewer rejected the previous draft.
+
+CASE FILE (facts — do not invent beyond this):
+{case_file}
+
+PREVIOUS DRAFT:
+{previous_draft}
+
+REVIEWER FEEDBACK (fix every item):
+{feedback}
+
+Produce a complete, FIU-IND-ready STR. All 5 flagged transfers must appear.
+TXN-004 beneficiary details must be complete. Do not claim layering without the full chain.
+"""
+        print(f"✍️  AML Analyst: revising STR (iteration {iteration + 1}) from reviewer feedback...")
+
+    response = generator_llm.invoke(
+        [SystemMessage(content=GENERATOR_SYSTEM_PROMPT), HumanMessage(content=human)]
+    )
+
+    return {
+        "str_draft": response.content,
+        "iteration_count": iteration + 1,
+    }
+
+print("✅ STR generator node created.")</code></pre>
+
+  <h2>Step 7: Create the STR evaluator node</h2>
+  <p>
+    The reviewer receives the case file <em>and</em> the draft so it can check facts rather than style.
+    If a first pass somehow comes back <code>approved</code>, we still force one revision with the
+    two canonical loop triggers. That guarantees you will see the cycle in class even if the model
+    writes a surprisingly complete first draft.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> and run the evaluator node.</p>
+  </div>
+
+  <pre><code>def str_evaluator(state: State) -> dict:
+    """Review the STR draft against FIU-IND completeness and supportability rules."""
+    iteration = state.get("iteration_count", 0)
+    draft = state["str_draft"]
+    case_file = state["case_file"]
+
+    human = f"""Review this STR draft. Iteration number: {iteration}
+
+CASE FILE (source of truth):
+{case_file}
+
+STR DRAFT UNDER REVIEW:
+{draft}
+
+Apply the grading rules from your system prompt. Return structured output only.
+"""
+
+    print(f"🔍 STR Quality Reviewer: reviewing draft from iteration {iteration}...")
+    evaluation = evaluator_llm.invoke(
+        [SystemMessage(content=EVALUATOR_SYSTEM_PROMPT), HumanMessage(content=human)]
+    )
+
+    grade = evaluation.grade
+    missing = evaluation.missing_items
+
+    # Pedagogical safety net: first review cannot close the file.
+    if iteration == 1 and grade == "approved":
+        grade = "needs_improvement"
+        missing = (
+            "Report mentions 'layering pattern' but only cites 2 transactions — "
+            "need at least the full chain of 5 flagged transfers to substantiate.\n"
+            "Missing the beneficiary details for transaction #4."
+        )
+        print("   ↳ First-pass policy: sending the draft back for a full-chain revision.")
+
+    comprehensive_feedback = f"""EVALUATION SUMMARY
+Grade: {grade.upper()}
+Iteration reviewed: {iteration}
+
+CHECKLIST
+- All 5 transactions cited : {evaluation.all_five_transactions_cited}
+- Red flags named          : {evaluation.red_flags_named}
+- FIU-IND language         : {evaluation.language_fiu_ready}
+- Conclusions supported    : {evaluation.conclusions_supported}
+- TXN-004 beneficiary OK   : {evaluation.txn4_beneficiary_complete}
+
+STRENGTHS
+{evaluation.strengths}
+
+MISSING / GAPS
+{missing}
+
+REVISION INSTRUCTIONS
+{evaluation.feedback}
+"""
+
+    print(f"   Grade: {grade.upper()}")
+    print(f"   Gaps : {missing[:180]}{'...' if len(missing) > 180 else ''}")
+
+    return {
+        "evaluation_result": grade,
+        "feedback": comprehensive_feedback,
+        "missing_items": missing,
+    }
+
+print("✅ STR evaluator node created.")</code></pre>
+
+  <h2>Step 8: Create the routing function</h2>
+  <p>
+    Routing is what turns two nodes into a loop. Two extra rules keep that loop useful in class:
+  </p>
+  <ul>
+    <li><strong>Minimum one revision</strong> — if we have only generated once, go back to the analyst</li>
+    <li><strong>Maximum iterations</strong> — stop after 4 generate-review cycles so the graph cannot run away</li>
+  </ul>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> and run the router.</p>
+  </div>
+
+  <pre><code>def route_str(state: State) -> Literal["approved", "needs_revision"]:
+    """Decide whether the STR can be filed or must go back to the analyst."""
+    result = state["evaluation_result"]
+    iteration = state.get("iteration_count", 0)
+    max_iterations = state.get("max_iterations", 4)
+
+    if iteration >= max_iterations:
+        print(f"⚠️  Max iterations ({max_iterations}) reached. Filing the current draft as-is.")
+        return "approved"
+
+    # Guarantee at least one generate → review → generate cycle
+    if iteration < 2:
+        print(f"🔄 Minimum review cycle not yet complete (iteration {iteration}). Returning to analyst.")
+        return "needs_revision"
+
+    if result == "approved":
+        print(f"✅ STR approved for FIU-IND filing after {iteration} iteration(s).")
+        return "approved"
+
+    print(f"🔄 STR needs revision (iteration {iteration}). Returning to AML Analyst.")
+    return "needs_revision"
+
+print("✅ Routing function created.")</code></pre>
+
+  <div class="note">
+    <strong>Expected path in class</strong>
+    <ol>
+      <li>Generator writes a thin first-cut (mostly TXN-001 and TXN-002, maybe a loose “layering” claim)</li>
+      <li>Evaluator rejects — full chain missing, TXN-004 beneficiary missing</li>
+      <li>Generator revises with all 5 legs and Ananya Sethi’s identifiers</li>
+      <li>Evaluator either approves, or asks for one more language/support pass, then approves</li>
+    </ol>
+    <p>You should see <strong>one or two loops</strong>, not zero and not ten.</p>
+  </div>
+
+  <h2>Step 9: Build and compile the graph</h2>
+  <p>The graph is a generate → evaluate → (revise or stop) loop.</p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> and compile the workflow.</p>
+  </div>
+
+  <pre><code>workflow = StateGraph(State)
+
+workflow.add_node("str_generator", str_generator)
+workflow.add_node("str_evaluator", str_evaluator)
+
+workflow.add_edge(START, "str_generator")
+workflow.add_edge("str_generator", "str_evaluator")
+workflow.add_conditional_edges(
+    "str_evaluator",
+    route_str,
+    {
+        "approved": END,
+        "needs_revision": "str_generator",
+    },
+)
+
+str_workflow = workflow.compile()
+
+print("✅ STR evaluator-optimizer graph compiled.")
+print("START → str_generator → str_evaluator → [approved: END | needs_revision: str_generator]")</code></pre>
+
+  <h2>Step 10: Visualize the graph</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Run this cell. If PNG rendering fails on Windows, the ASCII fallback still shows the loop.</p>
+  </div>
+
+  <pre><code>try:
+    from IPython.display import Image, display
+    display(Image(str_workflow.get_graph().draw_mermaid_png()))
+except Exception as err:
+    print("PNG render skipped:", err)
+    print(str_workflow.get_graph().draw_ascii())</code></pre>
+
+  <h2>Step 11: Run the workflow with streaming</h2>
+  <p>
+    Use <code>stream()</code> first so you can watch each hop. This is the cell that should make
+    the loop visible: first-cut → reject → revise → (maybe reject again) → approve.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> and run the streamed execution. Give it a minute — two LLM calls per iteration.</p>
+  </div>
+
+  <pre><code>initial_state = {
+    "case_file": CASE_FILE,
+    "str_draft": "",
+    "evaluation_result": "",
+    "feedback": "",
+    "iteration_count": 0,
+    "max_iterations": 4,
+    "missing_items": "",
+}
+
+print("=" * 80)
+print("HORIZON BANK — STR DRAFTING LOOP  |  Alert AML-2026-0819-4471")
+print("=" * 80)
+
+final_snapshot = None
+for step in str_workflow.stream(initial_state, {"recursion_limit": 25}):
+    node_name = list(step.keys())[0]
+    update = step[node_name]
+    final_snapshot = update
+
+    print("\n" + "-" * 80)
+    print(f"📍 Node: {node_name}")
+
+    if node_name == "str_generator":
+        draft = update.get("str_draft", "")
+        print(f"   Iteration: {update.get('iteration_count')}")
+        print(f"   Draft length: {len(draft)} characters")
+        print("   Preview:")
+        print("   " + draft[:400].replace("\n", "\n   ") + ("..." if len(draft) > 400 else ""))
+
+    elif node_name == "str_evaluator":
+        print(f"   Grade: {update.get('evaluation_result')}")
+        print("   Reviewer gaps:")
+        print("   " + str(update.get("missing_items", ""))[:500].replace("\n", "\n   "))
+
+print("\n" + "=" * 80)
+print("LOOP FINISHED")
+print("=" * 80)</code></pre>
+
+  <h2>Step 12: Display the filing-ready STR</h2>
+  <p>
+    <code>stream()</code> yields per-node updates, not the merged final state.
+    Run <code>invoke()</code> once more — or stash the last merged state — to print the document
+    you would actually send to compliance.
+  </p>
+  <p>
+    We re-invoke below with the same initial state so you have a complete <code>final_state</code>
+    object to inspect. If you want to save tokens, skip this cell and instead accumulate state
+    yourself in the stream loop.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Prefer not to pay for a second full run? Then skip this cell and use the notebook’s
+      “accumulate-while-streaming” version. If you want a clean final object, run this.
+    </p>
+  </div>
+
+  <pre><code># Clean final run — comment this out if you already captured state while streaming.
+final_state = str_workflow.invoke(initial_state, {"recursion_limit": 25})
+
+print("=" * 80)
+print("FILEABLE STR  |  Alert AML-2026-0819-4471")
+print("=" * 80)
+print(f"Iterations              : {final_state['iteration_count']}")
+print(f"Final evaluation        : {final_state['evaluation_result'].upper()}")
+print(f"TXN-004 / chain gaps    : {final_state.get('missing_items', '')[:200]}")
+print("\n" + "-" * 80)
+print("STR NARRATIVE")
+print("-" * 80)
+print(final_state["str_draft"])
+print("\n" + "-" * 80)
+print("LAST REVIEWER NOTE")
+print("-" * 80)
+print(final_state["feedback"])</code></pre>
+
+  <div class="note">
+    <strong>How to know the lab worked</strong>
+    <ul>
+      <li>Iteration count is <strong>2 or 3</strong> (one or two loops), not 1</li>
+      <li>First evaluator message complains about the incomplete chain and/or TXN-004 beneficiary</li>
+      <li>Final draft names TXN-001 through TXN-005, names Ananya Sethi with account <code>2200198845</code>, and names structuring, rapid movement/layering, and round-tripping</li>
+      <li>The word “layering” in the final draft is backed by the five-leg path: Rao → Kaveri → Pacific → Sethi → Priya Rao</li>
+    </ul>
+  </div>
+
+  <h2>Practice exercises (do these after the happy path runs)</h2>
+  <div class="exercise">
+    <div class="exercise-title">Exercise A — Break the generator on purpose</div>
+    <p>
+      Temporarily delete the “FIRST-CUT BEHAVIOUR” block from the generator system prompt so it tries
+      to write a complete STR on pass one. Re-run. Does the evaluator still loop? Why or why not?
+      What does the first-pass policy in <code>str_evaluator</code> do in that situation?
+    </p>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Exercise B — Add a new red flag</div>
+    <p>
+      Add a sixth observation to the case file: Vikram Rao’s KYC says “no related overseas entities”,
+      but Pacific Trade Desk Ltd has a registered address in Singapore on the alert notes.
+      Update the evaluator checklist with a boolean <code>kyc_inconsistency_addressed</code>.
+      The loop should now also fail drafts that ignore this inconsistency.
+    </p>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Exercise C — Human-in-the-loop (stretch)</div>
+    <p>
+      After the evaluator, add a node that prints the draft and uses <code>input()</code> so you
+      can type <code>approve</code> or extra feedback. Route to END or back to the generator.
+      This is how a real AML desk works: the model proposes, a compliance officer disposes.
+    </p>
+  </div>
+
+  <h2>What you should be able to explain to a colleague</h2>
+  <ol>
+    <li>Why an STR generator without an evaluator is a regulatory risk, not just a quality issue</li>
+    <li>Why “layering” is an unsupported conclusion unless the full transfer chain is in the narrative</li>
+    <li>How <code>with_structured_output</code> makes routing reliable</li>
+    <li>How system prompts encode role, first-cut behaviour, and revision behaviour</li>
+    <li>How <code>iteration_count</code> + <code>max_iterations</code> keep a critique loop bounded</li>
+  </ol>
+
+  <h2>Summary</h2>
+  <p>
+    You built an evaluator-optimizer loop around a real control:
+    <strong>every flagged transfer, every named red flag, no unsupported conclusion</strong>.
+    The first draft was supposed to fail. The second (or third) draft is the one that could be
+    filed with FIU-IND.
+  </p>
+  <p>
+    That is the pattern. Keep the graph. Change the case file, the system prompts, and the
+    review checklist, and you can run the same loop for SAR narratives, credit-decision memos,
+    or audit findings.
+  </p>
+
+</main>
+</body>
+</html>

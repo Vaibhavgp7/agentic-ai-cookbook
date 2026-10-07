@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>09 · Spec Evolution: Inventory – OpenSpec ShopLite</title>
+  <style>
+:root {
+  --ink: #0f172a;
+  --muted: #475569;
+  --accent: #1d4ed8;
+  --line: rgba(37, 99, 235, 0.18);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.65;
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+  color: #111827;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(15, 23, 42, 0.94);
+  color: #e5e7eb;
+  backdrop-filter: blur(8px);
+}
+
+.topbar-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0.7rem 1.25rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.topbar a {
+  color: #bfdbfe;
+  text-decoration: none;
+  font-size: 0.88rem;
+}
+
+.topbar a:hover { color: #fff; text-decoration: underline; }
+
+.brand {
+  font-weight: 700;
+  color: #fff !important;
+  letter-spacing: -0.02em;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+main {
+  max-width: 960px;
+  margin: 1.5rem auto 3rem;
+  padding: 2.25rem 2rem 3rem;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(148, 163, 184, 0.12);
+}
+
+h1 {
+  font-size: 2.05rem;
+  margin: 0 0 1.1rem;
+  letter-spacing: -0.03em;
+  text-align: center;
+  color: #0f172a;
+  padding: 1rem 1.4rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+  box-shadow:
+    0 10px 25px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(148, 163, 184, 0.35);
+}
+
+h2 {
+  font-size: 1.55rem;
+  margin-top: 2.15rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 0.35rem;
+  color: #0f172a;
+}
+
+h3 {
+  font-size: 1.2rem;
+  margin-top: 1.6rem;
+  color: #0f172a;
+}
+
+p { margin: 0.5rem 0 0.75rem; }
+
+code {
+  font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+  background-color: #f3f4ff;
+  padding: 0.12rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.95em;
+  color: #1d4ed8;
+}
+
+pre {
+  background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+  color: #e5e7eb;
+  padding: 2.25rem 4.75rem 1rem 1.1rem;
+  border-radius: 10px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+  margin: 0.75rem 0 1.5rem;
+  border: 1px solid rgba(15, 23, 42, 0.6);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.note, .exercise, .warn, .concept, .checkpoint, .behind, .think {
+  padding: 0.9rem 1.1rem;
+  margin: 1rem 0 1.5rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+}
+
+.note {
+  border-left: 4px solid #2563eb;
+  background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+  border-color: rgba(37, 99, 235, 0.4);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(191, 219, 254, 0.9);
+}
+
+.exercise {
+  border-left: 4px solid #16a34a;
+  background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+  border-color: rgba(22, 163, 74, 0.4);
+}
+
+.warn {
+  border-left: 4px solid #d97706;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: rgba(217, 119, 6, 0.4);
+}
+
+.concept {
+  border-left: 4px solid #7c3aed;
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+  border-color: rgba(124, 58, 237, 0.35);
+}
+
+.checkpoint {
+  border-left: 4px solid #0f766e;
+  background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+  border-color: rgba(15, 118, 110, 0.35);
+}
+
+.behind {
+  border-left: 4px solid #0e7490;
+  background: linear-gradient(135deg, #ecfeff, #cffafe);
+  border-color: rgba(14, 116, 144, 0.35);
+}
+
+.think {
+  border-left: 4px solid #c2410c;
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border-color: rgba(194, 65, 12, 0.35);
+}
+
+.exercise-title, .warn-title, .concept-title, .checkpoint-title, .behind-title, .think-title {
+  font-weight: 650;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+}
+
+.exercise-title { color: #166534; }
+.warn-title { color: #92400e; }
+.concept-title { color: #5b21b6; }
+.checkpoint-title { color: #115e59; }
+.behind-title { color: #155e75; }
+.think-title { color: #9a3412; }
+
+ol, ul { padding-left: 1.4rem; }
+li { margin: 0.25rem 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.95rem;
+}
+
+th, td {
+  border: 1px solid #e2e8f0;
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #eff6ff;
+  color: #0f172a;
+}
+
+tr:nth-child(even) td { background: #f8fafc; }
+
+.meta {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0 0 1.25rem;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.kicker {
+  text-align: center;
+  color: var(--muted);
+  margin-top: -0.35rem;
+  margin-bottom: 1.1rem;
+}
+
+.toc a { color: #1d4ed8; }
+
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.lesson-nav a {
+  color: #1d4ed8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.lesson-nav a:hover { text-decoration: underline; }
+
+.sample-output-title {
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+  color: #0f172a;
+}
+
+.code-wrapper { position: relative; }
+
+.copy-btn {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.5rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.55rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  color: #9ca3af;
+  font-family: system-ui, sans-serif;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  user-select: none;
+}
+
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #f9fafb;
+}
+
+.copy-btn.copied {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.45);
+}
+
+.progress {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.progress span {
+  display: block;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  background: #f1f5f9;
+  font-size: 0.82rem;
+  color: #334155;
+  text-align: center;
+}
+
+.progress span.done {
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 600;
+}
+
+.progress span.now {
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 700;
+}
+
+footer.site {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-bottom: 2rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.85rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.95rem 1rem;
+  background: #f8fafc;
+}
+
+.card h3 { margin-top: 0; font-size: 1.05rem; }
+.card a { color: #1d4ed8; font-weight: 650; text-decoration: none; }
+.card a:hover { text-decoration: underline; }
+.card p { margin: 0.35rem 0 0; font-size: 0.92rem; color: #475569; }
+
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="00-index.html">OpenSpec · ShopLite</a>
+    <nav>
+      <a href="00-index.html">Home</a>
+      <a href="01-why-spec-driven-development.html">01</a>
+      <a href="02-install-and-initialize.html">02</a>
+      <a href="03-core-concepts.html">03</a>
+      <a href="04-first-cycle-catalog.html">04</a>
+      <a href="05-explore-and-specify-search.html">05</a>
+      <a href="06-review-artifacts-cart.html">06</a>
+      <a href="07-apply-debug-checkout.html">07</a>
+      <a href="08-expanded-workflow-orders.html">08</a>
+      <a href="09-spec-evolution-inventory.html">09</a>
+      <a href="10-spec-management-and-beyond.html">10</a>
+    </nav>
+  </div>
+</div>
+
+<main>
+  <h1>09 · Spec Evolution: Inventory</h1>
+  <p class="kicker">Shops do not only grow. Sometimes a rule changes. A one-word typo still does not need this whole process. When a rule does change, each new scenario still needs a test.</p>
+  <div class="meta">
+    <span class="pill">Lesson 09 of 10</span>
+    <span class="pill">~80 minutes</span>
+    <span class="pill">MODIFIED / REMOVED / skip a typo</span>
+  </div>
+
+  <div class="progress">
+    <span class="done">Catalog</span><span class="done">Search</span><span class="done">Cart</span>
+    <span class="done">Checkout</span><span class="done">Orders</span><span class="now">Inventory</span>
+  </div>
+
+  <div class="note">
+    <strong>What you will do</strong>
+    <ul>
+      <li>Fix a tiny UI typo <em>without</em> OpenSpec (judgment).</li>
+      <li>Write MODIFIED and REMOVED deltas so the catalog tells the truth about stock.</li>
+      <li>Draft a proposal and delta specs by hand, then let the AI implement.</li>
+      <li>See the spec suite as persistent context across sessions.</li>
+    </ul>
+  </div>
+
+  <div class="behind">
+    <div class="behind-title">Archive copies rules by their headings</div>
+    <p>ADDED, MODIFIED, and REMOVED tell the copy step what to do with each rule. On archive, the program should:</p>
+    <ul>
+      <li>ADDED — add the new rule to <code>openspec/specs/…/spec.md</code>. Create the file if it is missing. Keep <code>## Purpose</code> if you wrote one.</li>
+      <li>MODIFIED — find the rule with the same title and replace the whole block with the new text.</li>
+      <li>REMOVED — delete that rule. If a whole area of the shop would become empty, retiring the file is a separate, explicit step. We will not do that to the catalog.</li>
+    </ul>
+    <p>
+      If you mark a change as ADDED when that title already exists, the spec ends up with two rules that disagree.
+      If you mark a brand-new title as MODIFIED, there is nothing to replace.
+      We write the inventory spec by hand so you feel those rules before you trust a draft.
+    </p>
+    <p>
+      Skipping OpenSpec for a typo is a judgment call, the same one from lesson 01.
+      You can skip the process for one change. Once a behavior is promised in the spec, that promise stays until you change it on purpose.
+      A new or changed scenario still needs a test.
+    </p>
+  </div>
+  <div class="think">
+    <div class="think-title">Think</div>
+    <p>
+      Catalog used to say “list every product as for sale.” Stock changes that sentence. Why is that MODIFIED rather
+      than a new spec file called <code>inventory</code> only? (You may still ADD stock quantity somewhere — but the
+      old listing rule must not remain, or archive leaves a lie.)
+    </p>
+  </div>
+
+  <h2>1. When this process is too much</h2>
+  <p>
+    Lesson 01 promised we would not spec every keystroke. Amazon.com has thousands of copy tweaks a year. OpenSpec
+    would be theatre for “Nile Retial” → “Nile Retail.”
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task — fix without a spec change</div>
+    <p>
+      Find a purely presentational issue: a heading typo, extra padding, a footer line, button label “Add to Basket”
+      vs “Add to Cart.” In a normal chat, <strong>do not</strong> run propose. Tell the agent:
+    </p>
+  </div>
+  <pre><code>Fix the typo / label on the home page heading (describe the exact string).
+Do not create an OpenSpec change. Do not edit openspec/specs.
+This is a presentation-only fix.</code></pre>
+  <p>Heuristic you should now feel in your bones:</p>
+  <pre><code>Would this update openspec/specs/?
+  Yes → use the workflow
+  No  → just make the change</code></pre>
+  <p>If you are unsure, ask: “would a future agent need this fact to behave correctly?” Typos, no. Out-of-stock rules, yes.</p>
+
+  <h2>2. Inventory changes existing behavior</h2>
+  <p>Until now almost every delta was ADDED. Inventory is different:</p>
+  <ul>
+    <li>The catalog currently lists products as if they are always for sale.</li>
+    <li>The cart currently allows adding without asking about stock.</li>
+    <li>Amazon shows “Currently unavailable” and blocks add-to-cart. We want a teaching-sized version of that.</li>
+  </ul>
+  <p>That is not a new island of behavior. It <strong>modifies</strong> catalog and cart contracts.</p>
+
+  <h3>2.1 ADDED vs MODIFIED vs REMOVED</h3>
+  <table>
+    <thead>
+      <tr><th>Section</th><th>Use when</th><th>Archive effect</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>## ADDED Requirements</code></td>
+        <td>Brand-new behavior (stock count exists; unavailable message)</td>
+        <td>Appended to the main spec</td>
+      </tr>
+      <tr>
+        <td><code>## MODIFIED Requirements</code></td>
+        <td>A named requirement already exists and its rules change (e.g. “list every product” becomes “list available; mark unavailable”)</td>
+        <td>Replaces the old requirement text</td>
+      </tr>
+      <tr>
+        <td><code>## REMOVED Requirements</code></td>
+        <td>A behavior is going away (e.g. if you had “always show Add to cart”)</td>
+        <td>Deleted from the main spec</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    MODIFIED must include the <strong>full new</strong> requirement, not a diff hunk. Copy the old requirement,
+    edit it, put it under MODIFIED, and add a one-line note of what changed.
+  </p>
+  <p>
+    If you REMOVE the last requirement in a capability, archive may need to retire the whole spec file. That is an
+    advanced edge (sometimes <code>retire_capabilities: true</code> in the change’s YAML). We will not retire catalog.
+  </p>
+
+  <h2>3. Identify what the current specs assume</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Search the spec suite for assumptions that stock will break.</p>
+  </div>
+  <pre><code>openspec view</code></pre>
+  <p>Or in the editor, search <code>openspec/specs</code> for phrases like “every product,” “add to the cart,” “available.” Write down the exact requirement titles you will MODIFIED.</p>
+  <p>Typical findings:</p>
+  <ul>
+    <li>Catalog: home lists each product — does that include quantity 0?</li>
+    <li>Cart: add from detail always succeeds.</li>
+    <li>Checkout: no mention of stock going to zero between add and place order. We will keep that simple: check stock at add-to-cart and at place-order; if place-order fails, say why and leave the cart.</li>
+  </ul>
+
+  <h2>4. Write the change by hand</h2>
+  <p>
+    Generating specs is convenient. Writing one by hand teaches you what the AI has been producing — and usually
+    produces the reaction “that is more thought than I expected.” Good.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create the folder structure yourself (terminal or editor). You may use <code>/opsx-new add-inventory-availability</code> to scaffold, then <strong>replace</strong> generated files with your writing. Or create files with no AI at all.</p>
+  </div>
+  <pre><code>openspec/changes/add-inventory-availability/
+  proposal.md
+  design.md
+  tasks.md
+  specs/catalog/spec.md
+  specs/cart/spec.md
+  specs/checkout/spec.md   # only if you change place-order rules</code></pre>
+
+  <h3>4.1 proposal.md (write this)</h3>
+  <pre><code># Proposal: add-inventory-availability
+
+## Intent
+Shoppers should not be able to buy products Nile Retail cannot ship.
+Unavailable products are still visible (like Amazon's "Currently unavailable")
+but cannot be added to the cart.
+
+## Scope
+- Each product has an integer stock quantity in seed data.
+- At least one seed product starts at 0 so we can demo the state.
+- Catalog shows an unavailable state when stock is 0.
+- Add to cart is rejected when stock is 0.
+- Place order is rejected if any line's quantity exceeds current stock.
+- Successful place order reduces stock by the purchased quantities.
+
+## Out of scope
+- Warehouse locations, backorders, restock emails, admin stock UI beyond editing JSON/seed,
+  overselling protection under concurrency, marketplace sellers.
+
+## Approach
+Keep the existing stack. Store stock next to product records. Enforce rules in the
+same layer that already mutates the cart and orders.</code></pre>
+
+  <h3>4.2 Catalog delta (pattern)</h3>
+  <p>Open the live <code>openspec/specs/catalog/spec.md</code>. Copy the requirement that says you list products. Put the new full text under MODIFIED. Example shape (adapt to your real titles):</p>
+  <pre><code># Delta for Catalog
+
+## MODIFIED Requirements
+
+### Requirement: Home catalog
+The system SHALL list each product that Nile Retail carries, including
+products with zero stock.
+When stock is zero, the listing SHALL indicate the product is unavailable.
+(Previously: listed products as available for sale without a stock concept.)
+
+#### Scenario: In-stock product
+- GIVEN a product with stock greater than 0
+- WHEN the shopper views the catalog
+- THEN the product is listed without an unavailable marker
+
+#### Scenario: Out-of-stock product
+- GIVEN a product with stock 0
+- WHEN the shopper views the catalog or detail page
+- THEN the product is visible
+- AND it is marked unavailable
+- AND the shopper is not offered a working add-to-cart action
+
+## ADDED Requirements
+
+### Requirement: Stock quantity
+Each product SHALL have a non-negative integer stock quantity.
+
+#### Scenario: Seed data
+- GIVEN the default ShopLite catalog
+- WHEN products are loaded
+- THEN each product has a stock quantity
+- AND at least one product has stock 0</code></pre>
+
+  <h3>4.3 Cart delta (pattern)</h3>
+  <pre><code># Delta for Cart
+
+## MODIFIED Requirements
+
+### Requirement: Add to cart
+The system SHALL add a product to the cart only when stock is greater than 0.
+(Previously: add always succeeded for any listed product.)
+
+#### Scenario: Add in-stock
+- GIVEN a product with stock greater than 0
+- WHEN the shopper adds it to the cart
+- THEN the product appears in the cart
+
+#### Scenario: Reject out-of-stock add
+- GIVEN a product with stock 0
+- WHEN the shopper attempts to add it
+- THEN the cart does not gain that product
+- AND the shopper is told it is unavailable
+
+## ADDED Requirements
+
+### Requirement: Quantity cannot exceed stock
+The system SHALL not allow a cart line quantity greater than current stock.
+
+#### Scenario: Cap at stock
+- GIVEN a product with stock 2
+- WHEN the shopper tries to set quantity to 3
+- THEN the quantity remains at most 2
+- AND the shopper is told why</code></pre>
+
+  <h3>4.4 Optional REMOVED</h3>
+  <p>Only if you literally had a requirement like “Add to cart is always shown.” Then:</p>
+  <pre><code>## REMOVED Requirements
+
+### Requirement: Always-available add action
+(Replaced by stock-aware add; unavailable products must not offer a working add.)</code></pre>
+  <p>Do not REMOVE things you never wrote. Fake REMOVED sections confuse archive.</p>
+
+  <h3>4.5 design.md and tasks.md</h3>
+  <p>Keep design short: where stock lives, which requests check it, and how you seed one item with zero stock. Tasks: seed stock, catalog page, block add, cap quantity, lower stock when an order is placed, the failed-order message, and one test for each new scenario.</p>
+  <p>
+    The living specs from earlier lessons should already contain “Test for each scenario.” Do not add that requirement a second time. ADDED would leave two copies. The new scenarios are already covered by that rule. What you add now is a task, and later a test, for each new scenario. If a brand-new spec file has no such requirement yet, add it once.
+  </p>
+
+  <h2>5. Ask the AI to review your hand-written specs</h2>
+  <p>You wrote them, so they will miss scenarios. That is expected. Now use the agent as a reviewer, not an author.</p>
+  <pre><code>Review openspec/changes/add-inventory-availability/ as a spec reviewer.
+Do not implement yet.
+List missing scenarios, missing tests, wrong delta types (ADDED vs MODIFIED), and any
+contradiction with openspec/specs/. A scenario with no test task is a gap.
+Propose edits; wait for my approval.</code></pre>
+  <p>Accept the useful gaps. Reject new scope (warehouses, backorders).</p>
+  <p>If you are in expanded mode you can still <code>/opsx-update</code> after you approve edits. If core-only, just edit files.</p>
+
+  <h2>6. Implement and archive</h2>
+  <pre><code>/opsx-apply add-inventory-availability</code></pre>
+  <p>Manual checks:</p>
+  <ol>
+    <li>A zero-stock product is visible and marked unavailable.</li>
+    <li>Add to cart fails for it.</li>
+    <li>An in-stock product still adds.</li>
+    <li>Line quantity cannot exceed stock.</li>
+    <li>Place order reduces stock; a second order that would oversell is rejected.</li>
+    <li>Search still finds the unavailable product (unless you specified otherwise — Amazon does show them).</li>
+    <li>The tests pass, and each new scenario title appears in a test name.</li>
+  </ol>
+  <pre><code>/opsx-verify add-inventory-availability
+/opsx-archive add-inventory-availability</code></pre>
+  <p>Open the main catalog spec. The old “everything is for sale” language should be gone, replaced by your MODIFIED text. If both old and new exist, you used ADDED when you needed MODIFIED — fix the main spec so it does not lie, and remember the lesson.</p>
+
+  <h2>7. The spec suite is the product</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Start a <strong>brand new</strong> chat. Ask:</p>
+  </div>
+  <pre><code>Do not read our previous conversation (there isn't one).
+Using only openspec/specs/, summarize how ShopLite handles:
+catalog, search, cart, checkout totals, orders, and stock.
+Cite requirement titles.</code></pre>
+  <p>
+    If the summary is accurate, your suite is doing its job as persistent context. If the agent invents Amazon Prime,
+    the specs are still too thin — or you did not point it at <code>openspec/specs/</code>.
+  </p>
+
+  <h2>8. Challenge (optional)</h2>
+  <p>
+    Amazon also shows “Only 2 left in stock.” Add a SHOULD (not MUST) requirement: when stock is 1–5, show a low-stock
+    hint. SHOULD means a justified exception is allowed — good practice using RFC 2119 strength on purpose.
+  </p>
+
+  <h2>9. Common issues</h2>
+  <table>
+    <thead>
+      <tr><th>Symptom</th><th>Fix</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Archive duplicated catalog listing requirements</td><td>You ADDED instead of MODIFIED. Manually edit main spec to one requirement; next time copy the old title exactly.</td></tr>
+      <tr><td>Hand-written spec missed cancel interaction</td><td>AI review step should have caught it. Add scenario if cancel restores stock — decide explicitly (teaching default: cancel restores stock).</td></tr>
+      <tr><td>You used propose for the footer typo</td><td>That was more process than the fix needed. The judgment call was the exercise.</td></tr>
+      <tr><td>Unavailable products hidden from search</td><td>Only OK if specified. Otherwise you changed search silently — MODIFIED search or restore visibility.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>10. Reflection</h2>
+  <ol>
+    <li>Why is inventory mostly MODIFIED rather than a brand-new unrelated spec?</li>
+    <li>What broke when you tried to write scenarios by hand?</li>
+    <li>Name one change you will never put through OpenSpec at work, and one you always will.</li>
+  </ol>
+
+  <div class="checkpoint">
+    <div class="checkpoint-title">Lesson 09 complete</div>
+    <p>ShopLite now refuses to sell empty shelves, and you have the words for adding, changing, and removing a rule. Last lesson: teams, the terminal, a project that already exists, and leaving the tutorial.</p>
+  </div>
+
+  <div class="lesson-nav">
+    <a href="08-expanded-workflow-orders.html">← 08 Orders</a>
+    <a href="10-spec-management-and-beyond.html">Next: 10 Real world →</a>
+  </div>
+</main>
+<script>
+(function () {
+  const COPY_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  const CHECK_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  function copyText(text, onDone) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(onDone).catch(fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      onDone();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("pre").forEach((pre) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "code-wrapper";
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "copy-btn";
+      btn.innerHTML = COPY_ICON + " Copy";
+      wrapper.appendChild(btn);
+
+      btn.addEventListener("click", () => {
+        const code = pre.querySelector("code");
+        const text = (code ? code.innerText : pre.innerText).trimEnd();
+        copyText(text, () => {
+          btn.innerHTML = CHECK_ICON + " Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.innerHTML = COPY_ICON + " Copy";
+            btn.classList.remove("copied");
+          }, 2000);
+        });
+      });
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>HR Skills in Cursor – Hands-on Guide</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2, h3 {
+      color: #0f172a;
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .note, .exercise {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .exercise-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #166534;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+  </style>
+</head>
+<body>
+<main>
+
+  <h1>HR Skills in Cursor – Hands-on Guide</h1>
+  <p>
+    I wrote this guide for you. The three skill folders are not in your project yet.
+    You will create every file yourself, then use each skill, in this order:
+    write a job description, screen candidate profiles, and build an interview kit.
+    The company in the exercise is fictional. I am calling it Northgate Solutions.
+  </p>
+
+  <div class="note">
+    <strong>How I want you to work</strong>
+    <ol>
+      <li>Open your project in Cursor and keep this page beside the Agent chat.</li>
+      <li>Go from top to bottom. Finish one skill before you start the next.</li>
+      <li>When I say “create the file”, make a new file, paste what I have given you, and save it. Do not search the project for a copy. These files are not there.</li>
+      <li>When I say “open a new Agent chat”, start a fresh chat, paste the prompt, and send it.</li>
+      <li>Read the short explanation above each sample so you know why that file exists. Then look at what Cursor writes back.</li>
+    </ol>
+  </div>
+
+  <h2>1. What You Are Automating</h2>
+
+  <p>
+    A recruiter usually does three jobs in a row: turn a hiring manager’s short note into a job description,
+    compare profiles with that description, and prepare interview questions.
+    I have split that work into three skills so you can build them one at a time.
+    Each skill does only its own job. The next skill uses what the previous one produced.
+    You still review the draft. The skill does not hire anyone for you.
+  </p>
+
+  <ol>
+    <li><strong>hr-jd-generator</strong> — turns a rough hiring note into a standard job description and checks the draft.</li>
+    <li><strong>candidate-screener</strong> — scores profiles against that job description and writes recruiter notes.</li>
+    <li><strong>interview-kit-builder</strong> — turns the approved description and screening notes into interview questions.</li>
+  </ol>
+
+  <h2>2. How a Cursor Skill Is Built</h2>
+
+  <p>
+    A skill is a folder of instructions. When your prompt matches the description in that folder, Cursor follows the steps.
+    You will put your skills under <code>.cursor/skills/</code> in this project. Create the folders as you go. They are not waiting for you.
+  </p>
+
+  <pre><code>.cursor/skills/your-skill-name/
+├── SKILL.md              required — steps the agent must follow
+├── some-rules.md         optional — read only when SKILL.md names the file
+└── scripts/              optional — a checker the agent runs
+    └── check.py</code></pre>
+
+  <p>
+    <code>SKILL.md</code> starts with a short header between two lines of three dashes.
+    Two fields matter in Cursor:
+  </p>
+
+  <ul>
+    <li><code>name</code> — lowercase letters, numbers, and hyphens only. It must match the folder name.</li>
+    <li><code>description</code> — what the skill does and when to use it. Cursor reads this to decide whether the skill applies.</li>
+  </ul>
+
+  <p>
+    Write the steps in the body of <code>SKILL.md</code>. I am keeping the long template, the scoring rules, and the question rules in separate files
+    so the main skill stays short. Name each file exactly, because the agent reads a file only when the steps tell it to.
+  </p>
+
+  <div class="note">
+    After you save a skill, start a <strong>new Agent chat</strong> before you send the prompt.
+    Cursor reads skill files when a chat starts. A chat that was already open will not see the files you just created.
+  </div>
+
+  <h2>3. Skill 1 — Job Description Generator</h2>
+
+  <p>
+    Start here. You are creating the first skill from an empty folder.
+    A hiring manager sends a short note. Your skill will turn that note into a Northgate Solutions job description,
+    keep must-have skills separate from good-to-have skills, and refuse to invent pay, age, college tier, or “culture fit” rules.
+    It will save <code>draft-jd.md</code> and run a small Python checker before it shows you the draft.
+  </p>
+
+  <h3>3.1 Create the folder</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      In the Cursor file explorer, create this new folder:
+      <code>.cursor/skills/hr-jd-generator/scripts/</code>.
+      If <code>.cursor</code> or <code>skills</code> is missing, create those folders first.
+    </p>
+  </div>
+
+  <h3>3.2 Write SKILL.md</h3>
+
+  <p>
+    This is the procedure I want the agent to follow. It says which facts must be in the hiring note, which files to read,
+    where to save the draft, and which command checks the draft.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create <code>.cursor/skills/hr-jd-generator/SKILL.md</code>, paste the following, and save it.
+    </p>
+  </div>
+
+  <pre><code>---
+name: hr-jd-generator
+description: Use when an HR recruiter needs to turn a hiring manager's rough requisition or short hiring note into a complete, inclusive job description in the company's standard format. Do NOT use for offer letters, internal promotions, or performance documents
+context: fork
+allowed-tools: Read, Grep, Glob
+argument-hint: "[job description ...]"
+---
+
+# HR JD Generator
+
+You are an HR Talent Acquisition Specialist at Northgate Solutions.
+
+## Steps
+
+1. Read the requisition. If role title, experience range, location, work mode, or must-have skills are missing, list them under "Clarifications needed" — do not guess.
+2. Separate skills into Must-have and Good-to-have. Never promote a good-to-have to must-have.
+3. Produce the JD using the layout in `jd-template.md`.
+4. Apply every rule in `inclusive-language.md` before finalising.
+5. Save the draft to `draft-jd.md` in the current working directory.
+6. Run validation before returning the draft:
+   ```bash
+   python scripts/validate_jd.py draft-jd.md
+   ```
+7. If validation fails, fix the draft and re-run step 6. Only return the JD after validation passes.
+
+## Rules
+
+- Reference `.md` files by exact filename — no `@` prefix needed; Claude loads them on demand.
+- Utility scripts live under `scripts/` — instruct execution with an explicit shell command (see step 6).
+- Clear, inclusive, professional language. No exaggeration.
+- Never include age, gender, marital status, nationality, college tier, or "culture fit" criteria.
+- Do not invent compensation or approval details.
+- Output is a DRAFT for human review.</code></pre>
+
+  <div class="note">
+    Cursor uses <code>name</code> and <code>description</code>. I have left three extra lines in the header —
+    <code>context</code>, <code>allowed-tools</code>, and <code>argument-hint</code>.
+    Cursor ignores those lines, so your skill still runs in a normal Agent chat. Leave them in the file as I wrote them.
+    If the checker cannot find <code>scripts/validate_jd.py</code>, tell the agent to run
+    <code>python .cursor/skills/hr-jd-generator/scripts/validate_jd.py draft-jd.md</code>.
+  </div>
+
+  <h3>3.3 Write the job description template</h3>
+
+  <p>
+    I want every job description to use the same headings. Your next skill will look for must-have and good-to-have skills in this layout, so do not rename the sections.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create <code>.cursor/skills/hr-jd-generator/jd-template.md</code>, paste the following, and save it.
+    </p>
+  </div>
+
+  <pre><code># Job Description Template
+
+Use this exact section order:
+
+## Job Title
+## Company
+Northgate Solutions
+
+## Role Overview
+3–4 sentences: role, project context, why the hire is needed.
+
+## Key Responsibilities
+5–8 bullets describing activities/outcomes — not technology lists alone.
+
+## Required Skills (Must-Have)
+Only skills required on day one.
+
+## Preferred Skills (Good-to-Have)
+Trainable or acquirable skills — never mixed into must-have.
+
+## Experience &amp; Education
+Realistic band for the role level.
+
+## Location &amp; Work Mode</code></pre>
+
+  <h3>3.4 Write the inclusive-language rules</h3>
+
+  <p>
+    This is the language rule I want applied before the draft is finished. Phrases such as “rockstar” or “IIT-only” must not appear in the job description.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create <code>.cursor/skills/hr-jd-generator/inclusive-language.md</code>, paste the following, and save it.
+    </p>
+  </div>
+
+  <pre><code># Inclusive Language — Job Descriptions
+
+## Replace biased phrasing
+
+| Avoid | Use instead |
+|-------|-------------|
+| Rockstar, ninja, guru | Skilled, experienced |
+| Young, energetic team | Collaborative team |
+| Native English speaker | Strong written English for client communication (if required) |
+
+## Do not include as requirements
+
+- Age or graduation year as proxy
+- Gender-coded traits ("aggressive", "dominant")
+- College tier (IIT-only, tier-1 only)
+- More than 8 must-have skills for mid-level roles
+
+## Pre-publish checklist
+
+- [ ] Every must-have is genuinely required day one
+- [ ] No good-to-have appears in must-have list
+- [ ] Responsibilities describe work, not buzzwords only</code></pre>
+
+  <h3>3.5 Write the checker script</h3>
+
+  <p>
+    I do not want you to trust the draft on the agent’s word alone. This script checks that the headings are present and that biased phrases did not slip in.
+    The agent must fix the file and run the script again until it prints <code>JD validation OK</code>.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create <code>.cursor/skills/hr-jd-generator/scripts/validate_jd.py</code>, paste the following, and save it.
+    </p>
+  </div>
+
+  <pre><code>#!/usr/bin/env python3
+"""Lightweight JD draft checker for the hr-jd-generator skill."""
+
+import re
+import sys
+from pathlib import Path
+
+REQUIRED_SECTIONS = [
+    "Job Title",
+    "Company",
+    "Role Overview",
+    "Key Responsibilities",
+    "Required Skills",
+    "Preferred Skills",
+    "Experience",
+    "Location",
+]
+
+BIASED_TERMS = [
+    "rockstar",
+    "ninja",
+    "guru",
+    "young and energetic",
+    "native english speaker",
+    "iit-only",
+    "tier-1 only",
+    "culture fit",
+]
+
+
+def validate(text: str):
+    errors = []
+
+    for section in REQUIRED_SECTIONS:
+        if section.lower() not in text.lower():
+            errors.append(f"Missing section: {section}")
+
+    lowered = text.lower()
+    for term in BIASED_TERMS:
+        if term in lowered:
+            errors.append(f"Biased or non-inclusive term found: {term!r}")
+
+    must_have = re.search(
+        r"required skills|must-have", text, re.IGNORECASE
+    )
+    preferred = re.search(
+        r"preferred skills|good-to-have", text, re.IGNORECASE
+    )
+    if must_have and preferred:
+        start = must_have.start()
+        end = preferred.start()
+        if end &gt; start:
+            must_block = text[start:end].lower()
+            if "preferred" in must_block or "good-to-have" in must_block:
+                errors.append(
+                    "Preferred skills appear inside the must-have section"
+                )
+
+    return errors
+
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: python scripts/validate_jd.py &lt;draft-jd.md&gt;", file=sys.stderr)
+        return 2
+
+    path = Path(sys.argv[1])
+    if not path.is_file():
+        print(f"File not found: {path}", file=sys.stderr)
+        return 2
+
+    errors = validate(path.read_text(encoding="utf-8"))
+    if errors:
+        print("JD validation FAILED:")
+        for err in errors:
+            print(f"  - {err}")
+        return 1
+
+    print("JD validation OK")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())</code></pre>
+
+  <h3>3.6 Use the job description skill</h3>
+
+  <p>
+    Your skill files are saved. Now use them. The prompt below is the hiring manager’s note.
+    I have included the role title, experience range, location, work mode, and must-have skills.
+    If one of those were missing, the skill would list <strong>Clarifications needed</strong> and would not guess. Try the complete note first.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Open a <strong>new Agent chat</strong>, paste the following prompt, and send it.
+    </p>
+  </div>
+
+  <pre><code>Use the hr-jd-generator skill. Turn this hiring note into a draft job description.
+
+Role title: Backend Engineer
+Experience: 4–7 years
+Location: Hyderabad
+Work mode: Hybrid, 3 days in the office
+Why we are hiring: The billing platform team needs an engineer to design REST APIs and support the settlement service in production.
+
+Must-have:
+- Java and Spring Boot
+- REST API design and ownership of a production service
+- SQL, including PostgreSQL
+
+Good-to-have:
+- React
+- Telecom billing or OSS/BSS
+- Kafka
+
+Do not invent compensation. Save the draft and run validation before you return it.</code></pre>
+
+  <p>
+    I want you to see a draft with the template headings, Java and SQL under required skills, and React, telecom, and Kafka under preferred skills.
+    Your project should now contain <code>draft-jd.md</code>, and the checker should print <code>JD validation OK</code>.
+    Open that file and read it before you move on. You will screen people against this description.
+  </p>
+
+  <h2>4. Skill 2 — Candidate Screener</h2>
+
+  <p>
+    Create this second skill from scratch, in a new folder. Do not add these files inside <code>hr-jd-generator</code>.
+    The skill reads the job description you just produced and each profile, then writes the same kind of note for every candidate:
+    a fit summary, matched skills, gaps, a few questions, a score out of 10, and a suggestion of Shortlist, Hold, or Reject.
+    That suggestion helps a recruiter. It is not a hire or reject decision, and I do not want you to treat it as one.
+  </p>
+
+  <h3>4.1 Write SKILL.md</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a new folder, <code>.cursor/skills/candidate-screener/</code>.
+      Inside it, create <code>SKILL.md</code>, paste the following, and save it.
+    </p>
+  </div>
+
+  <pre><code>---
+name: candidate-screener
+description: Use when an HR recruiter needs to screen one or more candidate profiles against a job description and produce structured recruiter notes with a consistent score. Do NOT use to make a final hire/reject decision — output is recruiter assistance only.
+---
+
+# Candidate Screener
+
+Screen each candidate against the provided JD.
+
+## Steps
+
+1. Read the JD. Identify must-have and good-to-have skills.
+2. Apply the scoring method from `scoring-rubric.md`.
+3. Apply every rule in `bias-guardrails.md` before writing notes.
+4. For each candidate output: Fit Summary, Matched Skills, Gaps, Clarification Questions (2–3), Score /10, Recommendation (Shortlist / Hold / Reject), Reason.
+
+## Rules
+
+- Do NOT consider name, gender, age, college brand, employment gaps, or company brand.
+- Do NOT invent information — mark missing details as "unclear — ask in recruiter call."
+- Final decisions are human-owned.</code></pre>
+
+  <h3>4.2 Write the scoring rubric</h3>
+
+  <p>
+    I want both candidates scored the same way. Must-have skills are worth most of the points.
+    If two or more must-have skills are missing, the score cannot go above 4.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create <code>.cursor/skills/candidate-screener/scoring-rubric.md</code>, paste the following, and save it.
+    </p>
+  </div>
+
+  <pre><code># Candidate Screening Score Rubric
+
+## Must-have gate
+
+For each must-have: Met / Partial / Not met.
+
+If 2+ must-haves are Not met, cap final score at 4.
+
+## Scoring (0–10)
+
+| Component | Max points |
+|-----------|------------|
+| Must-have coverage | 6 |
+| Good-to-have coverage | 2 |
+| Practical fit (location, notice, domain) | 2 |
+
+## Score bands
+
+| Score | Typical recommendation |
+|-------|------------------------|
+| 8–10 | Shortlist |
+| 6–7.9 | Shortlist or Hold |
+| 4–5.9 | Hold |
+| Below 4 | Reject or Hold (if HM may flex) |
+
+Always state: `Score: X/10 — [must-have: Y/6] + [good-to-have: Z/2] + [practical fit: W/2]`</code></pre>
+
+  <h3>4.3 Write the bias guardrails</h3>
+
+  <p>
+    A profile often includes a name, a college, or a famous employer. I want the agent to ignore those facts
+    and to write gaps as questions, not as judgments about the person.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create <code>.cursor/skills/candidate-screener/bias-guardrails.md</code>, paste the following, and save it.
+    </p>
+  </div>
+
+  <pre><code># Bias Guardrails — Candidate Screening
+
+## Do NOT consider
+
+- Name, gender, age, graduation year as age proxy
+- College or university tier
+- Previous employer brand
+- Employment gaps (unless role continuity is unclear from profile)
+- Location of origin or accent assumptions
+
+## DO consider (role-relevant only)
+
+- Skills with project context
+- Relevant years of experience
+- Domain alignment (e.g. telecom OSS/BSS)
+- Location/work-mode and notice period if stated in JD
+
+## Language rules
+
+- "React depth unclear" not "weak frontend background"
+- Flag gaps as questions, not judgments
+- Never reject on a single good-to-have gap
+
+End every output with: "This is recruiter assistance only. Final decisions are owned by the recruiter and hiring manager."</code></pre>
+
+  <h3>4.4 Use the candidate screener</h3>
+
+  <p>
+    Save the screener files first, then open a new chat. Screen the two fictional profiles against <code>draft-jd.md</code>.
+    Profile A has production Java and API work. Profile B is mostly frontend and only mentions Java in passing.
+    I put a name and a college in both profiles on purpose. The notes must not use those facts in the score.
+    If you do not have <code>draft-jd.md</code> yet, go back and finish section 3.6.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Open a <strong>new Agent chat</strong>, paste the following prompt, and send it.
+    </p>
+  </div>
+
+  <pre><code>Use the candidate-screener skill. Read draft-jd.md and screen both profiles. Do not make a final hire or reject decision.
+
+Profile A
+Name: Ananya Rao. College: IIT Delhi.
+6 years building Java and Spring Boot services. Owned the REST API for a telecom billing settlement service, including error handling and production support. Writes PostgreSQL queries and talks about indexes. Based in Hyderabad, 30-day notice. Used React on an internal admin page. Kafka is not mentioned.
+
+Profile B
+Name: Rohan Mehta. College: a local engineering college.
+3 years, mostly React screens for an internal HR tool. Resume says "familiar with Java". No production API ownership and no SQL project described. Based in Bengaluru and can join immediately. No telecom or Kafka experience stated.</code></pre>
+
+  <p>
+    For each person I want you to see Fit Summary, Matched Skills, Gaps, two or three clarification questions, a score line in the rubric format,
+    and Shortlist, Hold, or Reject with a reason. The last line should say that final decisions belong to the recruiter and hiring manager.
+    Keep those notes. You will use the gaps when you build the interview kit.
+  </p>
+
+  <h2>5. Skill 3 — Interview Kit Builder</h2>
+
+  <p>
+    Create this third skill in its own new folder. Once someone is shortlisted, interviewers still need the same questions and the same idea of a good answer.
+    Your skill will build that kit from the job description, the screening gaps, and the interview stage.
+    It must not score the candidate again, and it must not write salary or reference-check scripts.
+  </p>
+
+  <h3>5.1 Write SKILL.md</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a new folder, <code>.cursor/skills/interview-kit-builder/</code>.
+      Inside it, create <code>SKILL.md</code>, paste the following, and save it.
+    </p>
+  </div>
+
+  <pre><code>---
+name: interview-kit-builder
+description: Use when an HR recruiter or hiring manager needs role-specific interview questions and a structured interview kit from an approved JD and screening notes. Do NOT use for final candidate scoring, salary negotiation, or reference-check scripts.
+---
+
+# Interview Kit Builder
+
+Prepare consistent, non-discriminatory interviews for shortlisted candidates.
+
+## Inputs required
+
+1. Approved job description
+2. Screening notes (gaps and clarification themes)
+3. Interview stage: recruiter screen / technical / hiring-manager
+
+## Steps
+
+1. Extract must-have and good-to-have competencies from the JD.
+2. Map each competency using `competency-framework.md`.
+3. For each screening gap, draft 1–2 targeted clarification questions.
+4. Draft questions using rules in `question-bank-guide.md`.
+5. Produce the kit in the output format below.
+
+## Output format
+
+### Interview Kit — [Role Title] — [Stage]
+
+**Competencies to assess** — table: competency | why it matters | suggested depth
+
+**Recommended questions (6–10)** — each with: question, what good looks like, red flags (skill gaps only)
+
+**Follow-ups from screening notes**
+
+**Questions to avoid for this role**
+
+**Interviewer reminders**
+
+Output is a DRAFT for the hiring manager to approve.</code></pre>
+
+  <h3>5.2 Write the competency framework</h3>
+
+  <p>
+    I want the interviewer to know what a strong answer sounds like for the skills this role needs.
+    Must-have skills should receive more questions than good-to-have skills.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create <code>.cursor/skills/interview-kit-builder/competency-framework.md</code>, paste the following, and save it.
+    </p>
+  </div>
+
+  <pre><code># Competency Framework — Technical hiring
+
+| Competency | Assess via | Strong signal | Weak signal |
+|------------|------------|---------------|-------------|
+| Java / Spring Boot | Project walk-through | Describes modules owned, API design | Keyword only on resume |
+| REST APIs | Design discussion | Verbs, errors, integration | Consumed APIs only |
+| React | Scope question | Built components, state | "Basic exposure" with no example |
+| SQL | Practical scenario | Queries, indexes at high level | ORM-only |
+| Telecom domain | Domain story | OSS/BSS, billing context | Generic IT only |
+
+Weight must-have competencies heavier in question count.</code></pre>
+
+  <h3>5.3 Write the question guide</h3>
+
+  <p>
+    This file shows the question shapes I want, and the topics the kit must leave out.
+    About 60% of the questions should test the role, 30% should test how the person delivers work with others, and 10% should test why they want the role.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create <code>.cursor/skills/interview-kit-builder/question-bank-guide.md</code>, paste the following, and save it.
+    </p>
+  </div>
+
+  <pre><code># Interview Question Guide
+
+## Good patterns
+
+- "Walk me through a recent project where you built REST APIs. What was your ownership?"
+- "Tell me about a production issue you debugged in a Spring Boot service."
+- "Describe a sprint where requirements changed mid-way. What did you do?"
+
+## Bad patterns — do NOT generate
+
+- Age or graduation year as proxy
+- Personal life (marriage, children, health, religion)
+- Trick puzzles unrelated to the role
+- "Culture fit" — use collaboration and delivery behaviour instead
+
+## Balance
+
+- 60% role-specific technical or domain depth
+- 30% behavioural / delivery
+- 10% motivation and role understanding</code></pre>
+
+  <h3>5.4 Use the interview kit builder</h3>
+
+  <p>
+    Your three skill folders should now be in place. Use the job description you generated in section 3.6 and the gaps from Profile A.
+    If your screener notes differ from the excerpt below, replace that excerpt with your own notes before you send the prompt.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Open a <strong>new Agent chat</strong>, paste the following prompt, and send it.
+    </p>
+  </div>
+
+  <pre><code>Use the interview-kit-builder skill. Build a draft interview kit for the hiring manager to approve.
+
+Approved JD: read draft-jd.md
+Interview stage: technical
+Candidate context: the shortlisted backend profile. Do not score the candidate again.
+
+Screening notes:
+- Java, Spring Boot, REST ownership, PostgreSQL, and Hyderabad availability look met.
+- React depth is unclear — one internal admin page, no component or state example.
+- Kafka is not mentioned.
+- Ask how they handled production incidents on the settlement service.</code></pre>
+
+  <p>
+    I want you to see a kit titled for Backend Engineer at the technical stage:
+    a competency table, 6 to 10 questions with “what good looks like” and skill-only red flags,
+    follow-ups about React, Kafka, and production support, a list of questions to avoid, and interviewer reminders.
+    Treat the kit as a draft. A hiring manager would approve it before anyone used it in an interview.
+  </p>
+
+  <h2>6. Check Your Own Work</h2>
+
+  <p>
+    You have created the three skills and used them in order. Before you close the page, answer these in your own words.
+    Use your <code>draft-jd.md</code>, your screening notes, and your interview kit. Do not copy the answers from this guide.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <ul>
+      <li>Which facts did the job description skill refuse to invent?</li>
+      <li>Why did a good-to-have skill stay out of the must-have list?</li>
+      <li>What did the screener ignore, even though the profile included it?</li>
+      <li>Which screening gap showed up as a follow-up question in your kit?</li>
+    </ul>
+  </div>
+
+  <div class="note">
+    <strong>What I want you to remember</strong>
+    <p>
+      You built three drafts: a job description, a screening note, and an interview plan.
+      A recruiter still reviews the draft. A hiring manager still decides who proceeds.
+      Do not use the screener as an automatic hire or reject switch.
+    </p>
+  </div>
+
+</main>
+</body>
+</html>

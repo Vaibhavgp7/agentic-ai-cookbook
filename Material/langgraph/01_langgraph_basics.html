@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LangGraph Basics – Hands-on Guide</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+      color: #0f172a;
+    }
+    h4 {
+      font-size: 1.1rem;
+      margin-top: 1.5rem;
+      color: #1e40af;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .note, .exercise {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .exercise-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #166534;
+    }
+    .concept {
+      border-left: 4px solid #9333ea;
+      background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+      border-color: rgba(147, 51, 234, 0.4);
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+    }
+    .concept-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #7e22ce;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+    strong {
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>LangGraph Basics – Hands-on Guide</h1>
+
+  <div class="concept">
+    <div class="concept-title">What is LangGraph?</div>
+    <p>
+      LangGraph is a library for building stateful, multi-actor applications with LLMs. It extends LangChain's 
+      capabilities by providing a graph-based approach to building AI applications. Unlike traditional chains, 
+      LangGraph allows you to create complex workflows with conditional logic, loops, and state management.
+    </p>
+    <p>
+      <strong>Key Concepts:</strong>
+    </p>
+    <ul>
+      <li><strong>Nodes:</strong> Functions that process state and return updates</li>
+      <li><strong>Edges:</strong> Connections between nodes that define the flow</li>
+      <li><strong>State:</strong> Shared data structure that flows through the graph</li>
+      <li><strong>Conditional Edges:</strong> Dynamic routing based on state or conditions</li>
+    </ul>
+  </div>
+
+  <h2>1. Installation and Setup</h2>
+  <p>
+    Before we begin, we need to install LangGraph and its dependencies. LangGraph works seamlessly with LangChain,
+    so we'll also install the necessary LangChain packages.
+  </p>
+
+  <p>
+    Create a Jupyter notebook in this folder named <code>01_langgraph_basics.ipynb</code> (you will add code from the sections below into notebook cells).
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>In your terminal (not inside the notebook), install LangGraph and required packages by running the command below.</p>
+  </div>
+
+  <pre><code>pip install langgraph langchain_community langchain langchain_openai langchain_experimental python-dotenv pyowm setuptools httpx==0.27.2 langchain-tavily</code></pre>
+
+  <div class="note">
+    <strong>Note:</strong> The <code>pyowm</code> package is for OpenWeatherMap API integration, which we'll use later in this tutorial. 
+    The <code>httpx==0.27.2</code> version is specified to ensure compatibility with certain LangChain integrations.
+    <code>langchain-tavily</code> provides <code>TavilySearch</code>, the web search tool we bind to the agent in section 7.
+  </div>
+
+  <h2>2. Building the Simplest Graph</h2>
+  <p>
+    We'll start by creating the simplest possible graph: two nodes connected by one edge. This will help you understand
+    the fundamental concepts of LangGraph.
+  </p>
+
+  <div class="concept">
+    <div class="concept-title">Understanding State in LangGraph</div>
+    <p>
+      In LangGraph, <strong>state</strong> is a shared data structure that flows through all nodes in your graph.
+      Each node can read from and update the state. We define state using Python's <code>TypedDict</code> to ensure
+      type safety and clarity.
+    </p>
+  </div>
+
+  <h3>2.1 Defining the State Schema</h3>
+  <p>
+    First, we define our state structure using <code>TypedDict</code>. This tells LangGraph what data fields
+    our graph will work with.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the code below, and execute the cell.</p>
+  </div>
+
+  <pre><code>from typing_extensions import TypedDict
+
+class MyState(TypedDict):
+    message: str
+    a: str
+    b: str</code></pre>
+
+  <div class="note">
+    <strong>Explanation:</strong> <code>MyState</code> defines three string fields: <code>message</code> (input), 
+    <code>a</code> (intermediate result), and <code>b</code> (final result). Each node in our graph will read from
+    and update these fields.
+  </div>
+
+  <h3>2.2 Creating Node Functions</h3>
+  <p>
+    Nodes in LangGraph are simply Python functions that take state as input and return state updates.
+    Each function receives the current state, processes it, and returns a dictionary with the fields it wants to update.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>def function_1(state: MyState) -> MyState:
+    print("Function 1 called with input:", state)
+    
+    return {'a': state['message'] + " world"}
+
+
+def function_2(state: MyState) -> MyState:
+    print("Function 2 called with input:", state)
+    return {'b': state['a'] + "!"}</code></pre>
+
+  <div class="note">
+    <strong>Key Points:</strong>
+    <ul>
+      <li>Each function receives the full state as input</li>
+      <li>Functions return only the fields they want to update (partial updates are allowed)</li>
+      <li>Function 1 reads <code>message</code> and updates <code>a</code></li>
+      <li>Function 2 reads <code>a</code> and updates <code>b</code></li>
+    </ul>
+  </div>
+
+  <h3>2.3 Building the Graph</h3>
+  <p>
+    Now we'll create the graph structure by adding nodes and connecting them with edges. The graph defines
+    the execution flow: which nodes run in what order.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>from langgraph.graph import StateGraph
+from IPython.display import display, Image
+
+workflow = StateGraph(MyState)
+workflow.add_node("node_1", function_1)
+workflow.add_node("node_2", function_2)
+workflow.add_edge("node_1", "node_2")
+workflow.set_entry_point("node_1")
+workflow.set_finish_point("node_2")
+
+app = workflow.compile()
+app</code></pre>
+
+  <div class="concept">
+    <div class="concept-title">Graph Construction Steps</div>
+    <ol>
+      <li><code>StateGraph(MyState)</code>: Creates a graph that uses <code>MyState</code> as its state schema</li>
+      <li><code>add_node()</code>: Registers a function as a node with a name</li>
+      <li><code>add_edge()</code>: Connects two nodes (defines execution flow)</li>
+      <li><code>set_entry_point()</code>: Defines where execution starts</li>
+      <li><code>set_finish_point()</code>: Defines where execution ends</li>
+      <li><code>compile()</code>: Compiles the graph into an executable application</li>
+    </ol>
+  </div>
+
+  <h3>2.4 Running the Graph</h3>
+  <p>
+    Once compiled, we can run the graph using <code>invoke()</code> or <code>stream()</code>. The <code>invoke()</code>
+    method runs the entire graph and returns the final state, while <code>stream()</code> yields intermediate states
+    as each node executes.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to run the graph.</p>
+  </div>
+
+  <pre><code>app.invoke({"message": "Hello "})</code></pre>
+
+  <div class="note">
+    <strong>Expected Output:</strong> You should see the final state with all three fields populated:
+    <code>{'message': 'Hello ', 'a': 'Hello  world', 'b': 'Hello  world!'}</code>
+  </div>
+
+  <h3>2.5 Streaming Graph Execution</h3>
+  <p>
+    Streaming allows you to observe the graph execution step-by-step, which is useful for debugging and
+    understanding the flow of data through your graph.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to stream the execution.</p>
+  </div>
+
+  <pre><code>for output in app.stream({"message": "Hello "}):
+    for key, value in output.items():
+        print(f"{key}: {value}")</code></pre>
+
+  <div class="note">
+    <strong>Understanding Streaming:</strong> The <code>stream()</code> method yields a dictionary for each node execution,
+    where the key is the node name and the value is the state after that node's execution. This lets you see how
+    the state evolves as it flows through the graph.
+  </div>
+
+  <h2>3. Adding LLM Calls to the Graph</h2>
+  <p>
+    Now let's make our graph more powerful by integrating an LLM. We'll modify the first node to act as an "Agent"
+    that can call OpenAI models using LangChain.
+  </p>
+
+  <h3>3.1 Loading Environment Variables</h3>
+  <p>
+    First, we need to load our OpenAI API key from environment variables. This is a best practice for keeping
+    credentials secure.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>from dotenv import load_dotenv
+load_dotenv()</code></pre>
+
+  <div class="note">
+    <strong>Setup:</strong> Make sure you have a <code>.env</code> file in your project directory with your
+    <code>OPENAI_API_KEY</code> set. If you don't have one, create it with: <code>OPENAI_API_KEY=your-key-here</code>.
+    Also add <code>TAVILY_API_KEY=your-tavily-key</code> (get a key from <a href="https://tavily.com" target="_blank">tavily.com</a>).
+    The search agent in section 7 reads that key from the environment.
+  </div>
+
+  <h3>3.2 Creating the LLM Model</h3>
+  <p>
+    We'll use LangChain's <code>ChatOpenAI</code> to create an LLM instance. This provides a clean interface
+    for interacting with OpenAI's chat models.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>from langchain_openai import ChatOpenAI
+
+model = ChatOpenAI(model="gpt-4o-mini")</code></pre>
+
+  <h3>3.3 Updating State Schema for Messages</h3>
+  <p>
+    When working with LLMs in LangGraph, we typically use a messages-based state structure. This allows us to
+    maintain conversation history and pass messages between nodes.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>class MyState(TypedDict):
+    messages: list
+
+def function_1(state):
+    response = model.invoke(state['messages'])
+    
+    return {"messages": [response]}
+
+def function_2(state):
+    print("Function 2 called with input:", state)
+    return state</code></pre>
+
+  <div class="note">
+    <strong>Message Format:</strong> LangChain uses message objects (<code>HumanMessage</code>, <code>AIMessage</code>, etc.)
+    to represent different roles in a conversation. The LLM expects a list of these messages as input.
+  </div>
+
+  <h3>3.4 Running the LLM-Enabled Graph</h3>
+  <p>
+    Now let's rebuild the graph with our updated functions and test it with a human message.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>from langchain_core.messages import AIMessage, HumanMessage
+
+workflow = StateGraph(MyState)
+workflow.add_node("node_1", function_1)
+workflow.add_node("node_2", function_2)
+workflow.add_edge("node_1", "node_2")
+workflow.set_entry_point("node_1")
+workflow.set_finish_point("node_2")
+app = workflow.compile()
+
+app.invoke({"messages": [HumanMessage(content="Hello")]})</code></pre>
+
+  <div class="note">
+    <strong>What Happened:</strong> The graph received a <code>HumanMessage</code>, passed it to the LLM in node_1,
+    received an <code>AIMessage</code> response, and then passed it through node_2. The final state contains the
+    conversation history.
+  </div>
+
+  <h2>4. Adding External API Integration (Weather API)</h2>
+  <p>
+    Let's make our graph more practical by adding a weather API call. This demonstrates how LangGraph can
+    orchestrate multiple services: an LLM for understanding user queries and an external API for fetching data.
+  </p>
+
+  <div class="concept">
+    <div class="concept-title">Multi-Step Workflows</div>
+    <p>
+      Real-world AI applications often require multiple steps:
+    </p>
+    <ol>
+      <li><strong>Understanding:</strong> Parse user intent (using LLM)</li>
+      <li><strong>Action:</strong> Call external APIs or tools</li>
+      <li><strong>Synthesis:</strong> Combine results and generate final response (using LLM)</li>
+    </ol>
+    <p>
+      LangGraph makes it easy to chain these steps together with clear state management.
+    </p>
+  </div>
+
+  <h3>4.1 Setting Up OpenWeatherMap API</h3>
+  <p>
+    We'll use LangChain's OpenWeatherMap integration, which provides a convenient wrapper for the weather API.
+    You'll need to get a free API key from <a href="https://openweathermap.org/api" target="_blank">OpenWeatherMap</a>
+    (it takes a few hours to activate).
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>from langchain_community.utilities import OpenWeatherMapAPIWrapper
+import os
+weather = OpenWeatherMapAPIWrapper()</code></pre>
+
+  <h3>4.2 Testing the Weather API</h3>
+  <p>
+    Let's test that the weather API is working correctly before integrating it into our graph.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>weather_data = weather.run("Bangalore")
+print(weather_data)</code></pre>
+
+  <h3>4.3 Building a Three-Node Weather Graph</h3>
+  <p>
+    Now we'll create a more sophisticated graph with three nodes:
+  </p>
+  <ol>
+    <li><strong>Node 1:</strong> Extract city name from user query (using LLM)</li>
+    <li><strong>Node 2:</strong> Fetch weather data for that city (using API)</li>
+    <li><strong>Node 3:</strong> Generate a natural language response (using LLM)</li>
+  </ol>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>class MyState(TypedDict):
+    query: str
+    city: str
+    response: str
+
+def function_1(state):
+    prompt = "Your task is to provide only city name based on the query. " \
+             "Just return the city name without any additional text. Following is the query: " + state['query']
+
+    response = model.invoke(prompt)
+    
+    return {"city": response.content}
+
+def function_2(state):
+    response = weather.run(state['city'])
+    return {"response": response}
+
+def function_3(state):
+    agent2_query = """Your task is to provide info concisely based on the
+             user query and the available information from the internet.
+            Following is the user query: """ + state['query'] + " Available information: " + state['response']
+    response = model.invoke(agent2_query)
+    return {"response": response.content}</code></pre>
+
+  <h3>4.4 Compiling and Testing the Weather Graph</h3>
+  <p>
+    Now let's build the graph with all three nodes and test it with a weather query.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>workflow = StateGraph(MyState)
+workflow.add_node("node_1", function_1)
+workflow.add_node("node_2", function_2)
+workflow.add_node("node_3", function_3)
+workflow.add_edge("node_1", "node_2")
+workflow.add_edge("node_2", "node_3")
+workflow.set_entry_point("node_1")
+workflow.set_finish_point("node_3")
+app = workflow.compile()
+
+app.invoke({"query": "What is the windspeed in Bangalore today?"})</code></pre>
+
+  <div class="note">
+    <strong>Flow Analysis:</strong>
+    <ol>
+      <li>User query enters at node_1</li>
+      <li>LLM extracts "Bangalore" from the query</li>
+      <li>Node_2 calls weather API for Bangalore</li>
+      <li>Node_3 uses LLM to synthesize a natural response from the weather data</li>
+    </ol>
+  </div>
+
+  <h2>5. Using Message-Based State with Annotated Lists</h2>
+  <p>
+    For conversational applications, we want to maintain a message history. LangGraph provides special
+    annotations that make it easy to append messages to a list rather than overwriting them.
+  </p>
+
+  <div class="concept">
+    <div class="concept-title">State Reducers</div>
+    <p>
+      By default, when a node returns a state update, it <strong>overwrites</strong> the existing value.
+      For message lists, we want to <strong>append</strong> instead. LangGraph provides reducers like
+      <code>operator.add</code> and <code>add_messages</code> to handle this.
+    </p>
+  </div>
+
+  <h3>5.1 Defining State with Annotated Message List</h3>
+  <p>
+    We'll use <code>Annotated</code> with <code>operator.add</code> to tell LangGraph to append messages
+    rather than replace them.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>from typing import TypedDict, Annotated, Sequence
+import operator
+from langchain_core.messages import BaseMessage
+
+class AgentState(TypedDict):
+    messages: Annotated[list, operator.add]</code></pre>
+
+  <div class="note">
+    <strong>How It Works:</strong> <code>Annotated[list, operator.add]</code> tells LangGraph that when a node
+    returns a list for the <code>messages</code> field, it should be added to (concatenated with) the existing list,
+    not replace it.
+  </div>
+
+  <h3>5.2 Updating Functions for Message-Based State</h3>
+  <p>
+    Now we'll update our functions to work with the message-based state structure.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>def function_1(state):
+    messages = state['messages']
+    user_input = messages[-1]
+    complete_query = "Your task is to provide only the city name based on the user query. " \
+                     "Nothing more, just the city name mentioned. Following is the user query: " + user_input
+    response = model.invoke(complete_query)
+  
+    return {"messages": [response.content]}
+
+def function_2(state):
+    messages = state['messages']
+    agent_response = messages[-1]
+    weather = OpenWeatherMapAPIWrapper()
+    weather_data = weather.run(agent_response)
+    return {"messages": [weather_data]}
+
+def function_3(state):
+    messages = state['messages']
+    user_input = messages[0]
+    available_info = messages[-1]
+    agent2_query = """Your task is to provide info concisely based on the
+             user query and the available information from the internet.
+            Following is the user query: """ + user_input + " Available information: " + available_info
+    response = model.invoke(agent2_query)
+    return {"messages": [response.content]}</code></pre>
+
+  <h3>5.3 Testing the Message-Based Graph</h3>
+  <p>
+    Let's rebuild the graph and test it with a message-based input.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>workflow = StateGraph(AgentState)
+workflow.add_node("node_1", function_1)
+workflow.add_node("node_2", function_2)
+workflow.add_node("node_3", function_3)
+workflow.add_edge("node_1", "node_2")  
+workflow.add_edge("node_2", "node_3")
+workflow.set_entry_point("node_1")
+workflow.set_finish_point("node_3")
+app = workflow.compile()
+
+app.invoke({"messages": ["What is the temperature in Bangalore today?"]})</code></pre>
+
+  <h2>6. Using add_messages for Better Message Management</h2>
+  <p>
+    While <code>operator.add</code> works, LangGraph provides <code>add_messages</code> which offers more
+    sophisticated message handling, including message deduplication and removal capabilities.
+  </p>
+
+  <h3>6.1 Updating State to Use add_messages</h3>
+  <p>
+    <code>add_messages</code> is specifically designed for message lists and provides better handling of
+    message IDs, deduplication, and removal.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>from typing import TypedDict, Annotated, Sequence
+import operator
+from langchain_core.messages import BaseMessage
+from langgraph.graph.message import add_messages
+
+class AgentState(TypedDict):
+    # Messages have the type "list". The `add_messages` function
+    # in the annotation defines how this state key should be updated
+    # (in this case, it appends messages to the list, rather than overwriting them)
+    messages: Annotated[list, add_messages]
+    # messages: Annotated[Sequence[BaseMessage], operator.add]</code></pre>
+
+  <h3>6.2 Understanding add_messages Behavior</h3>
+  <p>
+    Let's explore how <code>add_messages</code> handles different scenarios: appending, overwriting, and removal.
+  </p>
+
+  <h4>6.2.1 Basic Appending</h4>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>from langgraph.graph.message import add_messages
+from langchain_core.messages import AIMessage, HumanMessage
+
+# Initial state
+initial_messages = [AIMessage(content="Hello! How can I assist you?", name="Model"),
+                    HumanMessage(content="I'm looking for information on marine biology.", name="Siva")
+                   ]
+
+# New message to add
+new_message = AIMessage(content="Sure, I can help with that. What specifically are you interested in?", name="Model")
+
+# Test
+add_messages(initial_messages, new_message)</code></pre>
+
+  <h4>6.2.2 Message Overwriting (Re-writing)</h4>
+  <p>
+    If you pass a message with the same ID as an existing one, <code>add_messages</code> will overwrite it.
+    This is useful for updating messages in place.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code># Initial state
+initial_messages = [AIMessage(content="Hello! How can I assist you?", name="Model", id="1"),
+                    HumanMessage(content="I'm looking for information on marine biology.", name="Siva", id="2")
+                   ]
+
+# New message to add (same ID as existing message)
+new_message = HumanMessage(content="I'm looking for information on whales, specifically", name="Siva", id="2")
+
+# Test
+add_messages(initial_messages, new_message)</code></pre>
+
+  <div class="note">
+    <strong>Key Insight:</strong> Messages with the same ID will overwrite existing messages. This allows you to
+    update messages in place, which is useful for streaming scenarios where you want to update partial responses.
+  </div>
+
+  <h4>6.2.3 Message Removal</h4>
+  <p>
+    <code>add_messages</code> also supports message removal using <code>RemoveMessage</code>.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>from langchain_core.messages import RemoveMessage
+
+# Message list
+messages = [AIMessage("Hi.", name="Bot", id="1")]
+messages.append(HumanMessage("Hi.", name="Siva", id="2"))
+messages.append(AIMessage("So you said you were researching ocean mammals?", name="Bot", id="3"))
+messages.append(HumanMessage("Yes, I know about whales. But what others should I learn about?", name="Siva", id="4"))
+
+# Isolate messages to delete (all except last 2)
+delete_messages = [RemoveMessage(id=m.id) for m in messages[:-2]]
+print(delete_messages)
+
+add_messages(messages, delete_messages)</code></pre>
+
+  <div class="note">
+    <strong>Use Case:</strong> Message removal is useful for implementing conversation pruning, where you want to
+    remove old messages to stay within token limits while keeping recent context.
+  </div>
+
+  <h2>7. Adding Conditional Logic and Tool Calling</h2>
+  <p>
+    So far, our graph always follows the same path. But real applications need to make decisions: should we
+    call a tool, or can we answer directly? Let's add conditional edges to make our agent smarter.
+  </p>
+
+  <div class="concept">
+    <div class="concept-title">Conditional Edges</div>
+    <p>
+      Conditional edges allow the graph to choose different paths based on the current state. This enables:
+    </p>
+    <ul>
+      <li><strong>Tool calling:</strong> Decide whether to use a tool or respond directly</li>
+      <li><strong>Routing:</strong> Send different queries to different specialized nodes</li>
+      <li><strong>Loops:</strong> Repeat steps until a condition is met</li>
+    </ul>
+  </div>
+
+  <h3>7.1 Binding TavilySearch to the LLM</h3>
+  <p>
+    Bind <code>TavilySearch</code>, LangChain's web search tool, to the model. The model then decides whether
+    the question needs a live web search or can be answered directly.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>from langchain_tavily import TavilySearch
+from langchain_openai import ChatOpenAI
+
+tools = [TavilySearch(max_results=3)]
+
+model = ChatOpenAI(temperature=0, streaming=True)
+model = model.bind_tools(tools)</code></pre>
+
+  <div class="note">
+    <strong>Tool Binding:</strong> <code>TavilySearch</code> reads <code>TAVILY_API_KEY</code> from the environment
+    (loaded earlier with <code>load_dotenv()</code>). After you bind it, the model can call web search when the
+    question needs current information. The response then includes <code>tool_calls</code> in its metadata.
+  </div>
+
+  <h3>7.2 Creating the Agent Node</h3>
+  <p>
+    The agent node invokes the LLM with the current messages. The LLM will decide whether to call
+    <code>TavilySearch</code> or respond directly.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>def function_1(state):
+    messages = state['messages']
+
+    response = model.invoke(messages)
+    print("Response from function_1", response)
+    return {"messages": [response]}</code></pre>
+
+  <h3>7.3 Creating the Tools Node</h3>
+  <p>
+    LangGraph provides a <code>ToolNode</code> that automatically executes tool calls from the agent's response.
+    This simplifies our code significantly.
+  </p>
+
+  <div class="note">
+    <strong>ToolNode:</strong> The <code>ToolNode</code> class automatically extracts tool calls from the agent's
+    response, runs <code>TavilySearch</code>, and returns the results as <code>ToolMessage</code> objects. This replaces the
+    older <code>ToolExecutor</code> pattern.
+  </div>
+
+  <h3>7.4 Creating the Conditional Edge Function</h3>
+  <p>
+    We need a function that examines the agent's response and decides whether to call tools or end the conversation.
+    If the response contains <code>tool_calls</code>, we route to the tools node; otherwise, we end.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>def where_to_go(state):
+    messages = state['messages']
+    last_message = messages[-1]
+    print("Inside where to go=== ", last_message)
+
+    if last_message.tool_calls:
+        return "continue"
+    else:
+        return "end"</code></pre>
+
+  <div class="note">
+    <strong>Conditional Logic:</strong> The function checks if the last message (from the agent) has a non-empty
+    <code>tool_calls</code> list. If yes, return "continue" to route to tools;
+    otherwise, return "end" to finish.
+  </div>
+
+  <h3>7.5 Installing Checkpoint Dependencies</h3>
+  <p>
+    Before building the final graph, we need to install the checkpoint package for state persistence.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>In your terminal, run the following command to install the checkpoint package.</p>
+  </div>
+
+  <pre><code>pip install langgraph-checkpoint-sqlite</code></pre>
+
+  <h3>7.6 Building the Complete Agent Graph</h3>
+  <p>
+    Now we'll build the complete graph with conditional edges, tool execution, and checkpointing for state persistence.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.sqlite import SqliteSaver
+import sqlite3
+
+from langgraph.graph import StateGraph, END
+from langgraph.prebuilt import ToolNode, tools_condition
+
+workflow = StateGraph(state_schema=AgentState)
+
+workflow.add_node("agent", function_1)
+workflow.add_node("tools", ToolNode(tools=tools))
+
+workflow.add_conditional_edges("agent", where_to_go, {
+    "continue": "tools",
+    "end": END
+})
+
+workflow.add_edge('tools', 'agent')
+
+workflow.set_entry_point("agent")
+
+conn = sqlite3.connect("checkpoints.sqlite", check_same_thread=False)
+memory = SqliteSaver(conn)
+
+app = workflow.compile(checkpointer=memory)
+
+app</code></pre>
+
+  <div class="concept">
+    <div class="concept-title">Graph Flow Explanation</div>
+    <ol>
+      <li><strong>Entry:</strong> Execution starts at the "agent" node</li>
+      <li><strong>Agent Decision:</strong> Agent processes messages and decides whether to call tools</li>
+      <li><strong>Conditional Routing:</strong>
+        <ul>
+          <li>If tool_calls exist → route to "tools" node</li>
+          <li>If no tool_calls → route to END</li>
+        </ul>
+      </li>
+      <li><strong>Tool Execution:</strong> If <code>TavilySearch</code> is called, run the search and return the results</li>
+      <li><strong>Loop Back:</strong> After the search finishes, always return to "agent" to write the answer</li>
+      <li><strong>Repeat:</strong> The agent can search again or respond to the user</li>
+    </ol>
+  </div>
+
+  <h3>7.7 Testing the Agent with Checkpointing</h3>
+  <p>
+    Now let's test our agent with checkpointing enabled. Checkpointing allows us to maintain conversation history
+    across multiple invocations using a thread ID.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>from langchain_core.messages import HumanMessage
+
+config = {"configurable": {"thread_id": "1"}}
+
+inputs = {"messages": [HumanMessage(content="What are the latest developments in LangGraph?")]}
+response = app.invoke(inputs, config)
+response</code></pre>
+
+  <div class="note">
+    <strong>What to look for:</strong> This question needs current information, so the agent should call
+    <code>TavilySearch</code>, then answer from the search results. The <code>thread_id</code> in the config
+    stores that exchange under thread <code>"1"</code>, so later calls with the same id continue the same conversation.
+  </div>
+
+  <h3>7.8 Inspecting Graph State</h3>
+  <p>
+    We can inspect the current state of the graph at any time using <code>get_state()</code>.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>snapshot = app.get_state(config)
+snapshot</code></pre>
+
+  <h3>7.9 Testing Different Query Types</h3>
+  <p>
+    Let's test our agent with different types of queries to see how it handles tool calling vs. direct responses.
+  </p>
+
+  <h4>7.9.1 Non-Tool Query (Direct Response)</h4>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>user_input = "What is java language? "
+config = {"configurable": {"thread_id": "15"}}
+# The config is the **second positional argument** to stream() or invoke()!
+events = app.stream(
+    {"messages": [("user", user_input)]}, config, stream_mode="values"
+)
+for event in events:
+    if "messages" in event:
+        event["messages"][-1].pretty_print()</code></pre>
+
+  <div class="note">
+    <strong>Observation:</strong> For a general knowledge question, the agent should respond directly without
+    calling any tools.
+  </div>
+
+  <h4>7.9.2 Web Search Query (Tool Call)</h4>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>user_input = "What are today's top technology news headlines?"
+config = {"configurable": {"thread_id": "16"}}
+# The config is the **second positional argument** to stream() or invoke()!
+events = app.stream(
+    {"messages": [("user", user_input)]}, config, stream_mode="values"
+)
+for event in events:
+    if "messages" in event:
+        event["messages"][-1].pretty_print()</code></pre>
+
+  <div class="note">
+    <strong>Observation:</strong> This question needs live web results, so the agent should call
+    <code>TavilySearch</code>, then answer from those results. A new <code>thread_id</code> keeps this
+    conversation separate from the previous one.
+  </div>
+
+  <h2>8. Advanced: Multiple Schemas and Private State</h2>
+  <p>
+    Sometimes you want to use different schemas for input/output vs. internal state, or pass private state
+    between nodes that shouldn't be exposed in the final output.
+  </p>
+
+  <div class="concept">
+    <div class="concept-title">Schema Separation</div>
+    <p>
+      LangGraph supports:
+    </p>
+    <ul>
+      <li><strong>Input/Output Schemas:</strong> Constrain what data enters and leaves the graph</li>
+      <li><strong>Internal State:</strong> Full state used during graph execution</li>
+      <li><strong>Private State:</strong> Intermediate data that nodes can use but isn't part of the final output</li>
+    </ul>
+  </div>
+
+  <h3>8.2 Input/Output Schema Constraints</h3>
+  <p>
+    You can also explicitly define input and output schemas to constrain what data enters and leaves the graph,
+    while using a larger internal state for processing.
+  </p>
+
+  <h4>8.2.1 Graph with Single Schema (Baseline)</h4>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>class OverallState(TypedDict):
+    question: str
+    answer: str
+    notes: str
+
+def thinking_node(state: OverallState):
+    return {"answer": "bye", "notes": "... his is name is Siva"}
+
+def answer_node(state: OverallState):
+    return {"answer": "bye Siva"}
+
+graph = StateGraph(OverallState)
+graph.add_node("answer_node", answer_node)
+graph.add_node("thinking_node", thinking_node)
+graph.add_edge(START, "thinking_node")
+graph.add_edge("thinking_node", "answer_node")
+graph.add_edge("answer_node", END)
+
+graph = graph.compile()
+
+# View
+display(Image(graph.get_graph().draw_mermaid_png()))
+
+graph.invoke({"question": "hi"})</code></pre>
+
+  <div class="note">
+    <strong>Observation:</strong> The output contains all keys from <code>OverallState</code>: question, answer, and notes.
+  </div>
+
+  <h4>8.2.2 Graph with Explicit Input/Output Schemas</h4>
+  <p>
+    Now let's constrain the input to only accept <code>question</code> and the output to only return <code>answer</code>,
+    while still using the full <code>OverallState</code> internally.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell.</p>
+  </div>
+
+  <pre><code>class InputState(TypedDict):
+    question: str
+
+class OutputState(TypedDict):
+    answer: str
+
+class OverallState(TypedDict):
+    question: str
+    answer: str
+    notes: str
+
+def thinking_node(state: InputState):
+    return {"answer": "bye", "notes": "... his is name is siva"}
+
+def answer_node(state: OverallState) -> OutputState:
+    return {"answer": "bye Siva"}
+
+graph = StateGraph(OverallState, input=InputState, output=OutputState)
+graph.add_node("answer_node", answer_node)
+graph.add_node("thinking_node", thinking_node)
+graph.add_edge(START, "thinking_node")
+graph.add_edge("thinking_node", "answer_node")
+graph.add_edge("answer_node", END)
+
+graph = graph.compile()
+
+# View
+display(Image(graph.get_graph().draw_mermaid_png()))
+
+graph.invoke({"question": "hi"})</code></pre>
+
+  <div class="note">
+    <strong>Key Difference:</strong> Even though <code>OverallState</code> contains <code>question</code>, <code>answer</code>,
+    and <code>notes</code>, the output schema constrains the result to only <code>answer</code>. The <code>notes</code>
+    field is used internally but not exposed in the final output.
+  </div>
+
+</main>
+</body>
+</html>
+

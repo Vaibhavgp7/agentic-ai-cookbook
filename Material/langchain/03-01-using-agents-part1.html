@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LangChain 1.0 Agents – Hands-on Guide (Part 1)</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+      color: #0f172a;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 2.25rem 4.75rem 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .note, .exercise {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .exercise-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #166534;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+    .sample-output-title {
+      font-weight: 600;
+      margin-top: 0.75rem;
+      margin-bottom: 0.25rem;
+      color: #0f172a;
+    }
+    .code-wrapper {
+      position: relative;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 0.45rem;
+      right: 0.5rem;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.22rem 0.55rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 6px;
+      color: #9ca3af;
+      font-family: system-ui, sans-serif;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: #f9fafb;
+    }
+    .copy-btn.copied {
+      color: #4ade80;
+      border-color: rgba(74, 222, 128, 0.45);
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>LangChain 1.0 Agents – Hands-on Lab (Part 1)</h1>
+
+  <h2>1. Getting Started</h2>
+  <p>
+    In this lab, you will build intelligent <strong>LangChain 1.0 agents</strong> that can use tools like calculators, web search,
+    weather APIs, databases, and even code execution. You will also learn about <strong>middleware</strong>, <strong>dynamic models</strong>,
+    <strong>structured output</strong>, and <strong>natural memory</strong>.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      In Jupyter or your code editor, create a new notebook named <code>05-using-agents.ipynb</code> that corresponds to this lab (or reuse an existing one).
+      Then in your terminal (not inside the notebook), install the required agent and tool packages.
+    </p>
+  </div>
+
+  <pre><code>pip install langchain langchain-openai langchain-community langchain-tavily tavily-python python-dotenv pydantic</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new notebook cell</strong>, import the core libraries, and load environment variables from your <code>.env</code> file.</p>
+  </div>
+
+  <pre><code># Import necessary libraries and set up environment
+import os
+from dotenv import load_dotenv
+from typing import Literal, Dict, Any, TypedDict
+import json
+
+load_dotenv()</code></pre>
+
+  <h2>2. Introduction to Agents and the ReAct Pattern</h2>
+
+  <h3>2.1 What Is an Agent?</h3>
+  <p>
+    An <strong>agent</strong> is a system that uses a language model to decide <em>which tools to use</em> and <em>how to use them</em> in order
+    to accomplish a goal. Agents follow the <strong>ReAct (Reasoning + Acting)</strong> pattern: they think, act with tools, observe,
+    and repeat until they can give a final answer.
+  </p>
+  <p>
+    We will start with a simple agent that can calculate expressions and tell the current time.
+  </p>
+
+  <h3>2.2 ReAct Pattern: How Agents Work</h3>
+  <p><strong>ReAct = Reasoning + Acting</strong>. Agents follow this loop:</p>
+  <ol>
+    <li><strong>Reason</strong>: Think about what to do next.</li>
+    <li><strong>Act</strong>: Use a tool or provide an answer.</li>
+    <li><strong>Observe</strong>: Look at the tool result.</li>
+    <li><strong>Repeat</strong>: Continue until the task is complete.</li>
+  </ol>
+  <p>
+    For example, if the user asks: <em>"What's 15 × 23 and the weather in Paris?"</em>, the agent:
+  </p>
+  <ul>
+    <li>Reasons: it needs a calculation <strong>and</strong> weather data.</li>
+    <li>Acts: calls a calculator tool → gets <code>345</code>.</li>
+    <li>Acts: calls a weather tool → gets something like <code>sunny, 22°C</code>.</li>
+    <li>Responds with a combined, natural-language answer.</li>
+  </ul>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a basic agent that can perform calculations and tell the current time. Copy the code below into a new notebook
+      cell and run it.
+    </p>
+  </div>
+
+  <pre><code>from langchain.agents import create_agent
+from langchain.tools import tool
+from langchain_openai import ChatOpenAI
+
+# Initialize the model
+model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+
+# Define simple tools
+@tool
+def calculator(expression: str) -> str:
+    """Perform basic mathematical calculations."""
+    try:
+        result = eval(expression)
+        return f"Result: {result}"
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+@tool
+def get_time() -> str:
+    """Get the current time."""
+    from datetime import datetime
+    return f"Current time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+
+# Create the agent with tools
+basic_agent = create_agent(
+    model=model,
+    tools=[calculator, get_time],
+    system_prompt="You are a helpful assistant that can perform calculations and tell time."
+)
+
+print("Basic agent created successfully!")</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Test the basic agent by asking it to both calculate an expression and tell you the current time. Add the code below
+      to a new cell and run it.
+    </p>
+  </div>
+
+  <pre><code># Test the basic agent
+result = basic_agent.invoke({
+    "messages": [{"role": "user", "content": "What is 15 * 7 + 23? Also, what time is it?"}]
+})
+
+print("Agent Response:")
+print(result["messages"][-1].content)</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Now inspect the <strong>full list of messages</strong> exchanged between the agent and the LLM.
+      Notice that there can be <strong>parallel tool calls</strong> and corresponding <code>ToolMessage</code> objects.
+    </p>
+  </div>
+
+  <pre><code>result["messages"]</code></pre>
+
+  <h2>3. Defining and Using Tools</h2>
+
+  <h3>3.1 What Are Tools?</h3>
+  <p>
+    <strong>Tools</strong> are functions that agents can call to interact with the outside world: APIs, databases, files, web search,
+    and more. LLMs alone cannot access real-time data or perform reliable calculations – tools bridge that gap.
+  </p>
+  <p>
+    Good tools have:
+  </p>
+  <ul>
+    <li>Clear, descriptive docstrings (so the model knows when to use them).</li>
+    <li>Typed arguments (often with Pydantic models) for validation.</li>
+    <li>Safe error handling.</li>
+  </ul>
+
+  <h3>3.2 Weather Tool with OpenWeatherMap</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Install the OpenWeatherMap Python client so you can use LangChain's OpenWeatherMap tools.
+      Run this command in your terminal.
+    </p>
+  </div>
+
+  <pre><code>pip install pyowm</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Use LangChain's OpenWeatherMap utility to build a weather tool.
+      Copy the code below into a new cell and run it.
+    </p>
+  </div>
+
+  <pre><code># Method 2: Using OpenWeatherMap tool from LangChain
+from langchain_community.tools.openweathermap import OpenWeatherMapQueryRun
+from langchain_community.utilities.openweathermap import OpenWeatherMapAPIWrapper
+from pydantic import BaseModel
+
+# Initialize OpenWeatherMap tool with API wrapper
+openweather_wrapper = OpenWeatherMapAPIWrapper()
+#get_weather = OpenWeatherMapQueryRun(api_wrapper=openweather_wrapper)
+
+# Alternative: Custom tool using OpenWeatherMap if you need more control
+class WeatherInput(BaseModel):
+    location: str
+
+@tool(args_schema=WeatherInput)
+def get_weather(location: str) -> str:
+    """Get detailed current weather information for a specific location using OpenWeatherMap."""
+    try:
+        # Use the wrapper directly for more detailed response
+        print(f"Fetching weather data for: {location}")
+        weather_data = openweather_wrapper.run(location)
+        return weather_data
+    except Exception as e:
+        return f"Error getting weather data: {str(e)}"</code></pre>
+
+  <h3>3.3 Tavily Web Search Tool</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a custom web search tool using Tavily. Make sure you have a valid <code>TAVILY_API_KEY</code> set
+      in your environment.
+    </p>
+  </div>
+
+  <pre><code># Custom Tavily web search function
+from tavily import TavilyClient
+from langchain.tools import tool
+
+# Initialize Tavily client
+tavily_client = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
+
+@tool
+def web_search(query: str, max_results: int = 5) -> str:
+    """Search the web using Tavily."""
+    try:
+        print("Performing web search...")
+        response = tavily_client.search(
+            query=query,
+            max_results=max_results,
+            include_raw_content=False
+        )
+        # Return the Tavily response directly for simplicity
+        return response
+    except Exception as e:
+        return f"Error performing web search: {str(e)}"
+
+print("Custom Tavily search tool created!")</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create an agent that combines web search and weather tools. Ask it to search and get weather, then summarize
+      both in its reply.
+    </p>
+  </div>
+
+  <pre><code># Create agent with custom tools
+tools_agent = create_agent(
+    model=model,
+    tools=[web_search, get_weather],
+    system_prompt="You are a helpful assistant with access to web search and weather."
+)
+
+# Test the tools
+result = tools_agent.invoke({
+    "messages": [{
+        "role": "user", 
+        "content": (
+            "Search for Sivaprasad valluru, get weather for Bangalore, "
+            "and give me a concise combined summary."
+        )
+    }]
+})</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Print the final agent response so you can see a summary of what it did.</p>
+  </div>
+
+  <pre><code>print("Agent Response:")
+print(result["messages"][-1].content)</code></pre>
+
+  <h3>3.4 Using the Predefined LangChain Tavily Tool</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      LangChain already provides a Tavily search tool. First, install the package and then use the predefined tool.
+    </p>
+  </div>
+
+  <pre><code>pip install langchain-tavily</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create the predefined Tavily search tool by copying and running the code below.</p>
+  </div>
+
+  <pre><code># Using the predefined LangChain Tavily tool
+from  langchain_tavily import TavilySearch
+# Create predefined Tavily tool
+tavily_tool = TavilySearch(
+    max_results=3,
+    search_depth="advanced",
+    include_answer=True,
+    include_raw_content=False,
+    include_images=False
+)
+
+print("Predefined Tavily tool created!")</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Build a web search agent using the predefined Tavily tool and a calculator. Ask it about recent AI developments.
+    </p>
+  </div>
+
+  <pre><code># Create agent with web search capabilities
+web_search_agent = create_agent(
+    model=model,
+    tools=[tavily_tool, calculator],
+    system_prompt=(
+        "You are a research assistant with web search capabilities. "
+        "Use web search to find current information and provide "
+        "accurate, up-to-date responses."
+    )
+)
+
+# Test web search
+result = web_search_agent.invoke({
+    "messages": [{
+        "role": "user", 
+        "content": "What are the latest developments in artificial intelligence in November 2025?"
+    }]
+})
+
+print("Web Search Agent Response:")
+print(result["messages"][-1].content)</code></pre>
+
+  <h2>4. Database Tools and Database Agents</h2>
+
+  <h3>4.1 Natural language to SQL and a realistic dataset</h3>
+  <p>
+    Database agents turn questions into SQL, run reads safely using LangChain&apos;s toolkit, and summarize results.
+    This lab uses a compact <strong>e‑commerce fraud / returns</strong> SQLite file with tables
+    <code>users</code>, <code>orders</code>, <code>order_items</code>, and <code>returns</code> plus realistic seeded rows for two personas
+    (<code>good_user@example.com</code> and <code>fraudster@example.com</code>).
+  </p>
+  <p>
+    Instead of one generic database agent, you build <strong>three narrow agents</strong>, each with the same toolkit but its own brief:
+    return<strong>‑frequency</strong> risk, <strong>monetary / high‑refund‑history</strong> patterns, and <strong>return‑reason wording / repetition</strong> risk.
+    Section&nbsp;4.3 walks through them sequentially so you see how swapping only <code>system_prompt</code> redirects the identical toolset.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      In a new cell, paste the SQLite setup below. It creates <code>fraud_demo.sqlite3</code> beside your notebook.
+      Running it again resets schema and demo rows (<code>_dup2</code> / <code>_dup3</code> sibling orders mimic volume).
+    </p>
+  </div>
+
+  <pre><code>import sqlite3
+from datetime import datetime, timedelta
+
+DB_PATH = "./fraud_demo.sqlite3"
+
+def init_database(path: str = DB_PATH):
+    conn = sqlite3.connect(path)
+    cur = conn.cursor()
+
+    cur.executescript(
+        """
+        DROP TABLE IF EXISTS users;
+        DROP TABLE IF EXISTS orders;
+        DROP TABLE IF EXISTS order_items;
+        DROP TABLE IF EXISTS returns;
+        """
+    )
+
+    cur.executescript(
+        """
+        CREATE TABLE users (
+            email TEXT PRIMARY KEY,
+            full_name TEXT NOT NULL
+        );
+
+        CREATE TABLE orders (
+            order_id TEXT PRIMARY KEY,
+            user_email TEXT NOT NULL,
+            order_date TEXT NOT NULL,
+            status TEXT NOT NULL,
+            total_amount REAL NOT NULL,
+            FOREIGN KEY(user_email) REFERENCES users(email)
+        );
+
+        CREATE TABLE order_items (
+            order_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id TEXT NOT NULL,
+            product_id TEXT NOT NULL,
+            quantity INTEGER NOT NULL,
+            unit_price REAL NOT NULL,
+            FOREIGN KEY(order_id) REFERENCES orders(order_id)
+        );
+
+        CREATE TABLE returns (
+            return_id TEXT PRIMARY KEY,
+            order_id TEXT NOT NULL,
+            user_email TEXT NOT NULL,
+            return_date TEXT NOT NULL,
+            reason TEXT NOT NULL,
+            status TEXT NOT NULL,
+            refund_amount REAL,
+            FOREIGN KEY(order_id) REFERENCES orders(order_id),
+            FOREIGN KEY(user_email) REFERENCES users(email)
+        );
+        """
+    )
+
+    users = [
+        ("good_user@example.com", "Good User"),
+        ("fraudster@example.com", "Frequent Returner"),
+    ]
+    cur.executemany("INSERT INTO users VALUES (?, ?)", users)
+
+    now = datetime.now()
+
+    def d(days: int) -> str:
+        return (now - timedelta(days=days)).strftime("%Y-%m-%d")
+
+    orders = [
+      ("ORD_GOOD_1", "good_user@example.com", d(5), "DELIVERED", 1299.99),
+      ("ORD_GOOD_1_dup2", "good_user@example.com", d(5), "DELIVERED", 1299.99),
+      ("ORD_GOOD_1_dup3", "good_user@example.com", d(5), "DELIVERED", 1299.99),
+      ("ORD_GOOD_2", "good_user@example.com", d(20), "DELIVERED", 249.99),
+      ("ORD_GOOD_2_dup2", "good_user@example.com", d(20), "DELIVERED", 249.99),
+      ("ORD_GOOD_2_dup3", "good_user@example.com", d(20), "DELIVERED", 249.99),
+      ("ORD_GOOD_3", "good_user@example.com", d(12), "DELIVERED", 120.00),
+      ("ORD_GOOD_3_dup2", "good_user@example.com", d(12), "DELIVERED", 120.00),
+      ("ORD_GOOD_3_dup3", "good_user@example.com", d(12), "DELIVERED", 120.00),
+      ("ORD_GOOD_4", "good_user@example.com", d(32), "DELIVERED", 349.00),
+      ("ORD_GOOD_4_dup2", "good_user@example.com", d(32), "DELIVERED", 349.00),
+      ("ORD_GOOD_4_dup3", "good_user@example.com", d(32), "DELIVERED", 349.00),
+      ("ORD_BAD_1", "fraudster@example.com", d(1), "DELIVERED", 899.99),
+      ("ORD_BAD_1_dup2", "fraudster@example.com", d(1), "DELIVERED", 899.99),
+      ("ORD_BAD_1_dup3", "fraudster@example.com", d(1), "DELIVERED", 899.99),
+      ("ORD_BAD_2", "fraudster@example.com", d(25), "DELIVERED", 1099.00),
+      ("ORD_BAD_2_dup2", "fraudster@example.com", d(25), "DELIVERED", 1099.00),
+      ("ORD_BAD_2_dup3", "fraudster@example.com", d(25), "DELIVERED", 1099.00),
+      ("ORD_BAD_3", "fraudster@example.com", d(3), "DELIVERED", 1299.99),
+      ("ORD_BAD_3_dup2", "fraudster@example.com", d(3), "DELIVERED", 1299.99),
+      ("ORD_BAD_3_dup3", "fraudster@example.com", d(3), "DELIVERED", 1299.99),
+      ("ORD_BAD_4", "fraudster@example.com", d(8), "DELIVERED", 450.00),
+      ("ORD_BAD_4_dup2", "fraudster@example.com", d(8), "DELIVERED", 450.00),
+      ("ORD_BAD_4_dup3", "fraudster@example.com", d(8), "DELIVERED", 450.00),
+      ("ORD_BAD_5", "fraudster@example.com", d(2), "DELIVERED", 2200.00),
+      ("ORD_BAD_5_dup2", "fraudster@example.com", d(2), "DELIVERED", 2200.00),
+      ("ORD_BAD_5_dup3", "fraudster@example.com", d(2), "DELIVERED", 2200.00),
+    ]
+    cur.executemany("INSERT INTO orders VALUES (?, ?, ?, ?, ?)", orders)
+
+    items = [
+      (None, "ORD_GOOD_1", "SKU_LAPTOP", 1, 1299.99),
+      (None, "ORD_GOOD_1_dup2", "SKU_LAPTOP", 1, 1299.99),
+      (None, "ORD_GOOD_1_dup3", "SKU_LAPTOP", 1, 1299.99),
+      (None, "ORD_GOOD_2", "SKU_MOUSE", 1, 249.99),
+      (None, "ORD_GOOD_2_dup2", "SKU_MOUSE", 1, 249.99),
+      (None, "ORD_GOOD_2_dup3", "SKU_MOUSE", 1, 249.99),
+      (None, "ORD_GOOD_3", "SKU_CABLE", 2, 60.00),
+      (None, "ORD_GOOD_3_dup2", "SKU_CABLE", 2, 60.00),
+      (None, "ORD_GOOD_3_dup3", "SKU_CABLE", 2, 60.00),
+      (None, "ORD_GOOD_4", "SKU_BACKPACK", 1, 349.00),
+      (None, "ORD_GOOD_4_dup2", "SKU_BACKPACK", 1, 349.00),
+      (None, "ORD_GOOD_4_dup3", "SKU_BACKPACK", 1, 349.00),
+      (None, "ORD_BAD_1", "SKU_MONITOR", 1, 899.99),
+      (None, "ORD_BAD_1_dup2", "SKU_MONITOR", 1, 899.99),
+      (None, "ORD_BAD_1_dup3", "SKU_MONITOR", 1, 899.99),
+      (None, "ORD_BAD_2", "SKU_WEBCAM", 1, 1099.00),
+      (None, "ORD_BAD_2_dup2", "SKU_WEBCAM", 1, 1099.00),
+      (None, "ORD_BAD_2_dup3", "SKU_WEBCAM", 1, 1099.00),
+      (None, "ORD_BAD_3", "SKU_DESK", 1, 1299.99),
+      (None, "ORD_BAD_3_dup2", "SKU_DESK", 1, 1299.99),
+      (None, "ORD_BAD_3_dup3", "SKU_DESK", 1, 1299.99),
+      (None, "ORD_BAD_4", "SKU_HEADSET", 2, 225.00),
+      (None, "ORD_BAD_4_dup2", "SKU_HEADSET", 2, 225.00),
+      (None, "ORD_BAD_4_dup3", "SKU_HEADSET", 2, 225.00),
+      (None, "ORD_BAD_5", "SKU_GAMING_PC", 1, 2200.00),
+      (None, "ORD_BAD_5_dup2", "SKU_GAMING_PC", 1, 2200.00),
+      (None, "ORD_BAD_5_dup3", "SKU_GAMING_PC", 1, 2200.00),
+    ]
+    cur.executemany("INSERT INTO order_items VALUES (?, ?, ?, ?, ?)", items)
+
+    returns_data = [
+      ("RET_BAD_PREV_1", "ORD_BAD_1", "fraudster@example.com", d(3), "changed my mind", "APPROVED", 350.00),
+      ("RET_BAD_PREV_1_dup2", "ORD_BAD_1_dup2", "fraudster@example.com", d(3), "changed my mind", "APPROVED", 350.00),
+      ("RET_BAD_PREV_1_dup3", "ORD_BAD_1_dup3", "fraudster@example.com", d(3), "changed my mind", "APPROVED", 350.00),
+      ("RET_BAD_PREV_2", "ORD_BAD_1", "fraudster@example.com", d(10), "ordered by mistake", "APPROVED", 520.00),
+      ("RET_BAD_PREV_2_dup2", "ORD_BAD_1_dup2", "fraudster@example.com", d(10), "ordered by mistake", "APPROVED", 520.00),
+      ("RET_BAD_PREV_2_dup3", "ORD_BAD_1_dup3", "fraudster@example.com", d(10), "ordered by mistake", "APPROVED", 520.00),
+      ("RET_BAD_PREV_3", "ORD_BAD_2", "fraudster@example.com", d(15), "don't need", "APPROVED", 650.00),
+      ("RET_BAD_PREV_3_dup2", "ORD_BAD_2_dup2", "fraudster@example.com", d(15), "don't need", "APPROVED", 650.00),
+      ("RET_BAD_PREV_3_dup3", "ORD_BAD_2_dup3", "fraudster@example.com", d(15), "don't need", "APPROVED", 650.00),
+      ("RET_BAD_PREV_4", "ORD_BAD_3", "fraudster@example.com", d(5), "no reason", "APPROVED", 1200.00),
+      ("RET_BAD_PREV_4_dup2", "ORD_BAD_3_dup2", "fraudster@example.com", d(5), "no reason", "APPROVED", 1200.00),
+      ("RET_BAD_PREV_4_dup3", "ORD_BAD_3_dup3", "fraudster@example.com", d(5), "no reason", "APPROVED", 1200.00),
+      ("RET_BAD_PREV_5", "ORD_BAD_3", "fraudster@example.com", d(1), "ordered by mistake", "APPROVED", 1299.99),
+      ("RET_BAD_PREV_5_dup2", "ORD_BAD_3_dup2", "fraudster@example.com", d(1), "ordered by mistake", "APPROVED", 1299.99),
+      ("RET_BAD_PREV_5_dup3", "ORD_BAD_3_dup3", "fraudster@example.com", d(1), "ordered by mistake", "APPROVED", 1299.99),
+      ("RET_BAD_PREV_6", "ORD_BAD_5", "fraudster@example.com", d(1), "changed my mind", "APPROVED", 1800.00),
+      ("RET_BAD_PREV_6_dup2", "ORD_BAD_5_dup2", "fraudster@example.com", d(1), "changed my mind", "APPROVED", 1800.00),
+      ("RET_BAD_PREV_6_dup3", "ORD_BAD_5_dup3", "fraudster@example.com", d(1), "changed my mind", "APPROVED", 1800.00),
+      ("RET_GOOD_PREV_1", "ORD_GOOD_1", "good_user@example.com", d(40), "arrived damaged", "APPROVED", 249.99),
+      ("RET_GOOD_PREV_1_dup2", "ORD_GOOD_1_dup2", "good_user@example.com", d(40), "arrived damaged", "APPROVED", 249.99),
+      ("RET_GOOD_PREV_1_dup3", "ORD_GOOD_1_dup3", "good_user@example.com", d(40), "arrived damaged", "APPROVED", 249.99),
+      ("RET_GOOD_PREV_2", "ORD_GOOD_3", "good_user@example.com", d(6), "size too small", "APPROVED", 120.00),
+      ("RET_GOOD_PREV_2_dup2", "ORD_GOOD_3_dup2", "good_user@example.com", d(6), "size too small", "APPROVED", 120.00),
+      ("RET_GOOD_PREV_2_dup3", "ORD_GOOD_3_dup3", "good_user@example.com", d(6), "size too small", "APPROVED", 120.00),
+    ]
+    cur.executemany("INSERT INTO returns VALUES (?, ?, ?, ?, ?, ?, ?)", returns_data)
+
+    conn.commit()
+    conn.close()
+
+init_database()
+print("Fraud demo database ready at", DB_PATH)</code></pre>
+
+  <p class="sample-output-title">Sample Output (for reference)</p>
+  <pre><code>Fraud demo database ready at ./fraud_demo.sqlite3</code></pre>
+
+  <h3>4.2 Connect with SQLDatabase and inspect toolkit tools</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Reuse your <code>ChatOpenAI</code> <code>model</code> from earlier cells. Attach <code>SQLDatabase</code> and
+      <code>SQLDatabaseToolkit</code> to see the LangChain-generated SQL helper tools (<code>sql_db_list_tables</code>, etc.).
+    </p>
+  </div>
+
+  <pre><code>from langchain_community.utilities import SQLDatabase
+from langchain_community.agent_toolkits import SQLDatabaseToolkit
+
+db = SQLDatabase.from_uri(f"sqlite:///{DB_PATH}")
+toolkit = SQLDatabaseToolkit(db=db, llm=model)
+tools = toolkit.get_tools()
+
+print("Available database tools:")
+for tool in tools:
+    print(f"- {tool.name}")
+print()</code></pre>
+
+  <p class="sample-output-title">Sample Output (for reference)</p>
+  <pre><code>Available database tools:
+- sql_db_list_tables
+- sql_db_schema
+- sql_db_query_checker
+- sql_db_query
+...</code></pre>
+
+  <h3>4.3 Same toolkit, three specialists (system prompt drives behavior)</h3>
+  <p>
+    Imagine an e‑commerce fraud team. Every analyst connects to the <strong>same SQLite database</strong> and uses the
+    <strong>same SQL tools</strong> from Section&nbsp;4.2. What makes each analyst different is their <strong>job brief</strong>—the
+    <code>system_prompt</code> you pass to <code>create_agent(...)</code>.
+  </p>
+  <p>
+    You will build three specialists who look at the <em>same suspicious shopper</em> from different angles:
+  </p>
+  <ul>
+    <li><strong>Agent A (Frequency)</strong> — “Is this person returning items too often?”</li>
+    <li><strong>Agent B (Value)</strong> — “Is this return expensive, and does this person already have a history of large refunds?”</li>
+    <li><strong>Agent C (Reason)</strong> — “Is the excuse they typed suspicious or copied from past returns?”</li>
+  </ul>
+  <p>
+    The Python tool list never changes. Only the system prompt changes—and that is enough to steer SQL queries and the final answer.
+  </p>
+
+  <div class="note">
+    <strong>The demo story (read this first)</strong>
+    <p>
+      Section&nbsp;4.1 seeded two shoppers in <code>fraud_demo.sqlite3</code>:
+    </p>
+    <ul>
+      <li><code>good_user@example.com</code> — a normal customer with a few legitimate returns (e.g. “arrived damaged”).</li>
+      <li><code>fraudster@example.com</code> — a repeat returner with many recent returns, large refunds, and vague reasons like “changed my mind”.</li>
+    </ul>
+    <p>
+      All three agents below investigate the <strong>same flagged shopper</strong>:
+      <code>fraudster@example.com</code>. They are filing yet another return for order <code>ORD_BAD_2</code> (a webcam, ~$1,099)
+      with the reason <em>“changed my mind”</em>. Your agents should generally score this account as <strong>higher risk</strong> than
+      <code>good_user@example.com</code> would receive.
+    </p>
+  </div>
+
+  <div class="note">
+    <strong>Shared safeguards (every agent)</strong>
+    <ul>
+      <li>Read-only SQLite — no INSERT, UPDATE, or DELETE.</li>
+      <li>Safe workflow: list tables → inspect schema → run bounded queries (use <code>LIMIT</code>).</li>
+      <li>
+        Each agent ends its reply with <strong>one line of JSON</strong> so you can later parse it with <code>json.loads</code>
+        (strip any prose or markdown fences first if the model adds them).
+      </li>
+    </ul>
+  </div>
+
+  <div class="note">
+    <strong>System prompt structure (use this pattern for every agent)</strong>
+    <p>Each specialist below uses the same four-part system prompt layout:</p>
+    <ul>
+      <li><strong>ROLE:</strong> who the agent is (job title / specialist type)</li>
+      <li><strong>GOAL:</strong> the one outcome it must deliver</li>
+      <li><strong>BACKSTORY:</strong> context, database scope, what to focus on and what to ignore</li>
+      <li><strong>OUTPUT FORMAT:</strong> how to structure the reply (plain-language summary + trailing JSON line)</li>
+    </ul>
+    <p>
+      SQL safety rules are shared in <code>shared_sql_instructions</code> and prepended to every agent.
+      Only the role block changes between Agents A, B, and C.
+    </p>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task — Step 1: shared setup</div>
+    <p>
+      Run this cell once. It defines the SQL safety rules that every agent shares.
+      Agents A, B, and C all investigate the same fictional return ticket, written
+      directly into each user message: shopper <code>fraudster@example.com</code>,
+      order <code>ORD_BAD_2</code> (webcam, ~$1,099), reason <em>“changed my mind”</em>.
+    </p>
+  </div>
+
+  <pre><code># --- SQL safety rules prepended to every agent's system prompt ---
+shared_sql_instructions = """
+SQL RULES (apply to every query):
+- Use only the provided SQL tools.
+- ALWAYS list tables, then inspect schema for tables you touch.
+- Add LIMIT when listing rows unless the question says otherwise.
+- NEVER run INSERT, UPDATE, DELETE, DROP, or other DML.
+"""</code></pre>
+
+  <h4>4.3.1 Agent A — return frequency</h4>
+  <p><strong>Business question:</strong> “How many returns has this shopper made recently?”</p>
+  <p>
+    A customer who returns items every few days may be abusing the policy—even if each individual return looks fine.
+    Agent A counts <strong>non-rejected returns in the last 30 days</strong> for the given email. It ignores dollar amounts
+    and return-reason text.
+  </p>
+  <p>
+    The agent assigns a <code>risk_score</code> from <strong>0 (safe) to 100 (very suspicious)</strong> using a fixed rubric based
+    only on how many returns it finds. The table below is also embedded in the system prompt so the model applies the same rules every time:
+  </p>
+  <table style="width:100%; border-collapse:collapse; font-size:0.95rem; margin:0.75rem 0 1rem;">
+    <thead>
+      <tr style="border-bottom:2px solid rgba(37,99,235,0.25); text-align:left;">
+        <th style="padding:0.4rem 0.5rem;">Returns in last 30 days</th>
+        <th style="padding:0.4rem 0.5rem;">Risk band</th>
+        <th style="padding:0.4rem 0.5rem;">Meaning</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid rgba(148,163,184,0.35);">
+        <td style="padding:0.4rem 0.5rem;">0</td>
+        <td style="padding:0.4rem 0.5rem;">0–10</td>
+        <td style="padding:0.4rem 0.5rem;">No recent returns — low risk</td>
+      </tr>
+      <tr style="border-bottom:1px solid rgba(148,163,184,0.35);">
+        <td style="padding:0.4rem 0.5rem;">1–2</td>
+        <td style="padding:0.4rem 0.5rem;">10–25</td>
+        <td style="padding:0.4rem 0.5rem;">Normal occasional returns</td>
+      </tr>
+      <tr style="border-bottom:1px solid rgba(148,163,184,0.35);">
+        <td style="padding:0.4rem 0.5rem;">3–5</td>
+        <td style="padding:0.4rem 0.5rem;">25–50</td>
+        <td style="padding:0.4rem 0.5rem;">Worth monitoring</td>
+      </tr>
+      <tr style="border-bottom:1px solid rgba(148,163,184,0.35);">
+        <td style="padding:0.4rem 0.5rem;">6–9</td>
+        <td style="padding:0.4rem 0.5rem;">50–75</td>
+        <td style="padding:0.4rem 0.5rem;">Elevated — possible policy abuse</td>
+      </tr>
+      <tr>
+        <td style="padding:0.4rem 0.5rem;">10 or more</td>
+        <td style="padding:0.4rem 0.5rem;">75–100</td>
+        <td style="padding:0.4rem 0.5rem;">High — likely repeat abuser</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    For <code>fraudster@example.com</code> you should land in the <strong>75–100</strong> band because the seeded data contains many
+    recent returns. Pick one integer inside the band (higher counts → higher end of the band).
+  </p>
+  <p><strong>What you type to the agent</strong> (return ticket format — same structure as Agents B and C):</p>
+  <pre><code>Return ticket — frequency risk check
+Shopper email: fraudster@example.com
+
+How many non-rejected returns has this shopper made in the last 30 days?
+Give a brief explanation and a frequency risk score.</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create <code>frequency_agent</code>, send the user message above, and read the response. The last line should be JSON with
+      <code>"check_type": "frequency"</code>.
+    </p>
+  </div>
+
+  <pre><code>frequency_role = """
+ROLE:
+Return-frequency risk analyst on an e-commerce fraud team.
+
+GOAL:
+When given a shopper email, count their non-rejected returns in the last 30 days
+and assign a frequency risk_score (0–100) using the rubric below.
+
+BACKSTORY:
+You investigate whether a customer is returning items too often — a common sign
+of policy abuse. You query a read-only SQLite database with tables: users, orders,
+order_items, returns. You focus ONLY on return counts and timing. Ignore refund
+dollar amounts and return-reason text; other specialists on the team handle those.
+
+WORKFLOW:
+1. Query the returns table — count rows where:
+   - user_email matches the shopper
+   - return_date is within the last 30 days
+   - status is NOT 'REJECTED'
+2. Map return_count to risk_score
+   (pick one integer inside the band; use the higher end at the top of the range):
+   - 0 returns       → 0–10   (low)
+   - 1–2 returns     → 10–25  (normal)
+   - 3–5 returns     → 25–50  (monitor)
+   - 6–9 returns     → 50–75  (elevated)
+   - 10+ returns     → 75–100 (high — likely abuse)
+
+OUTPUT FORMAT:
+1. Write 2–4 sentences in plain language summarizing what you found.
+2. End with ONE line of strict JSON only (no markdown fences). Example shape:
+   {"check_type": "frequency", "risk_score": 0, "reason": "short explanation",
+    "details": {"return_count": 0, "period_days": 30}}
+
+JSON field rules:
+- risk_score: integer 0–100 from the rubric (use the real count, not a placeholder)
+- reason: one sentence citing the count and band
+  (e.g. "12 returns in 30 days — high frequency")
+- details.return_count: exact integer from your SQL query
+- details.period_days: always 30
+"""
+
+frequency_agent = create_agent(
+    model=model,
+    tools=tools,
+    system_prompt=shared_sql_instructions + frequency_role,
+)
+
+freq_result = frequency_agent.invoke({
+    "messages": [{
+        "role": "user",
+        "content": (
+            "Return ticket — frequency risk check\n"
+            "Shopper email: fraudster@example.com\n\n"
+            "How many non-rejected returns has this shopper made in the last 30 days? "
+            "Give a brief explanation and a frequency risk score."
+        ),
+    }]
+})
+print(freq_result["messages"][-1].content)</code></pre>
+
+  <p><strong>Expected behavior:</strong> the agent queries the <code>returns</code> table, finds many recent rows for
+    <code>fraudster@example.com</code> (10+ in 30 days), and returns a <code>risk_score</code> in the <strong>75–100</strong> band with
+    the exact <code>return_count</code> in <code>details</code>.</p>
+
+  <h4>4.3.2 Agent B — value &amp; refund history patterns</h4>
+  <p><strong>Business question:</strong> “Is this return expensive, and has this shopper already received large refunds before?”</p>
+  <p>
+    Agent B looks at <strong>money</strong>, not how often someone returns. It computes two numbers from SQL:
+  </p>
+  <ul>
+    <li><strong>Current return value</strong> — from <code>order_items</code> (unit_price × quantity for the SKUs being returned).</li>
+    <li><strong>High-refund history</strong> — count of past returns where <code>refund_amount &gt; 500</code> and status is not <code>REJECTED</code>.</li>
+  </ul>
+  <p>
+    The final <code>risk_score</code> combines a <strong>base score</strong> from the current return value plus a <strong>history bump</strong>
+    from past large refunds (capped at 100). The rubric below is embedded in the system prompt:
+  </p>
+  <p><strong>Step 1 — base score from current return value</strong></p>
+  <table style="width:100%; border-collapse:collapse; font-size:0.95rem; margin:0.5rem 0 1rem;">
+    <thead>
+      <tr style="border-bottom:2px solid rgba(37,99,235,0.25); text-align:left;">
+        <th style="padding:0.4rem 0.5rem;">Return value (approx.)</th>
+        <th style="padding:0.4rem 0.5rem;">Base score</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid rgba(148,163,184,0.35);">
+        <td style="padding:0.4rem 0.5rem;">Under $200</td>
+        <td style="padding:0.4rem 0.5rem;">10–25</td>
+      </tr>
+      <tr style="border-bottom:1px solid rgba(148,163,184,0.35);">
+        <td style="padding:0.4rem 0.5rem;">$200 – $499</td>
+        <td style="padding:0.4rem 0.5rem;">25–45</td>
+      </tr>
+      <tr style="border-bottom:1px solid rgba(148,163,184,0.35);">
+        <td style="padding:0.4rem 0.5rem;">$500 – $999</td>
+        <td style="padding:0.4rem 0.5rem;">45–65</td>
+      </tr>
+      <tr>
+        <td style="padding:0.4rem 0.5rem;">$1,000 or more</td>
+        <td style="padding:0.4rem 0.5rem;">65–80</td>
+      </tr>
+    </tbody>
+  </table>
+  <p><strong>Step 2 — add history bump for past high refunds</strong></p>
+  <table style="width:100%; border-collapse:collapse; font-size:0.95rem; margin:0.5rem 0 1rem;">
+    <thead>
+      <tr style="border-bottom:2px solid rgba(37,99,235,0.25); text-align:left;">
+        <th style="padding:0.4rem 0.5rem;">Past returns with refund &gt; $500</th>
+        <th style="padding:0.4rem 0.5rem;">Add to base score</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid rgba(148,163,184,0.35);">
+        <td style="padding:0.4rem 0.5rem;">0</td>
+        <td style="padding:0.4rem 0.5rem;">+0</td>
+      </tr>
+      <tr style="border-bottom:1px solid rgba(148,163,184,0.35);">
+        <td style="padding:0.4rem 0.5rem;">1–2</td>
+        <td style="padding:0.4rem 0.5rem;">+5 to +15</td>
+      </tr>
+      <tr style="border-bottom:1px solid rgba(148,163,184,0.35);">
+        <td style="padding:0.4rem 0.5rem;">3–5</td>
+        <td style="padding:0.4rem 0.5rem;">+15 to +25</td>
+      </tr>
+      <tr>
+        <td style="padding:0.4rem 0.5rem;">6 or more</td>
+        <td style="padding:0.4rem 0.5rem;">+25 to +35</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <strong>Final score:</strong> <code>risk_score = min(100, base_score + history_bump)</code>.
+    For our demo ticket (~$1,099 webcam + many past high refunds), expect a score in the <strong>85–100</strong> range.
+  </p>
+  <p><strong>What you type to the agent</strong> (return ticket format — same fields every time):</p>
+  <pre><code>Return ticket — value risk check
+Shopper email: fraudster@example.com
+Order ID: ORD_BAD_2
+Items being returned: 1 × SKU_WEBCAM (webcam)
+
+Please estimate the refund value for this return and count how many past returns
+this shopper had with refunds over $500. Give a brief explanation and a value risk score.</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create <code>value_agent</code>, send the ticket above, and check the trailing JSON for
+      <code>"check_type": "value"</code>, <code>return_value_approx</code>, and <code>high_refund_returns</code>.
+    </p>
+  </div>
+
+  <pre><code>value_role = """
+ROLE:
+High-value refund risk analyst on an e-commerce fraud team.
+
+GOAL:
+When given a return ticket (shopper email, order_id, items being returned),
+estimate the refund value and assign a value risk_score (0–100) based on
+return size and the shopper's history of large refunds.
+
+BACKSTORY:
+You investigate whether a return is financially risky — expensive items combined
+with a pattern of large past refunds often signal friendly fraud. You query a
+read-only SQLite database with tables: users, orders, order_items, returns.
+You focus ONLY on dollar amounts. Ignore return frequency counts and return-reason
+wording; other specialists on the team handle those signals.
+
+WORKFLOW:
+1. Compute return_value_approx:
+   - Look up order_items for the given order_id and SKUs
+   - Sum (unit_price × quantity) for each item being returned
+2. Count high_refund_returns:
+   - Query returns where user_email matches the shopper
+   - refund_amount > 500
+   - status is NOT 'REJECTED'
+3. Map to risk_score using this rubric:
+   a) Base score from return_value_approx (pick one integer in the band):
+      - under $200      → 10–25
+      - $200–$499       → 25–45
+      - $500–$999       → 45–65
+      - $1,000 or more  → 65–80
+   b) History bump from high_refund_returns (add to base, cap at 100):
+      - 0 past high refunds  → +0
+      - 1–2                  → +5 to +15
+      - 3–5                  → +15 to +25
+      - 6 or more            → +25 to +35
+   risk_score = min(100, base_score + history_bump)
+
+OUTPUT FORMAT:
+1. Write 2–4 sentences summarizing return value and refund history.
+2. End with ONE line of strict JSON only (no markdown fences). Example shape:
+   {"check_type": "value", "risk_score": 0, "reason": "short explanation",
+    "details": {"return_value_approx": 0.0, "high_refund_returns": 0}}
+
+JSON field rules:
+- risk_score: integer 0–100 from the rubric (use real query results)
+- reason: one sentence citing return value and high-refund count
+  (e.g. "$1,099 return; 6 prior refunds over $500")
+- details.return_value_approx: float from your SQL calculation
+- details.high_refund_returns: exact integer count from your SQL query
+"""
+
+value_agent = create_agent(
+    model=model,
+    tools=tools,
+    system_prompt=shared_sql_instructions + value_role,
+)
+
+value_result = value_agent.invoke({
+    "messages": [{
+        "role": "user",
+        "content": (
+            "Return ticket — value risk check\n"
+            "Shopper email: fraudster@example.com\n"
+            "Order ID: ORD_BAD_2\n"
+            "Items being returned: 1 × SKU_WEBCAM (webcam)\n\n"
+            "Please estimate the refund value for this return and count how many past returns "
+            "this shopper had with refunds over $500. "
+            "Give a brief explanation and a value risk score."
+        ),
+    }]
+})
+print(value_result["messages"][-1].content)</code></pre>
+
+  <p><strong>Expected behavior:</strong> the agent finds the webcam line item (~$1,099), counts several past refunds above $500 for
+    <code>fraudster@example.com</code>, and returns a <code>risk_score</code> in the <strong>85–100</strong> range with both
+    <code>return_value_approx</code> and <code>high_refund_returns</code> filled in.</p>
+
+  <h4>4.3.3 Agent C — return-reason wording &amp; repetition</h4>
+  <p><strong>Business question:</strong> “Does the excuse they typed look suspicious or repeat past returns?”</p>
+  <p>
+    Agent C focuses on the <strong>free-text reason</strong> the shopper typed. It checks two signals from SQL and text:
+  </p>
+  <ul>
+    <li><strong>Keyword flag</strong> — does the reason contain vague phrases common in friendly fraud?</li>
+    <li><strong>Repetition count</strong> — how many past returns by this email used similar wording?</li>
+  </ul>
+  <p>
+    Flagged keywords include: <em>changed my mind</em>, <em>don't need</em>, <em>ordered by mistake</em>, <em>no reason</em>,
+    <em>don't want</em>, or any reason shorter than 15 characters. The scoring rubric combines both signals:
+  </p>
+  <table style="width:100%; border-collapse:collapse; font-size:0.95rem; margin:0.75rem 0 1rem;">
+    <thead>
+      <tr style="border-bottom:2px solid rgba(37,99,235,0.25); text-align:left;">
+        <th style="padding:0.4rem 0.5rem;">Keyword flagged?</th>
+        <th style="padding:0.4rem 0.5rem;">Similar past returns</th>
+        <th style="padding:0.4rem 0.5rem;">Risk band</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid rgba(148,163,184,0.35);">
+        <td style="padding:0.4rem 0.5rem;">No</td>
+        <td style="padding:0.4rem 0.5rem;">0</td>
+        <td style="padding:0.4rem 0.5rem;">0–20 (low)</td>
+      </tr>
+      <tr style="border-bottom:1px solid rgba(148,163,184,0.35);">
+        <td style="padding:0.4rem 0.5rem;">No</td>
+        <td style="padding:0.4rem 0.5rem;">1–2</td>
+        <td style="padding:0.4rem 0.5rem;">20–40 (some repetition)</td>
+      </tr>
+      <tr style="border-bottom:1px solid rgba(148,163,184,0.35);">
+        <td style="padding:0.4rem 0.5rem;">Yes</td>
+        <td style="padding:0.4rem 0.5rem;">0</td>
+        <td style="padding:0.4rem 0.5rem;">30–50 (vague excuse, no history)</td>
+      </tr>
+      <tr style="border-bottom:1px solid rgba(148,163,184,0.35);">
+        <td style="padding:0.4rem 0.5rem;">Yes</td>
+        <td style="padding:0.4rem 0.5rem;">1–2</td>
+        <td style="padding:0.4rem 0.5rem;">50–70 (vague + some repeats)</td>
+      </tr>
+      <tr>
+        <td style="padding:0.4rem 0.5rem;">Yes</td>
+        <td style="padding:0.4rem 0.5rem;">3 or more</td>
+        <td style="padding:0.4rem 0.5rem;">70–100 (vague + repeated pattern)</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    For <code>fraudster@example.com</code> with reason <em>“changed my mind”</em>, expect <code>keywords_flagged: true</code>,
+    several similar past returns, and a score in the <strong>70–100</strong> band.
+  </p>
+  <p><strong>What you type to the agent</strong> (return ticket format — include the exact reason text):</p>
+  <pre><code>Return ticket — reason wording check
+Shopper email: fraudster@example.com
+Return reason (exact text customer typed): "changed my mind"
+
+Does this reason contain suspicious keywords? Has this shopper used similar wording on past returns?
+Give a brief explanation and a reason risk score.</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create <code>reason_agent</code>, send the ticket above, and inspect the final JSON for
+      <code>"check_type": "reason"</code>, <code>similar_past_returns</code>, and <code>keywords_flagged</code>.
+    </p>
+  </div>
+
+  <pre><code>reason_role = """
+ROLE:
+Return-reason wording analyst on an e-commerce fraud team.
+
+GOAL:
+When given a shopper email and the exact return_reason text they typed,
+detect vague or suspicious wording, check for repeated phrases in history,
+and assign a reason risk_score (0–100) using the rubric below.
+
+BACKSTORY:
+You investigate the free-text excuse customers give when returning items.
+Vague phrases like "changed my mind" or "ordered by mistake" are common in
+friendly fraud, especially when reused across multiple returns. You query a
+read-only SQLite database with tables: users, orders, order_items, returns.
+You focus ONLY on reason text and repetition. Ignore return counts and refund
+dollar amounts; other specialists on the team handle those signals.
+
+WORKFLOW:
+1. Set keywords_flagged to true if the reason contains ANY of:
+   - "changed my mind", "don't need", "don't want"
+   - "ordered by mistake", "no reason"
+   - OR the reason is shorter than 15 characters
+   Otherwise set keywords_flagged to false.
+2. Count similar_past_returns:
+   - Query returns where user_email matches the shopper
+   - status is NOT 'REJECTED'
+   - reason text is similar (same phrase or flagged keywords)
+3. Map to risk_score (pick one integer inside the band):
+   - keywords_flagged=false, similar_past_returns=0    → 0–20
+   - keywords_flagged=false, similar_past_returns=1–2  → 20–40
+   - keywords_flagged=true,  similar_past_returns=0    → 30–50
+   - keywords_flagged=true,  similar_past_returns=1–2   → 50–70
+   - keywords_flagged=true,  similar_past_returns=3+   → 70–100
+
+OUTPUT FORMAT:
+1. Write 2–4 sentences summarizing keyword flags and repetition findings.
+2. End with ONE line of strict JSON only (no markdown fences). Example shape:
+   {"check_type": "reason", "risk_score": 0, "reason": "short explanation",
+    "details": {"similar_past_returns": 0, "keywords_flagged": false}}
+
+JSON field rules:
+- risk_score: integer 0–100 from the rubric (use real query results)
+- reason: one sentence citing keyword flag and repeat count
+  (e.g. "Vague phrase 'changed my mind' repeated 4 times")
+- details.similar_past_returns: exact integer count from your SQL query
+- details.keywords_flagged: true or false based on step 1
+"""
+
+reason_agent = create_agent(
+    model=model,
+    tools=tools,
+    system_prompt=shared_sql_instructions + reason_role,
+)
+
+reason_result = reason_agent.invoke({
+    "messages": [{
+        "role": "user",
+        "content": (
+            "Return ticket — reason wording check\n"
+            "Shopper email: fraudster@example.com\n"
+            "Return reason (exact text customer typed): \"changed my mind\"\n\n"
+            "Does this reason contain suspicious keywords? Has this shopper used similar wording on past returns? "
+            "Give a brief explanation and a reason risk score."
+        ),
+    }]
+})
+print(reason_result["messages"][-1].content)</code></pre>
+
+  <p><strong>Expected behavior:</strong> the agent flags “changed my mind” as a vague keyword (<code>keywords_flagged: true</code>),
+    finds multiple matching rows in <code>returns.reason</code> for <code>fraudster@example.com</code>, and returns a
+    <code>risk_score</code> in the <strong>70–100</strong> band.</p>
+
+  <div class="note">
+    <strong>Quick comparison — same tools, different focus</strong>
+    <table style="width:100%; border-collapse:collapse; font-size:0.95rem; margin-top:0.5rem;">
+      <thead>
+        <tr style="border-bottom:2px solid rgba(37,99,235,0.25); text-align:left;">
+          <th style="padding:0.4rem 0.5rem;">Agent</th>
+          <th style="padding:0.4rem 0.5rem;">Looks at</th>
+          <th style="padding:0.4rem 0.5rem;">Ignores</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid rgba(148,163,184,0.35);">
+          <td style="padding:0.4rem 0.5rem;"><strong>A — Frequency</strong></td>
+          <td style="padding:0.4rem 0.5rem;">How many returns in 30 days</td>
+          <td style="padding:0.4rem 0.5rem;">Refund amounts, reason text</td>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(148,163,184,0.35);">
+          <td style="padding:0.4rem 0.5rem;"><strong>B — Value</strong></td>
+          <td style="padding:0.4rem 0.5rem;">Refund size + past high refunds</td>
+          <td style="padding:0.4rem 0.5rem;">Return count alone, reason wording</td>
+        </tr>
+        <tr>
+          <td style="padding:0.4rem 0.5rem;"><strong>C — Reason</strong></td>
+          <td style="padding:0.4rem 0.5rem;">Excuse text + repeated phrases</td>
+          <td style="padding:0.4rem 0.5rem;">Dollar totals, return velocity</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    To prove the prompt is steering behavior, temporarily swap <code>frequency_role</code> for <code>value_role</code> when creating
+    <code>frequency_agent</code>. The tools stay identical, but the assistant will focus on dollar amounts instead of return counts.
+  </p>
+
+  <p>
+    Optionally parse the trailing JSON with <code>json.loads</code> (after stripping any leading prose or markdown fences)—useful when
+    the same payloads feed a scorer or downstream API.
+  </p>
+
+  <p class="sample-output-title">Sample Output (for reference)</p>
+  <pre><code># Agent A (frequency) — narration plus a trailing JSON line like:
+{
+  "check_type": "frequency",
+  "risk_score": 85,
+  "reason": "15 returns in 30 days — high frequency",
+  "details": {"return_count": 15, "period_days": 30}
+}
+
+# Agent B (value)
+{
+  "check_type": "value",
+  "risk_score": 92,
+  "reason": "$1,099 return; 9 prior refunds over $500",
+  "details": {"return_value_approx": 1099.0, "high_refund_returns": 9}
+}
+
+# Agent C (reason)
+{
+  "check_type": "reason",
+  "risk_score": 78,
+  "reason": "Vague phrase 'changed my mind' repeated 6 times",
+  "details": {"similar_past_returns": 6, "keywords_flagged": true}
+}
+</code></pre>
+
+  <div class="note">
+    <strong>Orchestration angle</strong>
+    <p>
+      You built three sequential cells to keep the pedagogical storyline clear.
+      Production code often wraps specialists behind one router endpoint or stitches results in code—here the takeaway is:
+      <strong>specialization came from prompts, not from new Python tools.</strong>
+    </p>
+  </div>
+
+  <h2>5. Short-Term Memory and Checkpointers</h2>
+  <p>
+    So far our agents have been <strong>stateless</strong>: each call starts fresh. In real applications you almost always want
+    the agent to remember previous messages in a conversation thread. In LangChain 1.0 agents, this is handled by a
+    <strong>checkpointer</strong>, which stores and reloads the agent state between calls for each conversation thread.
+  </p>
+
+  <div class="note">
+    <strong>Short-term vs long-term memory</strong>
+    <ul>
+      <li><strong>Short-term memory</strong>: thread-level state (conversation history, tool results, interrupts) stored via a checkpointer.</li>
+      <li><strong>Long-term memory</strong>: user or application data stored in a separate vector store or database.</li>
+    </ul>
+    <p>
+      In this lab we focus on <strong>short-term memory</strong> using LangChain agents, based on
+      the official <a href="https://docs.langchain.com/oss/python/langchain/short-term-memory#usage" target="_blank" rel="noopener noreferrer">LangChain short-term memory docs</a>.
+    </p>
+  </div>
+
+  <h3>5.1 InMemorySaver – simple short-term memory</h3>
+  <p>
+    The simplest way to add short-term memory is to pass <code>checkpointer=InMemorySaver()</code> when you create your agent.
+    This keeps state in RAM for as long as your Python process is running, which is perfect for <strong>local notebooks, demos, and experiments</strong>.
+  </p>
+  <p>
+    LangChain’s <code>create_agent</code> manages short-term memory as part of the agent state. When you specify a
+    <code>thread_id</code> in the <code>configurable</code> section, all calls with the same <code>thread_id</code> share the same conversation history.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Turn one of your existing agents into a stateful agent that remembers your name across turns using <code>InMemorySaver</code>.
+      Copy the code below into a new cell and run it.
+    </p>
+  </div>
+
+  <pre><code>from langgraph.checkpoint.memory import InMemorySaver
+from langchain.agents import create_agent
+
+# Reuse the ChatOpenAI model and tools (calculator, get_time) defined earlier
+memory_agent = create_agent(
+    model=model,
+    tools=[calculator, get_time],
+    checkpointer=InMemorySaver(),  # Enable short-term memory
+)
+
+config = {"configurable": {"thread_id": "memory-demo-1"}}
+
+print("=== First turn (introduce yourself) ===")
+result = memory_agent.invoke(
+    {"messages": [{"role": "user", "content": "Hi! My name is Bob."}]},
+    config,
+)
+print(result["messages"][-1].content)
+
+print("\n=== Second turn (same thread) ===")
+result = memory_agent.invoke(
+    {"messages": [{"role": "user", "content": "What's my name?"}]},
+    config,
+)
+print(result["messages"][-1].content)</code></pre>
+
+  <p class="sample-output-title">What to notice</p>
+  <pre><code>- Both calls use the same thread_id ("memory-demo-1"), so they share short-term memory.
+- The agent can answer "Your name is Bob" in the second turn because the checkpointer replayed the first user message.</code></pre>
+
+  <h3>5.2 SqliteSaver – lightweight local persistence</h3>
+  <p>
+    <code>InMemorySaver</code> is great for quick experiments, but its state disappears when the process restarts. For
+    local notebooks and demos where you still want state to persist between sessions, you can use a
+    <strong>file-based checkpointer</strong> such as <code>SqliteSaver</code> from <code>langgraph.checkpoint.sqlite</code>.
+    This stores the thread state in a SQLite file so it survives restarts while staying easy to set up.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Install the SQLite checkpointer and try it out. Only the <strong>checkpointer</strong> changes – the agent API and
+      <code>thread_id</code> usage stay the same.
+    </p>
+  </div>
+
+  <pre><code># Install dependency (run in your terminal, not in the notebook):
+pip install langgraph-checkpoint-sqlite
+
+import sqlite3
+from langgraph.checkpoint.sqlite import SqliteSaver
+from langchain.agents import create_agent
+
+# Create or reuse a local SQLite file for checkpoints
+conn = sqlite3.connect("checkpoints.sqlite", check_same_thread=False)
+checkpointer = SqliteSaver(conn=conn)
+checkpointer.setup()  # Creates tables if they don't exist
+
+persistent_memory_agent = create_agent(
+    model=model,
+    tools=[calculator, get_time],
+    checkpointer=checkpointer,  # Use SQLite-backed short-term memory
+)
+
+config = {"configurable": {"thread_id": "user-123"}}
+result = persistent_memory_agent.invoke(
+    {"messages": [{"role": "user", "content": "Hi! I'm Alice."}]},
+    config,
+)
+print(result["messages"][-1].content)</code></pre>
+
+  <h3>5.3 PostgresSaver – production-ready persistent memory</h3>
+  <p>
+    For production you should move to a <strong>database-backed checkpointer</strong> such as <code>PostgresSaver</code> from
+    <code>langgraph.checkpoint.postgres</code>. This stores short-term memory in Postgres so it survives restarts and scales.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Review the example below and note that only the <strong>checkpointer</strong> changes – the agent API and
+      <code>thread_id</code> usage stay the same.
+    </p>
+  </div>
+
+  <pre><code># Install dependencies (run in your terminal, not in the notebook):
+# pip install langgraph-checkpoint-postgres
+
+from langgraph.checkpoint.postgres import PostgresSaver
+from langchain.agents import create_agent
+
+DB_URI = "postgresql://postgres:postgres@localhost:5442/postgres?sslmode=disable"
+
+with PostgresSaver.from_conn_string(DB_URI) as checkpointer:
+    checkpointer.setup()  # Run once to auto-create tables in Postgres
+
+    persistent_memory_agent = create_agent(
+        model=model,
+        tools=[calculator, get_time],
+        checkpointer=checkpointer,  # Use Postgres-backed short-term memory
+    )
+
+    config = {"configurable": {"thread_id": "user-123"}}
+    result = persistent_memory_agent.invoke(
+        {"messages": [{"role": "user", "content": "Hi! I'm Alice."}]},
+        config,
+    )
+    print(result["messages"][-1].content)</code></pre>
+
+  <div class="note">
+    <strong>Next steps</strong>
+    <p>
+      This Part 1 file stops at Section 5. Open <code>05using-agents-part2.html</code> to continue from Section 6
+      (Middleware, dynamic models, error handling, prompts, and guardrails).
+    </p>
+  </div>
+
+</main>
+
+<script>
+  const COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+  </svg>`;
+  const CHECK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="20 6 9 17 4 12"></polyline>
+  </svg>`;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("pre").forEach(pre => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "code-wrapper";
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "copy-btn";
+      btn.innerHTML = COPY_ICON + " Copy";
+      wrapper.appendChild(btn);
+
+      btn.addEventListener("click", () => {
+        const code = pre.querySelector("code");
+        const text = (code ? code.innerText : pre.innerText).trimEnd();
+
+        const showCopied = () => {
+          btn.innerHTML = CHECK_ICON + " Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.innerHTML = COPY_ICON + " Copy";
+            btn.classList.remove("copied");
+          }, 2000);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(showCopied).catch(() => {
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            ta.style.position = "fixed";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+            showCopied();
+          });
+        } else {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          showCopied();
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>
+
+

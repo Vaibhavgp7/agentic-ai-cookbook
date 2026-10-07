@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LangGraph Multi-Agent E-commerce Support System – Capstone Project Specification</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 1100px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+      color: #0f172a;
+    }
+    h4 {
+      font-size: 1.1rem;
+      margin-top: 1.5rem;
+      color: #1e40af;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    .note, .exercise, .concept {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .concept {
+      border-left: 4px solid #9333ea;
+      background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+      border-color: rgba(147, 51, 234, 0.4);
+    }
+    .warning {
+      border-left: 4px solid #dc2626;
+      background: linear-gradient(135deg, #fef2f2, #fee2e2);
+      border-color: rgba(220, 38, 38, 0.4);
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+    }
+    .exercise-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #166534;
+    }
+    .concept-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #7e22ce;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+    .small {
+      font-size: 0.9rem;
+      color: #4b5563;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 0.75rem;
+      text-align: left;
+    }
+    th {
+      background-color: #f3f4f6;
+      font-weight: 600;
+    }
+    .architecture-diagram {
+      background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin: 1.5rem 0;
+      border: 2px solid #86efac;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>LangGraph Multi-Agent E-commerce Support System<br/>Capstone Project Specification</h1>
+
+  <div class="note">
+    <strong>Purpose of this document</strong>
+    <p class="small">
+      This document is the <strong>requirements and specification</strong> for your LangGraph capstone project.
+      It describes a sophisticated multi-agent system that demonstrates LangGraph's advanced capabilities including:
+      <strong>parallel processing, subgraphs, LLM-supervised agents, fan-out/fan-in patterns, state management,
+      and human-in-the-loop interactions</strong>. This project builds upon the LangChain 1.x concepts you learned
+      and elevates them to a production-ready multi-agent architecture.
+    </p>
+  </div>
+
+  <h2>1. Project Overview</h2>
+  <p>
+    You will build a <strong>Multi-Agent E-commerce Support System</strong> using <strong>LangGraph</strong>,
+    demonstrating advanced orchestration patterns. Unlike the single-agent LangChain project, this system features:
+  </p>
+  <ul>
+    <li><strong>Supervisor-Worker Pattern:</strong> An LLM-based supervisor coordinates multiple specialized agents.</li>
+    <li><strong>Parallel Processing:</strong> Multiple agents work simultaneously on independent tasks (e.g., checking inventory and payment status).</li>
+    <li><strong>Subgraphs:</strong> Complex workflows are encapsulated as reusable subgraphs (e.g., returns processing workflow, fraud detection workflow).</li>
+    <li><strong>Dynamic Routing:</strong> The supervisor intelligently routes requests based on context and conversation history.</li>
+    <li><strong>State Management:</strong> LangGraph's built-in state management with reducers for parallel updates.</li>
+    <li><strong>Human-in-the-Loop:</strong> Interrupts for admin approval in critical workflows.</li>
+    <li><strong>Streamlit UI:</strong> Customer chat interface and admin dashboard with real-time graph visualization.</li>
+  </ul>
+
+  <div class="concept">
+    <div class="concept-title">Key Architectural Improvements over LangChain 1.x</div>
+    <ul>
+      <li><strong>Multi-Agent vs. Single Agent:</strong> Instead of one agent with many tools, we have specialized agents with focused responsibilities.</li>
+      <li><strong>Parallel Execution:</strong> LangGraph's fan-out/fan-in enables concurrent operations for better performance.</li>
+      <li><strong>Subgraphs for Modularity:</strong> Complex workflows (returns, fraud detection) are self-contained and reusable.</li>
+      <li><strong>Supervisor Intelligence:</strong> An LLM supervisor makes dynamic routing decisions, not just predefined rules.</li>
+      <li><strong>Built-in Checkpointing:</strong> LangGraph provides native state persistence with better resume capabilities.</li>
+    </ul>
+  </div>
+  
+  <div class="note">
+    <strong>🎓 Learning Focus: 3-Level Nested Subgraph Architecture</strong>
+    <p>
+      This project demonstrates <strong>nested subgraph composition</strong> - a critical pattern for building complex AI systems:
+    </p>
+    <ul>
+      <li><strong>Level 1 - Main Graph:</strong> Supervisor routes to specialized worker agents (Order, Inventory, Policy)</li>
+      <li><strong>Level 2 - Returns Subgraph:</strong> Order Agent invokes returns workflow as a <em>tool</em> (includes HITL approval)</li>
+      <li><strong>Level 3 - Fraud Detection Subgraph:</strong> Returns workflow invokes fraud detection as a <em>node</em> (4 parallel checks via Send API)</li>
+    </ul>
+    <p>
+      <strong>Result:</strong> <code>Main Graph → Returns Subgraph → Fraud Detection → 4 Parallel Checks</code>
+    </p>
+    <p>
+      This architecture teaches two invocation patterns (tool vs node), state management across levels, and dynamic parallel processing with Send API.
+      See <code>ARCHITECTURE.md</code> for detailed diagrams and implementation guide.
+    </p>
+  </div>
+
+  <h2>2. System Architecture</h2>
+
+  <div class="architecture-diagram">
+    <h3 style="margin-top: 0; color: #166534;">High-Level Architecture</h3>
+    <pre>
+┌────────────────────────────────────────────────────────────────────┐
+│                        STREAMLIT UI LAYER                          │
+│  ┌─────────────────────┐         ┌──────────────────────┐        │
+│  │  Customer Chat UI   │         │   Admin Dashboard    │        │
+│  │  - New conversation │         │   - Ticket management│        │
+│  │  - Message input    │         │   - Approve/reject   │        │
+│  └─────────────────────┘         └──────────────────────┘        │
+└────────────────────────────────────────────────────────────────────┘
+                              ↓
+┌────────────────────────────────────────────────────────────────────┐
+│                      LANGGRAPH MAIN WORKFLOW                       │
+│                                                                     │
+│                    ┌─────────────────────┐                        │
+│                    │  SUPERVISOR AGENT   │                        │
+│                    │  (LLM-based Router) │                        │
+│                    └──────────┬──────────┘                        │
+│                               │                                    │
+│        ┌──────────────────────┼──────────────────────┐           │
+│        ↓                      ↓                       ↓           │
+│  ┌───────────┐         ┌────────────┐         ┌──────────┐      │
+│  │  Order    │         │  Inventory │         │  Policy  │      │
+│  │  Agent    │         │  Agent     │         │  Agent   │      │
+│  └─────┬─────┘         └──────┬─────┘         └────┬─────┘      │
+│        │                      │                     │            │
+│        │                      ↓                     ↓            │
+│        │               ┌─────────────┐      ┌─────────────┐     │
+│        │               │ SQL Toolkit │      │ RAG Search  │     │
+│        │               └─────────────┘      └─────────────┘     │
+│        │                                                         │
+│        ├─────────────→  NESTED SUBGRAPHS                        │
+│        │                   ↓                                     │
+│        │          ┌────────┴────────┐                           │
+│        │          ↓                 ↓                           │
+│        │   ┌──────────────┐  ┌─────────────────────┐           │
+│        │   │   Returns    │  │  🔍 Fraud Detection │           │
+│        │   │   Workflow   │──┼→ (Nested Subgraph)  │           │
+│        │   │  (HITL)      │  │  • 4 Parallel Checks│           │
+│        │   │              │  │  • Send API         │           │
+│        │   │  Level 2     │  │  • Level 3          │           │
+│        │   └──────────────┘  └─────────────────────┘           │
+│        │   ↑ Tool invoke         ↑ Node invoke                 │
+│        │   │                     │                              │
+│        │   └─────────────────────┘                              │
+│        │   3-Level Architecture:                                │
+│        │   Main → Returns → Fraud Detection                    │
+│        │                                                         │
+│        └──────→  NOTIFICATION AGENT (Reusable Utility)          │
+│                  ┌─────────────────────────┐                    │
+│                  │  - Gmail toolkit        │                    │
+│                  │  - Email logging        │                    │
+│                  │  - Called by agents     │                    │
+│                  └─────────────────────────┘                    │
+└────────────────────────────────────────────────────────────────────┘
+                              ↓
+┌────────────────────────────────────────────────────────────────────┐
+│                      DATA & PERSISTENCE LAYER                      │
+│  ┌────────────┐  ┌──────────────┐  ┌─────────────┐              │
+│  │  SQLite DB │  │  ChromaDB    │  │ LangGraph   │              │
+│  │  (Business)│  │  (Policies)  │  │ Checkpointer│              │
+│  └────────────┘  └──────────────┘  └─────────────┘              │
+└────────────────────────────────────────────────────────────────────┘
+    </pre>
+  </div>
+
+  <h2>3. Multi-Agent System Components</h2>
+
+  <h3>3.1 Supervisor Agent (LLM-Based Orchestrator)</h3>
+  <p>
+    The supervisor is the "brain" of the system. It analyzes each user message and the current state to decide
+    which specialized agent should handle the request next.
+  </p>
+  <p><strong>Responsibilities:</strong></p>
+  <ul>
+    <li>Analyze incoming messages and conversation context</li>
+    <li>Route to appropriate worker agent: <strong>OrderAgent, InventoryAgent, or PolicyAgent</strong></li>
+    <li>Determine when the task is complete (return "FINISH")</li>
+    <li>Maintain conversation coherence across multiple agent interactions</li>
+  </ul>
+  <p><strong>Important:</strong> The supervisor does NOT directly invoke subgraphs or send notifications. Worker agents (primarily OrderAgent) invoke subgraphs as needed during their processing.</p>
+  <p><strong>Implementation:</strong> Use <code>with_structured_output()</code> to ensure the supervisor returns a Pydantic model with routing decisions.</p>
+
+  <h3>3.2 Specialized Worker Agents (Supervisor Routes To These)</h3>
+  <p>The supervisor routes to these three agents only. These agents may invoke subgraphs as needed.</p>
+
+  <h4>a) Order Agent</h4>
+  <ul>
+    <li><strong>Purpose:</strong> Handle all order-related queries and operations</li>
+    <li><strong>Tools:</strong> SQL toolkit for querying orders, order_items, payments tables</li>
+    <li><strong>Capabilities:</strong>
+      <ul>
+        <li>Query order status, history, and details</li>
+        <li>Check payment information</li>
+        <li><strong>Handle cancellations directly:</strong> Validate business rules (order not yet shipped), update status, call notification agent to send email - no HITL needed</li>
+        <li><strong>Handle returns via subgraph:</strong> Invoke Returns Workflow subgraph (includes HITL for admin approval)</li>
+      </ul>
+    </li>
+  </ul>
+  <p><strong>Note:</strong> OrderAgent distinguishes between cancellations (simple, immediate) and returns (complex, requires admin approval via HITL). It calls the notification agent when emails need to be sent.</p>
+
+  <h4>b) Inventory Agent</h4>
+  <ul>
+    <li><strong>Purpose:</strong> Manage product availability and inventory queries</li>
+    <li><strong>Tools:</strong> SQL toolkit for products and inventory tables</li>
+    <li><strong>Capabilities:</strong>
+      <ul>
+        <li>Check product availability</li>
+        <li>Query product details and specifications</li>
+        <li>Check estimated delivery times</li>
+        <li>Provide product recommendations</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h4>c) Policy Agent</h4>
+  <ul>
+    <li><strong>Purpose:</strong> Answer policy and FAQ questions using RAG</li>
+    <li><strong>Tools:</strong> ChromaDB vector store retriever</li>
+    <li><strong>Capabilities:</strong>
+      <ul>
+        <li>Answer questions about returns, refunds, shipping policies</li>
+        <li>Provide FAQ information</li>
+        <li>Explain terms and conditions</li>
+      </ul>
+    </li>
+  </ul>
+
+  <div class="note">
+    <strong>Note on Notifications</strong>
+    <p>
+      Unlike the three worker agents above that the supervisor routes to, <strong>notification handling is done by a reusable utility agent</strong>
+      with Gmail tools. This agent is not part of the main graph routing - instead, other agents (primarily OrderAgent and within Returns Subgraph)
+      directly invoke the notification agent when they need to send emails. This keeps notification logic centralized and reusable.
+    </p>
+  </div>
+
+  <h3>3.3 Notification Agent (Reusable Utility)</h3>
+  <p><strong>Purpose:</strong> Handle all email communications - invoked by other agents as needed</p>
+  <p><strong>Tools:</strong> Gmail toolkit (GmailSendMessage, etc.), SQL toolkit for email_logs</p>
+  <p><strong>Capabilities:</strong></p>
+  <ul>
+    <li>Send emails using Gmail API via LangChain's GmailToolkit</li>
+    <li>Support different email types: order confirmation, cancellation, return request, return status updates</li>
+    <li>Use email templates with dynamic content population</li>
+    <li>Automatically log all sent emails to email_logs table</li>
+    <li>Handle failures gracefully and return status</li>
+  </ul>
+  <p><strong>Implementation:</strong> Create this agent once and make it callable by other agents. OrderAgent can invoke it with email details, and it returns success/failure status.</p>
+
+  <h2>4. Subgraph Workflows</h2>
+
+  <div class="concept">
+    <div class="concept-title">What are Subgraphs?</div>
+    <p>
+      Subgraphs are self-contained LangGraph workflows that can be embedded within larger graphs.
+      They enable modular design, code reuse, and clear separation of concerns. Each subgraph has its own
+      state schema and can be tested independently. Use subgraphs for complex multi-step workflows, not for simple operations.
+    </p>
+  </div>
+
+  <h3>4.1 Returns Processing Subgraph (with Human-in-the-Loop)</h3>
+  <p><strong>Purpose:</strong> Handle the complete returns workflow from request to resolution</p>
+  <p><strong>Important:</strong> This subgraph handles RETURNS only (items already delivered). Order cancellations (before shipment) are handled directly by OrderAgent without HITL, as they're simpler operations with just business rule validation.</p>
+  <p><strong>Workflow Steps:</strong></p>
+  <ol>
+    <li><strong>Validate Return Request:</strong> Check if order is eligible for return (30-day window, delivered status)</li>
+    <li><strong>Create Return Record:</strong> Insert into returns table with PENDING status</li>
+    <li><strong>Run Fraud Detection:</strong> Invoke fraud detection subgraph (Level 3)
+      <ul>
+        <li>Spawns 4 parallel checks using Send API</li>
+        <li>Frequency (35%), Value (35%), Reason (15%), Timing (15%)</li>
+        <li>Returns fraud score (0-100) and risk level (LOW/MEDIUM/HIGH)</li>
+      </ul>
+    </li>
+    <li><strong>Request Approval (HITL):</strong> Pause workflow with fraud score displayed
+      <ul>
+        <li>Admin sees color-coded risk indicator: 🟢 LOW / 🟡 MEDIUM / 🔴 HIGH</li>
+        <li>Fraud score and individual check details shown in dashboard</li>
+        <li>Interrupt point using <code>interrupt()</code></li>
+      </ul>
+    </li>
+    <li><strong>Admin Decision:</strong> Admin approves or rejects based on fraud assessment</li>
+    <li><strong>Process Decision:</strong> Update return status, calculate refund if approved</li>
+    <li><strong>Notify Customer:</strong> Send final email notification with outcome</li>
+  </ol>
+  <p><strong>State Schema:</strong> Return request details, validation results, fraud score, fraud details, admin decision</p>
+  
+  <div class="note">
+    <strong>Fraud Detection Integration Flow:</strong>
+    <p>
+      validate_return → create_return_record → <strong>run_fraud_detection</strong> → request_approval (HITL) → process_approved/rejected → notify_customer
+    </p>
+    <p>
+      The fraud detection runs <strong>before</strong> admin approval, so admins can see the fraud risk assessment when making their decision.
+    </p>
+  </div>
+
+  <h3>4.2 Fraud Detection Subgraph (Parallel Processing with Send)</h3>
+  <p><strong>Purpose:</strong> Analyze return requests for potential fraud patterns using dynamic parallel processing</p>
+  
+  <div class="note">
+    <strong>✅ IMPLEMENTED - Nested Subgraph Architecture</strong>
+    <p>
+      The Fraud Detection Subgraph is <strong>invoked as a NODE</strong> within the Returns Subgraph, demonstrating a 3-level nested architecture:
+    </p>
+    <ul>
+      <li><strong>Level 1:</strong> Main Graph (Supervisor + Workers)</li>
+      <li><strong>Level 2:</strong> Returns Subgraph (invoked as tool by Order Agent)</li>
+      <li><strong>Level 3:</strong> Fraud Detection Subgraph (invoked as node in Returns workflow)</li>
+    </ul>
+    <p>
+      This creates: <code>Main Graph → Returns Subgraph → Fraud Detection Subgraph → 4 Parallel Checks</code>
+    </p>
+    <p>
+      See <code>ARCHITECTURE.md</code> for detailed diagrams and implementation patterns.
+    </p>
+  </div>
+  
+  <p><strong>Parallel Checks (35%/35%/15%/15% weighted scoring):</strong></p>
+  <ul>
+    <li><strong>Check 1 - Return Frequency (35%):</strong> Count returns in last 30 days
+      <ul>
+        <li>&gt;5 returns = HIGH (80-100 score)</li>
+        <li>3-5 returns = MEDIUM (40-60 score)</li>
+        <li>&lt;3 returns = LOW (0-30 score)</li>
+      </ul>
+    </li>
+    <li><strong>Check 2 - Order Value Patterns (35%):</strong> Analyze return value and history
+      <ul>
+        <li>&gt;$1000 return = HIGH (70-100 score)</li>
+        <li>$500-1000 return = MEDIUM (40-60 score)</li>
+        <li>+20 score if user has multiple high-value returns in history</li>
+      </ul>
+    </li>
+    <li><strong>Check 3 - Return Reason Analysis (15%):</strong> Detect suspicious patterns
+      <ul>
+        <li>Vague reasons ("changed mind", "don't need") = +30 score</li>
+        <li>Short reasons (&lt;10 characters) = +25 score</li>
+        <li>Repeated patterns across user's returns = +20 score</li>
+      </ul>
+    </li>
+    <li><strong>Check 4 - Timing Patterns (15%):</strong> Days between order and return
+      <ul>
+        <li>≤2 days = HIGH (85 score) - very quick return</li>
+        <li>≤7 days = MEDIUM (50 score)</li>
+        <li>≥20 days = MEDIUM (35 score) - deadline gaming</li>
+        <li>8-19 days = LOW (15 score) - normal usage time</li>
+      </ul>
+    </li>
+  </ul>
+  
+  <p><strong>Implementation Pattern:</strong></p>
+  <pre style="background: #f8fafc; padding: 1rem; border-radius: 8px; border-left: 4px solid #3b82f6; overflow-x: auto;">
+# File: src/ecommerce_support/subgraphs/fraud_detection.py
+
+def spawn_fraud_checks(state) -> list[Send]:
+    """Router function for dynamic parallelization"""
+    return [
+        Send("check_frequency", state),
+        Send("check_value", state),
+        Send("check_reason", state),
+        Send("check_timing", state)
+    ]
+
+# Graph setup
+graph.add_conditional_edges(
+    START,
+    spawn_fraud_checks,  # Router function (NOT added as node!)
+    ["check_frequency", "check_value", "check_reason", "check_timing"]
+)
+
+# All 4 checks execute simultaneously!
+# Results aggregated with operator.add reducer
+  </pre>
+  
+  <p><strong>Invocation in Returns Subgraph:</strong></p>
+  <pre style="background: #f8fafc; padding: 1rem; border-radius: 8px; border-left: 4px solid #10b981; overflow-x: auto;">
+# File: src/ecommerce_support/subgraphs/returns_subgraph.py
+
+def run_fraud_detection_node(state: ReturnsState):
+    """Invoke fraud detection as a node in returns workflow"""
+    fraud_graph = create_fraud_detection_subgraph()
+    result = fraud_graph.invoke({
+        "return_id": state["return_id"],
+        "order_id": state["order_id"],
+        "user_email": state["user_email"],
+        "return_reason": state["return_reason"],
+        "return_items": state["return_items"]
+    })
+    return {"fraud_score": result["fraud_score"]}
+
+# Workflow: validate → create_record → fraud_detection → request_approval
+graph.add_edge("create_return_record", "run_fraud_detection")
+graph.add_edge("run_fraud_detection", "request_approval")
+  </pre>
+  
+  <p><strong>Output:</strong></p>
+  <ul>
+    <li><strong>fraud_score:</strong> Weighted average (0-100)</li>
+    <li><strong>risk_level:</strong> LOW (&lt;30), MEDIUM (30-60), HIGH (≥60)</li>
+    <li><strong>fraud_details:</strong> Individual check scores, reasons, and recommendation</li>
+  </ul>
+  
+  <p><strong>Performance:</strong> 4x speedup over sequential checks (~1 second vs ~4 seconds)</p>
+  
+  <p><strong>Test Data:</strong> Database includes two user profiles for fraud detection validation:</p>
+  <ul>
+    <li><strong>Good User:</strong> sivaprasad.valluru@gmail.com - 1 legitimate return in 30 days, expected LOW score</li>
+    <li><strong>Bad User:</strong> fraudster@example.com - 7 suspicious returns in 30 days, expected HIGH score</li>
+  </ul>
+
+  <h2>5. Parallel Processing Demonstrations</h2>
+
+  <div class="note">
+    <strong>Cancellations vs Returns - Different Workflows</strong>
+    <p>
+      <strong>Cancellations:</strong> OrderAgent handles directly with simple validation (order not shipped yet). No HITL needed. Quick operation: validate → update DB → send notification.<br/><br/>
+      <strong>Returns:</strong> Complex workflow requiring Returns Subgraph with HITL. Items already delivered, fraud risk assessment needed, admin approval required.<br/><br/>
+      Don't confuse these - they have very different complexity and approval requirements!
+    </p>
+  </div>
+
+  <div class="concept">
+    <div class="concept-title">Parallelization in LangGraph</div>
+    <p>
+      LangGraph supports two types of parallelization:
+    </p>
+    <ul>
+      <li><strong>Fan-out/Fan-in:</strong> Fixed parallel paths defined at graph build time (e.g., check last order details AND current inventory AND current pricing simultaneously)</li>
+      <li><strong>Dynamic Parallelization with Send:</strong> Create parallel tasks dynamically at runtime based on data (e.g., send multiple fraud checks, one per return item)</li>
+    </ul>
+  </div>
+
+  <h3>5.1 Fan-out/Fan-in Examples in Your Project</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Scenario</th>
+        <th>Fan-out Tasks</th>
+        <th>Fan-in Aggregation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Order Status with Details Query</td>
+        <td>
+          • Check order details from orders table<br/>
+          • Check all order items from order_items table<br/>
+          • Check payment status from payments table
+        </td>
+        <td>Combine all results into comprehensive order status response</td>
+      </tr>
+      <tr>
+        <td>"Can I reorder my last order?" Query</td>
+        <td>
+          • Fetch last order details (OrderAgent)<br/>
+          • Check current inventory for all items (InventoryAgent)<br/>
+          • Calculate current total price (OrderAgent)
+        </td>
+        <td>Tell customer if all items available, which are out of stock, and current pricing</td>
+      </tr>
+      <tr>
+        <td>Return Request Processing</td>
+        <td>
+          • Send confirmation email (call Notification Agent)<br/>
+          &nbsp;&nbsp;<em>Email says: "Return request received. Pending admin review. You'll be notified within 24-48 hours."</em><br/>
+          • Run fraud detection checks (Fraud Detection Subgraph)<br/>
+          • Calculate refund amount (OrderAgent)
+        </td>
+        <td>Aggregate results and create ticket for admin review with fraud score. Customer knows request is submitted but NOT yet approved.</td>
+      </tr>
+      <tr>
+        <td>Order Cancellation</td>
+        <td>
+          • Validate cancellation rules (order status, time window)<br/>
+          • Update order status to CANCELLED<br/>
+          • Call Notification Agent for cancellation email
+        </td>
+        <td>Confirm cancellation to user with updated status and confirmation number</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 Dynamic Parallelization with Send</h3>
+  <p>Use the <code>Send</code> API for dynamic parallel processing scenarios:</p>
+  
+  <div class="note">
+    <strong>✅ IMPLEMENTED - Fraud Detection Parallel Checks</strong>
+    <p>
+      The fraud detection subgraph demonstrates dynamic parallelization using Send API:
+    </p>
+    <ul>
+      <li><strong>4 fraud checks spawn simultaneously:</strong> Frequency, Value, Reason, Timing</li>
+      <li><strong>Router function:</strong> <code>spawn_fraud_checks()</code> returns <code>list[Send]</code></li>
+      <li><strong>Conditional edges:</strong> <code>add_conditional_edges(START, spawn_fraud_checks, [node_list])</code></li>
+      <li><strong>State reducer:</strong> <code>fraud_checks: Annotated[list, operator.add]</code> aggregates results</li>
+      <li><strong>Performance gain:</strong> ~1 second (parallel) vs ~4 seconds (sequential) = 4x speedup</li>
+    </ul>
+    <p>
+      See <code>src/ecommerce_support/subgraphs/fraud_detection.py</code> for complete implementation.
+    </p>
+  </div>
+  
+  <p><strong>Other potential uses for Send API:</strong></p>
+  <ul>
+    <li><strong>Batch notifications:</strong> When admin approves multiple returns, send parallel notification emails</li>
+    <li><strong>Inventory checks:</strong> When user asks about multiple products, check availability in parallel</li>
+    <li><strong>Multi-item validation:</strong> For orders with many items, validate each item in parallel</li>
+  </ul>
+
+  <h2>6. State Management and Reducers</h2>
+
+  <h3>6.1 State Schema Design Requirements</h3>
+  <p>
+    You must design typed state schemas for your main graph and all subgraphs. Understanding how state flows between graphs is critical.
+  </p>
+  
+  <h4>Main Graph State Requirements:</h4>
+  <ul>
+    <li>Extend <code>MessagesState</code> from LangGraph (includes messages list with built-in reducer)</li>
+    <li>User context: <code>user_email</code>, <code>conversation_id</code></li>
+    <li>Routing decisions: field to track which agent supervisor routes to next (use Literal type for valid options)</li>
+    <li>Parallel processing results: list with <code>operator.add</code> reducer to combine results from parallel tasks</li>
+    <li>Workflow metadata: current workflow type, HITL flags</li>
+    <li><strong>Subgraph Input Fields:</strong> Fields needed to invoke subgraphs (order_id, return_items, return_reason, etc.)</li>
+    <li><strong>Subgraph Output Fields:</strong> Fields to receive results from subgraphs (return_id, ticket_id, fraud_score, refund_amount, etc.)</li>
+  </ul>
+  
+  <div class="note">
+    <strong>Important: State Flow Between Main Graph and Subgraphs</strong>
+    <p>
+      When a worker agent invokes a subgraph:
+    </p>
+    <ul>
+      <li><strong>Input:</strong> The agent passes relevant data from main state to the subgraph (e.g., user_email, order_id, return_items)</li>
+      <li><strong>Subgraph Processing:</strong> The subgraph works with its own detailed state schema internally</li>
+      <li><strong>Output:</strong> When the subgraph completes, it returns results that get merged back into the main state (e.g., return_id, fraud_score, ticket_id)</li>
+    </ul>
+    <p>
+      Your main state doesn't need ALL the internal subgraph fields (like validation_result, intermediate steps, etc.) - only the inputs you pass TO subgraphs and the outputs you receive FROM subgraphs.
+    </p>
+  </div>
+  
+  <h4>Returns Subgraph State Requirements:</h4>
+  <ul>
+    <li><strong>Input from main graph:</strong> user_email, order_id, return_reason, return_items</li>
+    <li><strong>Internal processing state:</strong> validation_result, return_id, ticket_id</li>
+    <li><strong>Fraud detection results:</strong> fraud_score (float), fraud_details (dict) - returned from Level 3 subgraph</li>
+    <li><strong>HITL state:</strong> approval_status, admin_decision (approved/rejected), admin_notes</li>
+    <li><strong>Output to main graph:</strong> return_id, ticket_id, fraud_score, final_status, notification_status</li>
+  </ul>
+  
+  <div class="note">
+    <strong>✅ 3-Level State Flow Example</strong>
+    <p><strong>Level 1 (Main Graph) → Level 2 (Returns Subgraph):</strong></p>
+    <pre style="background: #f8fafc; padding: 0.5rem; border-radius: 4px;">
+# Order Agent invokes returns subgraph (tool invocation)
+result = returns_graph.invoke({
+    "order_id": "ORD123",
+    "user_email": "customer@example.com",
+    "return_reason": "Product defective",
+    "return_items": [{"product_id": "SKU001", "quantity": 1}]
+})
+    </pre>
+    
+    <p><strong>Level 2 (Returns Subgraph) → Level 3 (Fraud Detection Subgraph):</strong></p>
+    <pre style="background: #f8fafc; padding: 0.5rem; border-radius: 4px;">
+# Returns subgraph invokes fraud detection (node invocation)
+fraud_result = fraud_graph.invoke({
+    "return_id": state["return_id"],
+    "order_id": state["order_id"],
+    "user_email": state["user_email"],
+    "return_reason": state["return_reason"],
+    "return_items": state["return_items"]
+})
+# Returns: {"fraud_score": 5.75, "fraud_details": {...}}
+    </pre>
+    
+    <p><strong>Level 3 (Fraud Detection) → 4 Parallel Checks:</strong></p>
+    <pre style="background: #f8fafc; padding: 0.5rem; border-radius: 4px;">
+# Fraud detection spawns 4 parallel nodes via Send API
+# Each check adds result to state via operator.add reducer
+# Aggregator combines with weights: 35%, 35%, 15%, 15%
+    </pre>
+  </div>
+  
+  <h4>Fraud Detection Subgraph State Requirements:</h4>
+  <ul>
+    <li><strong>Input from returns subgraph:</strong> return_id, order_id, user_email, return_reason, return_items</li>
+    <li><strong>Parallel check results:</strong> fraud_checks: Annotated[list[FraudCheckResult], operator.add]</li>
+    <li><strong>Output to returns subgraph:</strong> fraud_score (0-100), risk_level (LOW/MEDIUM/HIGH), fraud_details</li>
+  </ul>
+  </ul>
+  
+  <h4>State Design Guidelines:</h4>
+  <ul>
+    <li>Use <code>TypedDict</code> or Pydantic models for all state schemas</li>
+    <li>Use <code>Annotated[list, operator.add]</code> for any fields that need to accumulate results from parallel nodes</li>
+    <li>Use <code>Literal</code> types for fields with fixed valid options (e.g., agent names, statuses)</li>
+    <li>Keep main state focused on coordination - don't duplicate all subgraph internal fields</li>
+    <li>Subgraph states can be more detailed - they don't pollute the main state</li>
+    <li>Document in docstrings what each state field represents and where it's used</li>
+  </ul>
+
+  <h2>7. Human-in-the-Loop (HITL) Implementation</h2>
+
+  <div class="concept">
+    <div class="concept-title">LangGraph Interrupts</div>
+    <p>
+      LangGraph provides built-in support for human-in-the-loop workflows through <strong>interrupts</strong>.
+      When a graph encounters an interrupt, it pauses execution and persists its state to the checkpointer.
+      Later, when a human provides input, the graph resumes from exactly where it paused.
+    </p>
+  </div>
+
+  <h3>7.1 Return Request Approval Flow</h3>
+  <ol>
+    <li>Customer requests return via chatbot</li>
+    <li>Returns subgraph validates request and runs parallel processing (fraud checks, email, refund calculation)</li>
+    <li><strong>Graph pauses execution</strong> using an interrupt to wait for admin approval</li>
+    <li>Admin sees ticket in dashboard with:
+      <ul>
+        <li>Customer details and conversation ID</li>
+        <li>Return items and reason</li>
+        <li>Fraud risk score</li>
+        <li>Estimated refund amount</li>
+      </ul>
+    </li>
+    <li>Admin makes decision: Approve / Reject / Request More Info</li>
+    <li><strong>Graph resumes</strong> with admin decision (using <code>Command(resume=...)</code>)</li>
+    <li>Final processing: update database, send notification, close ticket</li>
+  </ol>
+  
+  <div class="note">
+    <strong>Implementation Note</strong>
+    <p>
+      Use LangGraph's <code>interrupt()</code> function within your returns subgraph nodes to pause execution.
+      The interrupt can return approval details to the caller (for display in admin UI), and when resumed,
+      the admin's decision becomes the return value of <code>interrupt()</code>. Study the interrupts tutorial
+      notebook for implementation patterns.
+    </p>
+  </div>
+
+  <h2>8. Roles and User Journeys</h2>
+
+  <h3>8.1 Customer Journey with Multi-Agent System</h3>
+  <ol>
+    <li><strong>Login:</strong> Customer authenticates with email and password</li>
+    <li><strong>Start Conversation:</strong> New UUID conversation_id generated</li>
+    <li><strong>Complex Query Example:</strong> "Can I reorder my last order?"
+      <ul>
+        <li>Supervisor routes to OrderAgent</li>
+        <li>OrderAgent triggers parallel fan-out:
+          <ul>
+            <li>Fetch last order details (SQL query)</li>
+            <li>Check current inventory for those items (coordinates with InventoryAgent)</li>
+            <li>Calculate new total with current prices (SQL query)</li>
+          </ul>
+        </li>
+        <li>Results aggregated: availability status, current pricing, items out of stock</li>
+      </ul>
+    </li>
+    <li><strong>Order Cancellation Example:</strong> "I want to cancel order #123"
+      <ul>
+        <li>Supervisor routes to OrderAgent</li>
+        <li>OrderAgent validates: order exists, status is PLACED or PROCESSING (not yet SHIPPED)</li>
+        <li>If valid: updates status to CANCELLED, calls notification agent to send cancellation email</li>
+        <li>Customer receives: "Order #123 cancelled successfully. Confirmation email sent."</li>
+        <li><strong>Note:</strong> No HITL needed - cancellations are immediate if business rules pass</li>
+      </ul>
+    </li>
+    <li><strong>Return Request Example:</strong> "I want to return item X from order #123"
+      <ul>
+        <li>Supervisor recognizes return intent, routes to OrderAgent</li>
+        <li>OrderAgent validates order eligibility</li>
+        <li>OrderAgent invokes Returns Subgraph</li>
+        <li>Returns subgraph processes in parallel: fraud check (calling fraud subgraph), email (calling notification agent), refund calculation</li>
+        <li>Graph pauses at HITL interrupt</li>
+        <li>Customer sees: "Your return request has been submitted. A support agent will review it shortly."</li>
+      </ul>
+    </li>
+    <li><strong>Policy Question:</strong> "How long does a refund take?"
+      <ul>
+        <li>Supervisor routes to PolicyAgent</li>
+        <li>PolicyAgent queries RAG system with ChromaDB</li>
+        <li>Returns policy information</li>
+      </ul>
+    </li>
+  </ol>
+
+  <h3>8.2 Admin Journey with Graph Resume</h3>
+  <ol>
+    <li><strong>Login:</strong> Admin authenticates</li>
+    <li><strong>View Dashboard:</strong> See all pending return tickets with:
+      <ul>
+        <li>Customer email</li>
+        <li>Conversation ID (for resuming graph)</li>
+        <li>Order and return details</li>
+        <li>Fraud risk score</li>
+        <li>Estimated refund</li>
+      </ul>
+    </li>
+    <li><strong>Review Ticket:</strong> Click on a ticket to see full details</li>
+    <li><strong>Make Decision:</strong> Approve / Reject / Request More Info</li>
+    <li><strong>Graph Resumes:</strong> System uses conversation_id to:
+      <ul>
+        <li>Load paused graph state from checkpointer</li>
+        <li>Inject admin decision</li>
+        <li>Resume returns subgraph execution</li>
+        <li>Update database and send notification</li>
+      </ul>
+    </li>
+    <li><strong>Optional:</strong> Resume customer conversation to explain decision</li>
+  </ol>
+
+  <h2>9. Functional Requirements</h2>
+
+  <h3>9.1 Multi-Agent Orchestration</h3>
+  <ul>
+    <li>Implement supervisor agent using LLM with structured output</li>
+    <li>Create 3 specialized worker agents that supervisor routes to: OrderAgent, InventoryAgent, PolicyAgent</li>
+    <li>Implement dynamic routing based on conversation context</li>
+    <li>Worker agents (especially OrderAgent) must be able to invoke subgraphs when needed</li>
+    <li>Enable parallel execution for independent tasks</li>
+    <li>Demonstrate fan-out/fan-in patterns with at least 3 scenarios</li>
+  </ul>
+
+  <h3>9.2 Subgraph Implementation</h3>
+  <ul>
+    <li>Create returns processing subgraph with minimum 5 nodes</li>
+    <li>Implement fraud detection subgraph with dynamic parallel checks using Send</li>
+    <li>Both subgraphs must be reusable and independently testable</li>
+    <li>Create a reusable notification agent (not a subgraph) with Gmail tools that other agents can invoke</li>
+  </ul>
+
+  <h3>9.3 Parallel Processing</h3>
+  <ul>
+    <li>Demonstrate static parallelization (fan-out/fan-in) in at least 3 workflows</li>
+    <li>Implement dynamic parallelization using Send API for fraud detection</li>
+    <li>Use proper reducers (operator.add) for combining parallel results</li>
+    <li>Show performance benefits of parallelization in README</li>
+  </ul>
+
+  <h3>9.4 Human-in-the-Loop</h3>
+  <ul>
+    <li>Implement interrupts in returns workflow</li>
+    <li>Enable graph resume from checkpointer after admin decision</li>
+    <li>Admin dashboard must show all paused workflows</li>
+    <li>Support approve/reject/request-more-info actions</li>
+  </ul>
+
+  <h3>9.5 State Management</h3>
+  <ul>
+    <li>Design typed state schemas for main graph and all subgraphs</li>
+    <li>Use Annotated types with reducers for parallel updates</li>
+    <li>Implement proper state passing between main graph and subgraphs</li>
+    <li>Use LangGraph's built-in checkpointer (SqliteSaver recommended)</li>
+  </ul>
+
+  <h3>9.6 Streamlit UI Enhancements</h3>
+  <ul>
+    <li><strong>Customer Chat:</strong>
+      <ul>
+        <li>Display conversation history</li>
+        <li>Show which agent is currently processing</li>
+        <li>Show parallel processing indicators</li>
+      </ul>
+    </li>
+    <li><strong>Admin Dashboard:</strong>
+      <ul>
+        <li>List all pending tickets with fraud scores</li>
+        <li>Show paused workflow details</li>
+        <li>Enable graph resume with decision input</li>
+        <li>Filter by status, fraud risk level, customer</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h2>10. Data and Persistence</h2>
+
+  <h3>10.1 SQLite Business Database Schema</h3>
+  <p>Design a relational database with the following tables. Column details are provided to help you understand the requirements.</p>
+
+  <h4>Table 1: users</h4>
+  <p><strong>Purpose:</strong> Store customer and admin accounts</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Column</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>user_id</td>
+        <td>INTEGER PRIMARY KEY</td>
+        <td>Auto-increment unique ID</td>
+      </tr>
+      <tr>
+        <td>email</td>
+        <td>TEXT UNIQUE NOT NULL</td>
+        <td>User's email (used for login and as identifier throughout the system)</td>
+      </tr>
+      <tr>
+        <td>password</td>
+        <td>TEXT NOT NULL</td>
+        <td>Password (plain-text is acceptable for this project)</td>
+      </tr>
+      <tr>
+        <td>full_name</td>
+        <td>TEXT NOT NULL</td>
+        <td>User's full name</td>
+      </tr>
+      <tr>
+        <td>role</td>
+        <td>TEXT NOT NULL</td>
+        <td>'customer' or 'admin'</td>
+      </tr>
+      <tr>
+        <td>created_at</td>
+        <td>TIMESTAMP</td>
+        <td>Account creation timestamp</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>Table 2: products</h4>
+  <p><strong>Purpose:</strong> Product catalog for e-commerce</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Column</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>product_id</td>
+        <td>TEXT PRIMARY KEY</td>
+        <td>Product SKU (e.g., 'SKU001')</td>
+      </tr>
+      <tr>
+        <td>name</td>
+        <td>TEXT NOT NULL</td>
+        <td>Product name</td>
+      </tr>
+      <tr>
+        <td>description</td>
+        <td>TEXT</td>
+        <td>Product description</td>
+      </tr>
+      <tr>
+        <td>category</td>
+        <td>TEXT</td>
+        <td>Product category (e.g., 'Electronics', 'Clothing')</td>
+      </tr>
+      <tr>
+        <td>price</td>
+        <td>REAL NOT NULL</td>
+        <td>Current unit price</td>
+      </tr>
+      <tr>
+        <td>stock_quantity</td>
+        <td>INTEGER NOT NULL</td>
+        <td>Available stock (for InventoryAgent queries)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>Table 3: orders</h4>
+  <p><strong>Purpose:</strong> Customer orders</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Column</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>order_id</td>
+        <td>TEXT PRIMARY KEY</td>
+        <td>Order number (e.g., 'ORD001')</td>
+      </tr>
+      <tr>
+        <td>user_email</td>
+        <td>TEXT NOT NULL</td>
+        <td>Foreign key to users.email - customer who placed the order</td>
+      </tr>
+      <tr>
+        <td>order_date</td>
+        <td>TIMESTAMP NOT NULL</td>
+        <td>When order was placed</td>
+      </tr>
+      <tr>
+        <td>status</td>
+        <td>TEXT NOT NULL</td>
+        <td>'PLACED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'</td>
+      </tr>
+      <tr>
+        <td>total_amount</td>
+        <td>REAL NOT NULL</td>
+        <td>Total order value (sum of all items)</td>
+      </tr>
+      <tr>
+        <td>shipping_address</td>
+        <td>TEXT</td>
+        <td>Delivery address</td>
+      </tr>
+      <tr>
+        <td>cancelled_at</td>
+        <td>TIMESTAMP</td>
+        <td>When order was cancelled (NULL if not cancelled)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>Table 4: order_items</h4>
+  <p><strong>Purpose:</strong> Line items for each order</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Column</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>order_item_id</td>
+        <td>INTEGER PRIMARY KEY</td>
+        <td>Auto-increment unique ID</td>
+      </tr>
+      <tr>
+        <td>order_id</td>
+        <td>TEXT NOT NULL</td>
+        <td>Foreign key to orders.order_id</td>
+      </tr>
+      <tr>
+        <td>product_id</td>
+        <td>TEXT NOT NULL</td>
+        <td>Foreign key to products.product_id</td>
+      </tr>
+      <tr>
+        <td>quantity</td>
+        <td>INTEGER NOT NULL</td>
+        <td>Number of units ordered</td>
+      </tr>
+      <tr>
+        <td>unit_price</td>
+        <td>REAL NOT NULL</td>
+        <td>Price per unit at time of order (may differ from current price)</td>
+      </tr>
+      <tr>
+        <td>subtotal</td>
+        <td>REAL NOT NULL</td>
+        <td>quantity × unit_price</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>Table 5: payments</h4>
+  <p><strong>Purpose:</strong> Payment records for orders</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Column</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>payment_id</td>
+        <td>TEXT PRIMARY KEY</td>
+        <td>Payment transaction ID</td>
+      </tr>
+      <tr>
+        <td>order_id</td>
+        <td>TEXT NOT NULL</td>
+        <td>Foreign key to orders.order_id</td>
+      </tr>
+      <tr>
+        <td>payment_method</td>
+        <td>TEXT NOT NULL</td>
+        <td>'Credit Card', 'Debit Card', 'PayPal', etc.</td>
+      </tr>
+      <tr>
+        <td>amount</td>
+        <td>REAL NOT NULL</td>
+        <td>Payment amount</td>
+      </tr>
+      <tr>
+        <td>payment_date</td>
+        <td>TIMESTAMP NOT NULL</td>
+        <td>When payment was processed</td>
+      </tr>
+      <tr>
+        <td>status</td>
+        <td>TEXT NOT NULL</td>
+        <td>'SUCCESS', 'FAILED', 'REFUNDED'</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>Table 6: returns</h4>
+  <p><strong>Purpose:</strong> Return requests (one row per item being returned)</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Column</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>return_id</td>
+        <td>TEXT PRIMARY KEY</td>
+        <td>Return request ID (e.g., 'RET001')</td>
+      </tr>
+      <tr>
+        <td>order_id</td>
+        <td>TEXT NOT NULL</td>
+        <td>Foreign key to orders.order_id</td>
+      </tr>
+      <tr>
+        <td>order_item_id</td>
+        <td>INTEGER NOT NULL</td>
+        <td>Foreign key to order_items.order_item_id - specific item being returned</td>
+      </tr>
+      <tr>
+        <td>user_email</td>
+        <td>TEXT NOT NULL</td>
+        <td>Customer requesting the return</td>
+      </tr>
+      <tr>
+        <td>return_reason</td>
+        <td>TEXT NOT NULL</td>
+        <td>Reason for return (e.g., 'Defective', 'Wrong size', 'Changed mind')</td>
+      </tr>
+      <tr>
+        <td>quantity</td>
+        <td>INTEGER NOT NULL</td>
+        <td>Number of units being returned</td>
+      </tr>
+      <tr>
+        <td>refund_amount</td>
+        <td>REAL</td>
+        <td>Calculated refund amount (populated by returns subgraph)</td>
+      </tr>
+      <tr>
+        <td>fraud_score</td>
+        <td>REAL</td>
+        <td>Fraud risk score 0-100 (populated by fraud detection subgraph)</td>
+      </tr>
+      <tr>
+        <td>status</td>
+        <td>TEXT NOT NULL</td>
+        <td>'PENDING', 'APPROVED', 'REJECTED' (updated after HITL)</td>
+      </tr>
+      <tr>
+        <td>created_at</td>
+        <td>TIMESTAMP NOT NULL</td>
+        <td>When return request was created</td>
+      </tr>
+      <tr>
+        <td>updated_at</td>
+        <td>TIMESTAMP</td>
+        <td>When status was last updated</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>Table 7: tickets</h4>
+  <p><strong>Purpose:</strong> Support tickets for return requests requiring HITL approval</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Column</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>ticket_id</td>
+        <td>TEXT PRIMARY KEY</td>
+        <td>Ticket ID (e.g., 'TKT001')</td>
+      </tr>
+      <tr>
+        <td>return_id</td>
+        <td>TEXT NOT NULL</td>
+        <td>Foreign key to returns.return_id</td>
+      </tr>
+      <tr>
+        <td>user_email</td>
+        <td>TEXT NOT NULL</td>
+        <td>Customer who initiated the return</td>
+      </tr>
+      <tr>
+        <td>conversation_id</td>
+        <td>TEXT NOT NULL</td>
+        <td><strong>CRITICAL:</strong> UUID from customer conversation - used to resume paused graph from checkpointer</td>
+      </tr>
+      <tr>
+        <td>subject</td>
+        <td>TEXT NOT NULL</td>
+        <td>Ticket subject (e.g., "Return Request for Order #ORD123")</td>
+      </tr>
+      <tr>
+        <td>description</td>
+        <td>TEXT</td>
+        <td>Additional details about the return request</td>
+      </tr>
+      <tr>
+        <td>fraud_score</td>
+        <td>REAL</td>
+        <td>Copy of fraud score from returns table (for quick dashboard display)</td>
+      </tr>
+      <tr>
+        <td>status</td>
+        <td>TEXT NOT NULL</td>
+        <td>'OPEN', 'RESOLVED', 'CLOSED'</td>
+      </tr>
+      <tr>
+        <td>workflow_status</td>
+        <td>TEXT NOT NULL</td>
+        <td>'PAUSED' (waiting for admin), 'RESUMED' (admin decided), 'COMPLETED'</td>
+      </tr>
+      <tr>
+        <td>admin_decision</td>
+        <td>TEXT</td>
+        <td>'APPROVED', 'REJECTED', 'REQUEST_MORE_INFO' (set by admin)</td>
+      </tr>
+      <tr>
+        <td>admin_notes</td>
+        <td>TEXT</td>
+        <td>Admin's comments or reasoning for decision</td>
+      </tr>
+      <tr>
+        <td>created_at</td>
+        <td>TIMESTAMP NOT NULL</td>
+        <td>When ticket was created</td>
+      </tr>
+      <tr>
+        <td>updated_at</td>
+        <td>TIMESTAMP</td>
+        <td>When ticket was last updated</td>
+      </tr>
+      <tr>
+        <td>resolved_at</td>
+        <td>TIMESTAMP</td>
+        <td>When admin made a decision</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>Table 8: email_logs</h4>
+  <p><strong>Purpose:</strong> Track all emails sent by the notification agent</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Column</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>email_log_id</td>
+        <td>INTEGER PRIMARY KEY</td>
+        <td>Auto-increment unique ID</td>
+      </tr>
+      <tr>
+        <td>recipient_email</td>
+        <td>TEXT NOT NULL</td>
+        <td>Who received the email (user_email)</td>
+      </tr>
+      <tr>
+        <td>email_type</td>
+        <td>TEXT NOT NULL</td>
+        <td>'ORDER_CONFIRMATION', 'CANCELLATION', 'RETURN_REQUEST', 'RETURN_APPROVED', 'RETURN_REJECTED'</td>
+      </tr>
+      <tr>
+        <td>subject</td>
+        <td>TEXT NOT NULL</td>
+        <td>Email subject line</td>
+      </tr>
+      <tr>
+        <td>body_preview</td>
+        <td>TEXT</td>
+        <td>First 200 characters of email body (for logging purposes)</td>
+      </tr>
+      <tr>
+        <td>related_order_id</td>
+        <td>TEXT</td>
+        <td>Order ID if email is order-related</td>
+      </tr>
+      <tr>
+        <td>related_return_id</td>
+        <td>TEXT</td>
+        <td>Return ID if email is return-related</td>
+      </tr>
+      <tr>
+        <td>sent_at</td>
+        <td>TIMESTAMP NOT NULL</td>
+        <td>When email was sent</td>
+      </tr>
+      <tr>
+        <td>status</td>
+        <td>TEXT NOT NULL</td>
+        <td>'SENT', 'FAILED' (track email delivery status)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>Key Design Decisions</strong>
+    <ul>
+      <li><strong>user_email as foreign key:</strong> We use email (not user_id) as the identifier throughout the system for simplicity and consistency with LangGraph thread IDs</li>
+      <li><strong>tickets.conversation_id:</strong> This is the UUID that links the ticket to the paused LangGraph state in the checkpointer - essential for HITL resume</li>
+      <li><strong>returns vs tickets:</strong> Returns table stores the actual return data; tickets table stores HITL workflow metadata</li>
+      <li><strong>fraud_score in both:</strong> Stored in returns (source of truth) and copied to tickets (for admin dashboard performance)</li>
+      <li><strong>workflow_status:</strong> Tracks whether the LangGraph workflow is paused, resumed, or completed</li>
+    </ul>
+  </div>
+  
+  <div class="exercise">
+    <div class="exercise-title">✅ Test Data for Fraud Detection Validation</div>
+    <p>
+      The database initialization script (<code>src/ecommerce_support/utils/db_init.py</code>) creates comprehensive test data including:
+    </p>
+    
+    <h4>Standard Test Data:</h4>
+    <ul>
+      <li>5 users (4 customers + 1 admin)</li>
+      <li>25 products across 6 categories (Electronics, Accessories, Home & Office, Audio, Gaming, Storage)</li>
+      <li>29 orders with various statuses (PLACED, PROCESSING, SHIPPED, DELIVERED, CANCELLED)</li>
+      <li>Multiple order scenarios for testing cancellations and returns</li>
+    </ul>
+    
+    <h4>Fraud Detection Test Profiles:</h4>
+    <p><strong>Good User Profile (sivaprasad.valluru@gmail.com):</strong></p>
+    <ul>
+      <li>1 legitimate return in last 30 days</li>
+      <li>Detailed reason: "Product arrived damaged, keys not working properly"</li>
+      <li>Normal timing: 15 days between order and return</li>
+      <li>Test order available: ORD_GOOD003 ($49.99, 15 days old)</li>
+      <li><strong>Expected fraud score: LOW (&lt; 30)</strong></li>
+    </ul>
+    
+    <p><strong>Bad User Profile (fraudster@example.com):</strong></p>
+    <ul>
+      <li>7 returns in last 30 days (high frequency)</li>
+      <li>Suspicious reasons: "changed mind", "don't need", "mistake", "no reason"</li>
+      <li>High-value returns including laptop ($1299.99)</li>
+      <li>Quick return pattern: Returns made 2 days after orders</li>
+      <li>Test order available: ORD_BAD_QUICK ($129.99, 1 day old)</li>
+      <li><strong>Expected fraud score: HIGH (&gt; 60)</strong></li>
+    </ul>
+    
+    <p><strong>Testing Fraud Detection:</strong></p>
+    <pre style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; font-size: 0.9em;">
+# Initialize database with all test data
+uv run python src/ecommerce_support/utils/db_init.py
+
+# Test fraud detection standalone
+uv run python src/ecommerce_support/subgraphs/fraud_detection.py
+
+# Expected results:
+# - Good user (ORD_GOOD003): Score ~5-10 (LOW)
+# - Bad user (ORD_BAD_QUICK): Score ~40-50 (MEDIUM to HIGH)
+    </pre>
+  </div>
+
+  <h3>10.2 LangGraph State Persistence</h3>
+  <ul>
+    <li>Use <code>SqliteSaver</code> as the LangGraph checkpointer</li>
+    <li>Store in separate file: <code>langgraph_checkpoints.db</code></li>
+    <li>Thread ID format: <code>f"{user_email}_{conversation_id}"</code></li>
+    <li>Enables full conversation replay and graph resume</li>
+  </ul>
+
+  <h3>10.3 ChromaDB for RAG (Same as LangChain Project)</h3>
+  <ul>
+    <li>Same policy documents: returns_policy.txt, shipping_policy.txt, faq_returns_and_cancellations.txt</li>
+    <li>PolicyAgent uses retriever tool</li>
+  </ul>
+
+  <h2>11. Suggested Project Structure</h2>
+
+  <pre><code>langgraph-ecommerce-support/
+├── pyproject.toml                  # uv dependencies
+├── .env                            # Environment variables
+├── README.md                       # Architecture docs, demo scenarios
+│
+├── src/
+│   ├── config.py                   # Configuration and env loading
+│   ├── auth.py                     # Authentication helpers
+│   │
+│   ├── agents/
+│   │   ├── __init__.py
+│   │   ├── supervisor.py           # Supervisor agent with routing logic
+│   │   ├── order_agent.py          # Order management agent (invokes subgraphs)
+│   │   ├── inventory_agent.py      # Inventory queries agent
+│   │   └── policy_agent.py         # RAG-based policy agent
+│   │
+│   ├── subgraphs/
+│   │   ├── __init__.py
+│   │   ├── returns_workflow.py     # Returns processing with HITL
+│   │   └── fraud_detection.py      # Fraud checks with Send API
+│   │
+│   ├── tools/
+│   │   ├── __init__.py
+│   │   ├── sql_tools.py            # SQL toolkit configuration
+│   │   ├── rag_tools.py            # ChromaDB retriever tools
+│   │   ├── gmail_tools.py          # Gmail integration
+│   │   └── notification_agent.py   # Reusable notification agent with Gmail tools
+│   │
+│   ├── state/
+│   │   ├── __init__.py
+│   │   ├── main_state.py           # Main graph state schema
+│   │   └── subgraph_states.py      # All subgraph state schemas
+│   │
+│   ├── graph/
+│   │   ├── __init__.py
+│   │   ├── main_graph.py           # Main LangGraph workflow
+│   │   └── builder.py              # Graph construction helpers
+│   │
+│   ├── ui/
+│   │   ├── app_customer.py         # Streamlit customer chat
+│   │   └── app_admin.py            # Streamlit admin dashboard
+│   │
+│   └── utils/
+│       ├── __init__.py
+│       ├── db_init.py              # Database initialization
+│       └── logging_config.py       # Logging setup
+│
+├── data/
+│   ├── ecommerce.db                # Business database
+│   ├── langgraph_checkpoints.db    # LangGraph state
+│   └── chroma/                     # ChromaDB storage
+│
+├── policies/
+│   ├── returns_policy.txt
+│   ├── shipping_policy.txt
+│   └── faq_returns_and_cancellations.txt
+│
+└── logs/
+    └── app.log
+</code></pre>
+
+  <h2>12. Implementation Phases</h2>
+
+  <div class="exercise">
+    <div class="exercise-title">Recommended Implementation Sequence</div>
+    <ol>
+      <li><strong>Phase 1 - Foundation (Days 1-2):</strong>
+        <ul>
+          <li>Set up project structure and dependencies</li>
+          <li>Initialize databases (SQLite, ChromaDB)</li>
+          <li>Create state schemas</li>
+          <li>Implement authentication</li>
+        </ul>
+      </li>
+      <li><strong>Phase 2 - Basic Agents (Days 3-4):</strong>
+        <ul>
+          <li>Create all 4 worker agents with tools</li>
+          <li>Implement supervisor agent</li>
+          <li>Build basic main graph with routing</li>
+          <li>Test simple conversations</li>
+        </ul>
+      </li>
+      <li><strong>Phase 3 - Parallel Processing (Days 5-6):</strong>
+        <ul>
+          <li>Implement fan-out/fan-in patterns</li>
+          <li>Add reducers to state schema</li>
+          <li>Test parallel order status queries</li>
+          <li>Create fraud detection with Send API</li>
+        </ul>
+      </li>
+      <li><strong>Phase 4 - Subgraphs (Days 7-9):</strong>
+        <ul>
+          <li>Implement returns workflow subgraph</li>
+          <li>Add HITL interrupt points</li>
+          <li>Create notification workflow</li>
+          <li>Integrate subgraphs into main graph</li>
+        </ul>
+      </li>
+      <li><strong>Phase 5 - UI (Days 10-11):</strong>
+        <ul>
+          <li>Build customer chat interface</li>
+          <li>Create admin dashboard</li>
+          <li>Add graph visualization</li>
+          <li>Implement graph resume functionality</li>
+        </ul>
+      </li>
+      <li><strong>Phase 6 - Testing & Documentation (Days 12-14):</strong>
+        <ul>
+          <li>End-to-end testing of all workflows</li>
+          <li>Performance testing (measure parallel speedup)</li>
+          <li>Write comprehensive README</li>
+          <li>Create demo scenarios</li>
+        </ul>
+      </li>
+    </ol>
+  </div>
+
+  <h2>13. Demonstration Scenarios</h2>
+
+  <p>Your README should include detailed walkthroughs of these scenarios:</p>
+
+  <h3>13.1 Simple Query (Single Agent)</h3>
+  <pre>Customer: "Show me my last 3 orders"
+→ Supervisor routes to OrderAgent
+→ OrderAgent queries SQL
+→ Returns order list
+(Demonstrates: Basic routing, single agent)</pre>
+
+  <h3>13.2 Complex Query with Multiple Agents (Parallel Processing)</h3>
+  <pre>Customer: "Can I reorder everything from my last order?"
+→ Supervisor routes to OrderAgent
+→ OrderAgent triggers parallel fan-out:
+   • Fetch last order details (SQL query)
+   • Check current inventory availability for each item (InventoryAgent)
+   • Calculate current total price based on latest pricing (SQL query)
+→ Results aggregated
+→ Response: "Your last order had 3 items. 2 are in stock (Laptop, Mouse). 
+   Keyboard is out of stock. Current total would be $1,099.98 (up from $1,029.98)"
+(Demonstrates: Fan-out/fan-in, multiple agents coordinating, parallel execution, real-world use case)</pre>
+
+  <h3>13.3 Return Request (Subgraph + HITL)</h3>
+  <pre>Customer: "I want to return items from order #123"
+→ Supervisor routes to OrderAgent
+→ OrderAgent validates eligibility and invokes ReturnsSubgraph
+→ Returns subgraph:
+   • Validates return eligibility
+   • Creates return and ticket in DB
+   • Parallel processing:
+     - Send confirmation email (NotificationAgent)
+     - Run fraud detection (Send API spawns 4 parallel checks)
+     - Calculate refund (OrderAgent)
+   • Graph PAUSES at HITL interrupt
+→ Customer sees: "Return request submitted. Awaiting review."
+→ Admin reviews in dashboard (sees fraud score, refund amount)
+→ Admin approves
+→ Graph RESUMES from checkpoint
+→ Final processing: update status, send final email
+→ Customer gets notification
+(Demonstrates: Subgraphs, Send API, parallel processing, HITL, graph resume)</pre>
+
+  <h3>13.4 Policy Question (RAG)</h3>
+  <pre>Customer: "What's your return policy?"
+→ Supervisor routes to PolicyAgent
+→ PolicyAgent queries ChromaDB
+→ Returns policy information
+(Demonstrates: RAG, agent specialization)</pre>
+
+  <div class="note">
+    <strong>Final Note</strong>
+    <p class="small">
+      This project is significantly more complex than the LangChain 1.x project. Expect to spend 2-3 weeks
+      implementing it properly. The goal is not just to make it work, but to deeply understand LangGraph's
+      architecture patterns: supervisor-worker, parallelization, subgraphs, and HITL. These patterns are
+      essential for building production-ready agentic systems. Take your time, test thoroughly, and document
+      your learnings.
+    </p>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">For Students</div>
+    <p>
+      Before you start coding:
+    </p>
+    <ol>
+      <li>Read this entire specification carefully (multiple times if needed)</li>
+      <li>Review all LangGraph tutorial notebooks (especially 03, 04, 07, 09)</li>
+      <li><strong>Study ARCHITECTURE.md:</strong> Comprehensive guide to the 3-level nested subgraph architecture with detailed diagrams, invocation patterns, state management, and Send API implementation</li>
+      <li>Sketch the complete architecture on paper: main graph, subgraphs, agents, data flow</li>
+      <li>Identify which concepts from the tutorials apply to which parts of this project</li>
+      <li>Plan your implementation phases</li>
+      <li>Set up your development environment</li>
+      <li>Then start with Phase 1</li>
+    </ol>
+    <p>
+      <strong>Remember:</strong> This project demonstrates that you've mastered not just LangGraph syntax,
+      but the architectural patterns that make multi-agent systems scalable and maintainable.
+    </p>
+  </div>
+  
+  <div class="note">
+    <strong>📚 Additional Resources</strong>
+    <ul>
+      <li><strong>ARCHITECTURE.md</strong> - Deep dive into nested subgraph architecture with visual diagrams</li>
+      <li><strong>README.md</strong> - Complete setup guide, usage examples, and troubleshooting</li>
+      <li><strong>Test Scripts:</strong>
+        <ul>
+          <li><code>test_returns_hitl.py</code> - Test returns workflow with HITL approval</li>
+          <li><code>src/ecommerce_support/subgraphs/fraud_detection.py</code> - Standalone fraud detection test</li>
+        </ul>
+      </li>
+      <li><strong>Reference Implementation:</strong> All code is provided in <code>langgraph-ecommerce-support/</code> folder</li>
+    </ul>
+  </div>
+
+</main>
+</body>
+</html>

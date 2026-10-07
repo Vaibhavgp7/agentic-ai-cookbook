@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>03 · Core Concepts – OpenSpec ShopLite</title>
+  <style>
+:root {
+  --ink: #0f172a;
+  --muted: #475569;
+  --accent: #1d4ed8;
+  --line: rgba(37, 99, 235, 0.18);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.65;
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+  color: #111827;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(15, 23, 42, 0.94);
+  color: #e5e7eb;
+  backdrop-filter: blur(8px);
+}
+
+.topbar-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0.7rem 1.25rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.topbar a {
+  color: #bfdbfe;
+  text-decoration: none;
+  font-size: 0.88rem;
+}
+
+.topbar a:hover { color: #fff; text-decoration: underline; }
+
+.brand {
+  font-weight: 700;
+  color: #fff !important;
+  letter-spacing: -0.02em;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+main {
+  max-width: 960px;
+  margin: 1.5rem auto 3rem;
+  padding: 2.25rem 2rem 3rem;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(148, 163, 184, 0.12);
+}
+
+h1 {
+  font-size: 2.05rem;
+  margin: 0 0 1.1rem;
+  letter-spacing: -0.03em;
+  text-align: center;
+  color: #0f172a;
+  padding: 1rem 1.4rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+  box-shadow:
+    0 10px 25px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(148, 163, 184, 0.35);
+}
+
+h2 {
+  font-size: 1.55rem;
+  margin-top: 2.15rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 0.35rem;
+  color: #0f172a;
+}
+
+h3 {
+  font-size: 1.2rem;
+  margin-top: 1.6rem;
+  color: #0f172a;
+}
+
+p { margin: 0.5rem 0 0.75rem; }
+
+code {
+  font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+  background-color: #f3f4ff;
+  padding: 0.12rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.95em;
+  color: #1d4ed8;
+}
+
+pre {
+  background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+  color: #e5e7eb;
+  padding: 2.25rem 4.75rem 1rem 1.1rem;
+  border-radius: 10px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+  margin: 0.75rem 0 1.5rem;
+  border: 1px solid rgba(15, 23, 42, 0.6);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.note, .exercise, .warn, .concept, .checkpoint, .behind, .think {
+  padding: 0.9rem 1.1rem;
+  margin: 1rem 0 1.5rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+}
+
+.note {
+  border-left: 4px solid #2563eb;
+  background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+  border-color: rgba(37, 99, 235, 0.4);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(191, 219, 254, 0.9);
+}
+
+.exercise {
+  border-left: 4px solid #16a34a;
+  background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+  border-color: rgba(22, 163, 74, 0.4);
+}
+
+.warn {
+  border-left: 4px solid #d97706;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: rgba(217, 119, 6, 0.4);
+}
+
+.concept {
+  border-left: 4px solid #7c3aed;
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+  border-color: rgba(124, 58, 237, 0.35);
+}
+
+.checkpoint {
+  border-left: 4px solid #0f766e;
+  background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+  border-color: rgba(15, 118, 110, 0.35);
+}
+
+.behind {
+  border-left: 4px solid #0e7490;
+  background: linear-gradient(135deg, #ecfeff, #cffafe);
+  border-color: rgba(14, 116, 144, 0.35);
+}
+
+.think {
+  border-left: 4px solid #c2410c;
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border-color: rgba(194, 65, 12, 0.35);
+}
+
+.exercise-title, .warn-title, .concept-title, .checkpoint-title, .behind-title, .think-title {
+  font-weight: 650;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+}
+
+.exercise-title { color: #166534; }
+.warn-title { color: #92400e; }
+.concept-title { color: #5b21b6; }
+.checkpoint-title { color: #115e59; }
+.behind-title { color: #155e75; }
+.think-title { color: #9a3412; }
+
+.thought-check {
+  margin: -0.65rem 0 1.5rem;
+  padding: 0.75rem 1.1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 118, 110, 0.35);
+  border-left: 4px solid #0f766e;
+  background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+  font-size: 0.95rem;
+}
+
+.thought-check summary {
+  cursor: pointer;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+  color: #115e59;
+  user-select: none;
+}
+
+.thought-check summary:hover { text-decoration: underline; }
+
+.thought-check[open] summary { margin-bottom: 0.45rem; }
+
+.thought-check p:last-child { margin-bottom: 0; }
+
+ol, ul { padding-left: 1.4rem; }
+li { margin: 0.25rem 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.95rem;
+}
+
+th, td {
+  border: 1px solid #e2e8f0;
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #eff6ff;
+  color: #0f172a;
+}
+
+tr:nth-child(even) td { background: #f8fafc; }
+
+.meta {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0 0 1.25rem;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.kicker {
+  text-align: center;
+  color: var(--muted);
+  margin-top: -0.35rem;
+  margin-bottom: 1.1rem;
+}
+
+.toc a { color: #1d4ed8; }
+
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.lesson-nav a {
+  color: #1d4ed8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.lesson-nav a:hover { text-decoration: underline; }
+
+.sample-output-title {
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+  color: #0f172a;
+}
+
+.code-wrapper { position: relative; }
+
+.copy-btn {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.5rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.55rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  color: #9ca3af;
+  font-family: system-ui, sans-serif;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  user-select: none;
+}
+
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #f9fafb;
+}
+
+.copy-btn.copied {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.45);
+}
+
+.progress {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.progress span {
+  display: block;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  background: #f1f5f9;
+  font-size: 0.82rem;
+  color: #334155;
+  text-align: center;
+}
+
+.progress span.done {
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 600;
+}
+
+.progress span.now {
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 700;
+}
+
+footer.site {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-bottom: 2rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.85rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.95rem 1rem;
+  background: #f8fafc;
+}
+
+.card h3 { margin-top: 0; font-size: 1.05rem; }
+.card a { color: #1d4ed8; font-weight: 650; text-decoration: none; }
+.card a:hover { text-decoration: underline; }
+.card p { margin: 0.35rem 0 0; font-size: 0.92rem; color: #475569; }
+
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="00-index.html">OpenSpec · ShopLite</a>
+    <nav>
+      <a href="00-index.html">Home</a>
+      <a href="01-why-spec-driven-development.html">01</a>
+      <a href="02-install-and-initialize.html">02</a>
+      <a href="03-core-concepts.html">03</a>
+      <a href="04-first-cycle-catalog.html">04</a>
+      <a href="05-explore-and-specify-search.html">05</a>
+      <a href="06-review-artifacts-cart.html">06</a>
+      <a href="07-apply-debug-checkout.html">07</a>
+      <a href="08-expanded-workflow-orders.html">08</a>
+      <a href="09-spec-evolution-inventory.html">09</a>
+      <a href="10-spec-management-and-beyond.html">10</a>
+    </nav>
+  </div>
+</div>
+
+<main>
+  <h1>03 · Core Concepts</h1>
+  <p class="kicker">Five words you will keep hearing. I will say each one in plain language, then show you the folder and the headings OpenSpec expects.</p>
+  <div class="meta">
+    <span class="pill">Lesson 03 of 10</span>
+    <span class="pill">~60 minutes</span>
+    <span class="pill">Read and discuss</span>
+  </div>
+
+  <div class="note">
+    <strong>By the end of this lesson you should be able to say</strong>
+    <ul>
+      <li>What a spec is, what a change is, and why they live in different folders.</li>
+      <li>What a delta spec is, and what ADDED, MODIFIED, and REMOVED do when you archive.</li>
+      <li>What the four planning files are, and which question each one answers.</li>
+      <li>Why we write SHALL, SHOULD, and MAY, what a Given / When / Then scenario is for, and why each scenario needs its own test.</li>
+    </ul>
+  </div>
+
+  <div class="behind">
+    <div class="behind-title">A short reminder before the new names</div>
+    <p>
+      In lesson 01 we kept two piles of notes for Nile Retail, our small teaching shop.
+      One pile said how the shop works today. The other pile held work that was still a draft.
+      OpenSpec uses that same split. This lesson only gives those piles their real names, and shows you the headings the files must use.
+    </p>
+    <p>
+      The headings look fussy. There is a simple reason. Later, a small program reads the file and copies the new rules into the main spec.
+      If you write “Changed stuff”, that program cannot guess that you meant the heading <code>## MODIFIED Requirements</code>.
+      So we use the headings it already knows.
+    </p>
+  </div>
+  <div class="think">
+    <div class="think-title">Think</div>
+    <p>
+      Suppose “checkout shows tax” is written in the same file as the rules that are already live.
+      A teammate opens that file on Wednesday. How do they know whether that sentence is already true in the shop, or only a draft you have not finished?
+    </p>
+  </div>
+  <details class="thought-check">
+    <summary>Check your thought</summary>
+    <p>
+      They cannot tell. A half-written sentence looks the same as a finished rule.
+      That is why OpenSpec keeps two folders. <code>specs/</code> is what the shop does today.
+      <code>changes/</code> is a proposal, until you archive it and the new rules are copied into <code>specs/</code>.
+    </p>
+  </details>
+
+  <h2>1. The picture I want in your head</h2>
+  <pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                          openspec/                              │
+│                                                                 │
+│   ┌──────────────────┐         ┌──────────────────────────┐    │
+│   │     specs/       │         │        changes/          │    │
+│   │                  │ ◄─────  │                          │    │
+│   │ how the shop     │  copy   │ one folder per change    │    │
+│   │ works today      │  when   │ proposal · design ·      │    │
+│   │                  │  you    │ tasks · the new rules    │    │
+│   │                  │ archive │                          │    │
+│   └──────────────────┘         └──────────────────────────┘    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+  <p>
+    Two folders. <code>specs/</code> is what is true today. <code>changes/</code> is the work you are still proposing.
+    When the work is finished, archive copies the new rules into <code>specs/</code> and files the change folder away.
+  </p>
+
+  <h2>2. Idea 1 — A spec says how the shop works today</h2>
+  <p>
+    A <strong>spec</strong> is a written description of how the shop behaves right now.
+    If a sentence is in the spec, we treat it as true. Specs live in <code>openspec/specs/</code>.
+  </p>
+  <p>
+    We split them by <strong>capability</strong>. A capability is one area of the shop.
+    You can also call it a domain. Same idea. For ShopLite we will grow these folders:
+  </p>
+  <ul>
+    <li><code>openspec/specs/catalog/</code> — looking at products</li>
+    <li><code>openspec/specs/search/</code> — finding a product</li>
+    <li><code>openspec/specs/cart/</code> — the basket</li>
+    <li><code>openspec/specs/checkout/</code> — placing an order</li>
+    <li><code>openspec/specs/orders/</code> — what happens after you buy</li>
+    <li><code>openspec/specs/inventory/</code> — how many items are in stock</li>
+  </ul>
+  <p>Each folder usually has one file, <code>spec.md</code>. Inside that file you will see two kinds of writing:</p>
+  <ul>
+    <li>A <strong>requirement</strong> is the rule. We usually start it with SHALL or MUST, which means “this has to happen.”</li>
+    <li>A <strong>scenario</strong> is one concrete example of that rule. We write it as Given / When / Then, so a person can try it without reading the code.</li>
+  </ul>
+  <p>If someone asks “what does this shop do?”, the spec is the answer you both agreed on.</p>
+
+  <h3>2.1 The words SHALL, SHOULD, and MAY</h3>
+  <p>
+    Everyday English is slippery. “The page should show the price” can mean “it must” or “it would be nice.”
+    People who write internet standards got tired of that argument. They published a short list of words, called RFC 2119, and agreed what each word means.
+    OpenSpec uses the same words. You do not need to read that document. You need these three:
+  </p>
+  <table>
+    <thead>
+      <tr><th>Word</th><th>What I mean when I write it</th><th>ShopLite example</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>MUST</code> / <code>SHALL</code></td>
+        <td>This has to happen. There is no exception.</td>
+        <td>The catalog SHALL list each in-stock product with name and price.</td>
+      </tr>
+      <tr>
+        <td><code>SHOULD</code></td>
+        <td>Do this, unless you have a clear reason not to.</td>
+        <td>Product cards SHOULD show a placeholder image if none is provided.</td>
+      </tr>
+      <tr>
+        <td><code>MAY</code></td>
+        <td>This is optional. Skipping it is fine.</td>
+        <td>The catalog MAY show a “Nile’s choice” badge.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    When you are unsure, write SHALL. Use SHOULD only when you really mean “do this, unless there is a good reason not to.”
+    Words like “gracefully”, “intuitively”, or “Amazon-like” do not tell anyone what to check. Leave them out of a requirement.
+  </p>
+
+  <h3>2.2 Scenarios</h3>
+  <p>
+    A requirement without a scenario is only a slogan. A scenario is one situation a tester could try.
+    They should be able to follow it without opening the code.
+  </p>
+  <pre><code>### Requirement: Catalog listing
+The system SHALL display every product that is available for sale,
+each showing a name and a price in the store currency.
+
+#### Scenario: Shopper opens the home page
+- GIVEN the store has three available products
+- WHEN the shopper opens the home page
+- THEN all three products are visible
+- AND each product shows its name and price</code></pre>
+  <p>When you write a scenario, I want these habits:</p>
+  <ul>
+    <li>Name the situation. “Rejects empty search” tells me the case. “Test 2” tells me nothing.</li>
+    <li>Include a case that goes wrong, as well as the case that goes well. An empty store is a real case. So is a bad input.</li>
+    <li>Make it a specific situation. If you only repeat the requirement in different words, you have not added an example.</li>
+  </ul>
+
+  <h3>2.3 Each scenario gets a test</h3>
+  <p>
+    A scenario is a promise. A test is how we check that the promise is still true after the code changes.
+    I want the spec itself to say this, so a later chat does not treat the scenarios as optional reading.
+  </p>
+  <p>Put this requirement in every spec, once:</p>
+  <pre><code>### Requirement: Test for each scenario
+The project SHALL include one automated test for each scenario in this spec.
+The test name SHALL include the scenario title.
+The test SHALL fail when that scenario's THEN is not met.</code></pre>
+  <p>
+    Then, in <code>tasks.md</code>, give each scenario its own checkbox: write that test and make it pass.
+    If a scenario has no test, the change is not finished. When you archive, this requirement stays in the main spec, next to the scenarios it covers.
+  </p>
+  <p>
+    In lesson 01 the page is a single HTML file, so the test can be a small script that opens that file and checks the text.
+    From lesson 04 onward the app is Python, and the usual tool is pytest. The rule is the same either way: one scenario, one test, and the test name says which scenario it covers.
+  </p>
+
+  <h2>3. Idea 2 — A change is one piece of work</h2>
+  <p>
+    When you want to add behavior, change behavior, or remove behavior, you create a <strong>change</strong>.
+    A change is one folder inside <code>openspec/changes/</code>.
+    You should be able to say what that folder is for in one sentence.
+  </p>
+  <table>
+    <thead>
+      <tr><th>A name I can understand</th><th>A name that hides the work</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>add-product-catalog</code></td><td><code>feature-1</code></td></tr>
+      <tr><td><code>add-product-search</code></td><td><code>update</code></td></tr>
+      <tr><td><code>add-shopping-cart</code></td><td><code>wip</code></td></tr>
+      <tr><td><code>fix-checkout-tax-rounding</code></td><td><code>changes</code></td></tr>
+    </tbody>
+  </table>
+  <p>
+    If you hear yourself say “and also” several times, you have more than one change.
+    “Add the catalog, and also the cart, and also checkout” is three changes. Split them.
+    A small change is easier to read, easier to finish in one sitting, and easier to file away when you are done.
+  </p>
+
+  <h2>4. Idea 3 — A delta is only the difference</h2>
+  <p>
+    Inside a change, you do not copy the whole spec and rewrite it.
+    You write a <strong>delta</strong>. Delta here just means “the difference”: what this change adds, what it changes, and what it removes.
+  </p>
+  <p>
+    This is why the tool works on a shop that already exists.
+    If you only want to change the cart, you write the cart difference.
+    You do not first have to describe every page on the site.
+  </p>
+  <pre><code># Delta for Catalog
+
+## ADDED Requirements
+
+### Requirement: Catalog listing
+The system SHALL ...
+
+## MODIFIED Requirements
+
+### Requirement: Product price display
+The system SHALL show prices with exactly two decimal places.
+(Previously: integer rupees only.)
+
+## REMOVED Requirements
+
+### Requirement: Guest price hiding
+(Prices are now visible without signing in.)</code></pre>
+  <p>When you archive, this is what those three headings do:</p>
+  <ul>
+    <li><strong>ADDED</strong> — the new rule is copied onto the end of the main spec. If that spec file does not exist yet, archive creates it.</li>
+    <li><strong>MODIFIED</strong> — the old rule with the same heading is replaced. Write the full new requirement. A short note like “now use two decimals” is not enough for the program to rebuild the rule.</li>
+    <li><strong>REMOVED</strong> — the old rule with that heading is deleted from the main spec.</li>
+  </ul>
+  <p>
+    The heading you choose matters, because the program trusts it.
+    If an old rule changed and you mark the new text as ADDED, the old rule stays and the new rule is added beside it. Now the spec says two different things.
+    If a brand-new rule is marked MODIFIED, there is no old heading to replace, so the update does not land.
+    When you are unsure, open the current spec and look for the heading.
+  </p>
+  <p>
+    When a capability is new, start the delta with a short <code>## Purpose</code> section.
+    If you skip it, archive can leave the words “TBD” sitting in the file.
+    In lessons 04 to 08 we will mostly add new rules. Lesson 09 is where we practice changing a rule and removing a rule.
+  </p>
+  <div class="think">
+    <div class="think-title">Think</div>
+    <p>
+      Look at the delta above. On archive, the program finds the old rule by the heading
+      <code>### Requirement: Product price display</code>, then replaces that whole block.
+      Suppose you wrote loose notes instead: “tweak tax”, “also shipping”. Two changes both say “tweak checkout”.
+      What goes wrong when you archive?
+    </p>
+  </div>
+  <details class="thought-check">
+    <summary>Check your thought</summary>
+    <p>
+      The program that copies the rules is not a person reading your notes.
+      It matches a rule by its heading. A bullet with no heading has no name, so the program cannot tell which old paragraph to replace, which line is new, or whether the two changes are even about the same behavior.
+      You can end up with two rules that disagree, the wrong paragraph replaced, or a merge that fails.
+      Give every requirement a name. That name is how the old file and the new file are matched.
+    </p>
+  </details>
+
+  <h2>5. Idea 4 — Each change has a few planning files</h2>
+  <p>
+    Each change folder holds a few Markdown files. I will call them <strong>artifacts</strong>.
+    That word only means “the documents for this change.” You write them in an order, because each one uses the one before it:
+  </p>
+  <pre><code>proposal ──► specs ──► design ──► tasks ──► implement
+   why        what       how       steps      do it</code></pre>
+  <table>
+    <thead>
+      <tr><th>File</th><th>The question it answers</th><th>ShopLite catalog example</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>proposal.md</code></td>
+        <td>Why are we doing this, what is included, and what is left out?</td>
+        <td>Shoppers need a home page grid of products. Search and cart wait for later changes.</td>
+      </tr>
+      <tr>
+        <td><code>specs/</code></td>
+        <td>What can a shopper see or do? This file is the delta.</td>
+        <td>The home page SHALL list products with name and price. An empty catalog SHALL say there are no products.</td>
+      </tr>
+      <tr>
+        <td><code>design.md</code></td>
+        <td>How will we build it?</td>
+        <td>FastAPI, a Python library for web apps, serves <code>/</code> and <code>/api/products</code>. We start with 6 household items in a JSON file.</td>
+      </tr>
+      <tr>
+        <td><code>tasks.md</code></td>
+        <td>What are the steps, as a checklist?</td>
+        <td>1.1 Set up the FastAPI app. 1.2 Add the seed data. 2.1 Home page HTML. 2.2 Product cards.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    In the usual setup, <code>/opsx:propose</code> drafts all of these planning files in one go.
+    You still read them before you run <code>/opsx:apply</code>. Apply is the step where the assistant writes the code.
+  </p>
+
+  <h3>5.1 You can go back and edit</h3>
+  <div class="concept">
+    <div class="concept-title">The order is a guide</div>
+    <p>
+      Some older ways of working finish every planning document, and only then allow you to write code. Going back is painful.
+      OpenSpec does not lock you like that.
+      The order <code>proposal → specs → design → tasks</code> tells you what you are ready to write next.
+      If you learn something later, you go back and edit.
+    </p>
+  </div>
+  <p>
+    Say you are coding and you notice the tax rounding is wrong.
+    Edit the spec and <code>design.md</code>, then continue. There is also a command, <code>/opsx:update</code>, that helps you refresh the plan from the files you changed.
+    If you notice that search does not belong in the catalog change, make the proposal smaller.
+    These files do not lock you out of an edit.
+  </p>
+  <p>
+    I like this because real work changes as you learn.
+    The cost is that nothing pushes you forward for you. You have to keep one change about one thing.
+  </p>
+
+  <h2>6. Idea 5 — Archive copies the change into the spec</h2>
+  <p>When the work is done, three things happen:</p>
+  <ol>
+    <li>The delta is copied into <code>openspec/specs/</code>.</li>
+    <li>The change folder moves to <code>openspec/changes/archive/YYYY-MM-DD-change-name/</code>. The date is the day you archived it.</li>
+    <li>The spec now describes the shop as it is after this change. You can start the next feature.</li>
+  </ol>
+  <p>
+    After we archive the catalog, you can open a new chat.
+    That chat can read <code>openspec/specs/catalog/</code> and see that the store already lists products.
+    In lesson 01, a new chat guessed a different tax rule because the rule lived only in the old conversation.
+    The spec file is what stops that.
+  </p>
+  <p>
+    Archive often asks you to <strong>sync</strong> first, if the new rules have not been copied into the main spec yet.
+    Sync is the copy. Archive is filing the change folder away.
+    When you run <code>/opsx:archive</code>, both often happen together.
+  </p>
+
+  <h2>7. The loop you will actually type</h2>
+  <p>This is the loop. Explore is optional. The other three are the normal path.</p>
+  <pre><code>/opsx:explore                 →  talk it through first (writes no files)
+/opsx:propose add-product-catalog
+        (you read the plan and fix it)
+/opsx:apply                   →  the assistant writes the code from the tasks
+/opsx:archive                 →  specs updated, change folder filed away</code></pre>
+  <p>In Cursor, the same commands use a hyphen:</p>
+  <pre><code>/opsx-explore
+/opsx-propose add-product-catalog
+/opsx-apply
+/opsx-archive</code></pre>
+  <p>
+    <code>/opsx:explore</code> only talks with you. It writes no planning files and no code.
+    Use it when you cannot yet say the change in one sentence.
+    If you already know what you want, skip it.
+    Lesson 04 skips explore, because I will give you the scope.
+    Lesson 05 is where we slow down and practice explore.
+  </p>
+
+  <h2>8. Looking at the work from the terminal</h2>
+  <p>
+    The assistant does the writing in chat. You can still look at the changes from the terminal.
+    These commands are for looking. They do not build the feature.
+  </p>
+  <pre><code>openspec list                 # changes that are still open
+openspec list --specs         # the main specs (if this flag differs, try openspec list --help)
+openspec show add-product-catalog
+openspec validate add-product-catalog
+openspec status
+openspec view                 # a small dashboard in the browser</code></pre>
+  <p>
+    Command flags can differ by version. If one of these fails, run <code>openspec --help</code> and <code>openspec list --help</code> and use the names your version prints.
+  </p>
+
+  <h2>9. Write a small catalog delta by hand</h2>
+  <p>
+    In lesson 04 the assistant will write these files for you.
+    Before that, I want you to write a small one yourself.
+    You need an eye for a bad sentence, because your job in the next lesson is to read what the assistant drafted.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      On paper, or in a scratch file, write <strong>two</strong> requirements and <strong>three</strong> scenarios for ShopLite’s first catalog.
+      Write what the shopper can see. Leave out FastAPI, JSON, and CSS. Those are build choices, and they belong in the design.
+    </p>
+    <ul>
+      <li>In scope: a home page that shows products for sale.</li>
+      <li>Out of scope: search, cart, login, and recommendations.</li>
+      <li>Cover these cases: at least one product is visible, the store can be empty, and each card shows a price.</li>
+    </ul>
+  </div>
+  <p>A good answer looks like this. Your wording can be different. The shape should be close.</p>
+  <pre><code>## Purpose
+The catalog lets shoppers see what Nile Retail currently sells.
+
+## ADDED Requirements
+
+### Requirement: Product grid
+The system SHALL display each available product with its name and price.
+
+#### Scenario: Store has products
+- GIVEN at least one available product exists
+- WHEN the shopper opens the home page
+- THEN every available product is listed
+- AND each listing shows name and price
+
+#### Scenario: Empty store
+- GIVEN no products exist
+- WHEN the shopper opens the home page
+- THEN the page explains that no products are available
+- AND it does not show an empty broken grid of missing images
+
+### Requirement: Product identity
+Each product SHALL have a stable identifier so the same product can be opened again.
+
+#### Scenario: Open a product from the grid
+- GIVEN a listed product
+- WHEN the shopper selects it
+- THEN a detail view shows that product’s name and price
+
+### Requirement: Test for each scenario
+The project SHALL include one automated test for each scenario in this spec.
+The test name SHALL include the scenario title.
+The test SHALL fail when that scenario's THEN is not met.</code></pre>
+  <p>
+    Notice what the sample leaves out. It does not say “use Bootstrap” or “store the data in SQLite.”
+    Those sentences are about how we build it. They belong in <code>design.md</code>.
+    The spec says what the shopper can see.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task — mark these</div>
+    <p>If you were reviewing a spec, which of these would you send back, and why?</p>
+    <ol>
+      <li>“The home page SHALL look modern and Amazon-like.”</li>
+      <li>“The system SHALL use a Python list named <code>PRODUCTS</code>.”</li>
+      <li>“The system SHALL show a name and price for every available product.”</li>
+    </ol>
+    <p>
+      Here is how I would mark them.
+      (1) Send it back. “Modern” and “Amazon-like” are opinions. A tester cannot check them.
+      (2) Send it back. A Python list named <code>PRODUCTS</code> is a decision about the code. That belongs in the design.
+      (3) Keep it. It says what the shopper sees.
+    </p>
+  </div>
+
+  <h2>10. How big should a change be?</h2>
+  <p>A change is too big when:</p>
+  <ul>
+    <li>The proposal is a list of features that do not depend on each other.</li>
+    <li>Reading it would take an afternoon, so nobody will read it.</li>
+    <li>Half of the tasks could be finished and shipped on their own.</li>
+  </ul>
+  <p>
+    The writing can also be too heavy for the work.
+    A one-line typo does not need three requirements and a design document.
+  </p>
+  <p>
+    Match the amount of writing to the size of the change.
+    In this course we will try a small change and a larger one, so you can feel the difference.
+  </p>
+
+  <h2>11. Check yourself</h2>
+  <div class="exercise">
+    <div class="exercise-title">Answer these in your own words</div>
+    <ol>
+      <li>What lives in <code>openspec/specs/</code>, and what lives in <code>openspec/changes/</code>?</li>
+      <li>Why do we write a delta, instead of rewriting the whole spec every time?</li>
+      <li>Name the four planning files, and the question each one answers.</li>
+      <li>When you archive, what happens to a requirement you marked ADDED?</li>
+      <li>What does the spec say must exist for each scenario, and what should the test name include?</li>
+    </ol>
+  </div>
+
+  <div class="checkpoint">
+    <div class="checkpoint-title">Lesson 03 complete</div>
+    <p>
+      You now have the five ideas, and the folder names that go with them.
+      Next lesson we run the loop for real. ShopLite will show a grid of products: Nile’s small home page, the teaching version of a storefront.
+    </p>
+  </div>
+
+  <div class="lesson-nav">
+    <a href="02-install-and-initialize.html">← 02 Install</a>
+    <a href="04-first-cycle-catalog.html">Next: 04 Catalog (first cycle) →</a>
+  </div>
+</main>
+<script>
+(function () {
+  const COPY_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  const CHECK_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  function copyText(text, onDone) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(onDone).catch(fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      onDone();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("pre").forEach((pre) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "code-wrapper";
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "copy-btn";
+      btn.innerHTML = COPY_ICON + " Copy";
+      wrapper.appendChild(btn);
+
+      btn.addEventListener("click", () => {
+        const code = pre.querySelector("code");
+        const text = (code ? code.innerText : pre.innerText).trimEnd();
+        copyText(text, () => {
+          btn.innerHTML = CHECK_ICON + " Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.innerHTML = COPY_ICON + " Copy";
+            btn.classList.remove("copied");
+          }, 2000);
+        });
+      });
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

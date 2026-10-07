@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>RAG (Retrieval Augmented Generation) with LangChain – Hands-on Lab</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+      color: #0f172a;
+    }
+    h4 {
+      font-size: 1.05rem;
+      margin-top: 1.25rem;
+      margin-bottom: 0.35rem;
+      color: #334155;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .note, .exercise {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .exercise-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #166534;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+    .diagram {
+      margin: 1rem 0 1.5rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      text-align: center;
+    }
+    .diagram svg {
+      max-width: 100%;
+      height: auto;
+    }
+    .diagram img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+    .chunk-demo {
+      text-align: left;
+    }
+    .chunk-demo-title {
+      margin: 0 0 0.15rem;
+      text-align: center;
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .chunk-kicker {
+      margin: 0.85rem 0 0.4rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #64748b;
+    }
+    .split-bar {
+      display: flex;
+      height: 28px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #cbd5e1;
+      margin: 0 0 0.65rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .split-bar span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .split-bar .bar-a { flex: 108; background: #bfdbfe; color: #1e3a8a; }
+    .split-bar .bar-b { flex: 108; background: #fde68a; color: #92400e; box-shadow: inset 3px 0 0 #ef4444; }
+    .split-bar .bar-c { flex: 109; background: #a7f3d0; color: #065f46; box-shadow: inset 3px 0 0 #ef4444; }
+    .source-run {
+      margin: 0;
+      padding: 0.7rem 0.8rem;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      line-height: 1.75;
+    }
+    .seg {
+      padding: 0.08rem 0;
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+    }
+    .seg-a { background: #dbeafe; }
+    .seg-b { background: #fef3c7; }
+    .seg-c { background: #d1fae5; }
+    .broken {
+      background: #fecaca;
+      color: #991b1b;
+      font-weight: 700;
+      padding: 0 0.12rem;
+      border-radius: 3px;
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+    }
+    .cut {
+      color: #dc2626;
+      font-weight: 800;
+      padding: 0 0.12rem;
+    }
+    .chunk-cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.65rem;
+    }
+    .chunk-card {
+      border-radius: 8px;
+      padding: 0.65rem 0.7rem 0.75rem;
+      border: 1px solid transparent;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+    .chunk-card p {
+      margin: 0.4rem 0 0;
+      color: #0f172a;
+    }
+    .chunk-card-h {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .chunk-card-h span {
+      font-weight: 600;
+      opacity: 0.85;
+    }
+    .card-a { background: #eff6ff; border-color: #93c5fd; }
+    .card-a .chunk-card-h { color: #1e3a8a; }
+    .card-b { background: #fffbeb; border-color: #fcd34d; }
+    .card-b .chunk-card-h { color: #92400e; }
+    .card-c { background: #ecfdf5; border-color: #6ee7b7; }
+    .card-c .chunk-card-h { color: #065f46; }
+    .chunk-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1rem;
+      margin: 0.7rem 0 0;
+      font-size: 0.78rem;
+      color: #475569;
+    }
+    .chunk-legend i {
+      display: inline-block;
+      width: 0.7rem;
+      height: 0.7rem;
+      border-radius: 2px;
+      margin-right: 0.3rem;
+      vertical-align: -0.05rem;
+    }
+    @media (max-width: 720px) {
+      .chunk-cards { grid-template-columns: 1fr; }
+    }
+    .diagram-caption {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin: 0.5rem 0 0;
+    }
+    .info-only {
+      border-left: 4px solid #9333ea;
+      background: linear-gradient(135deg, #faf5ff, #f5f3ff);
+      border-color: rgba(147, 51, 234, 0.4);
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>RAG (Retrieval Augmented Generation) with LangChain – Hands-on Lab</h1>
+
+  <div class="note">
+    <strong>How to use this lab</strong>
+    <ol>
+      <li>Open your editor (VS Code / Cursor / Jupyter) and create a notebook named <code>09-rag.ipynb</code>.</li>
+      <li>Place this HTML guide side‑by‑side with your notebook.</li>
+      <li>For every section labeled <strong>Your Task</strong>, create a <strong>new cell</strong> in your notebook.</li>
+      <li>Type or paste the code into that cell, run it, and read the output carefully.</li>
+      <li>By the end, you will have built a complete RAG system over an employee handbook PDF.</li>
+    </ol>
+  </div>
+
+  <h2>1. RAG Overview</h2>
+  <p>
+    RAG (Retrieval Augmented Generation) combines two ideas:
+    you first <strong>retrieve</strong relevant information from your knowledge base
+    and then <strong>augment</strong the LLM prompt with that information so the model
+    can <strong>generate</strong a grounded, context‑aware answer.
+  </p>
+
+  <h3>1.1 What is RAG?</h3>
+  <p>Conceptually, RAG has two big phases:</p>
+  <ul>
+    <li><strong>Indexing</strong>: Prepare your knowledge base once (load documents, split into chunks, embed, store in a vector DB).</li>
+    <li><strong>Retrieval &amp; Generation</strong>: At query time, find relevant chunks and use them as context for the LLM.</li>
+  </ul>
+  <p>
+    In this lab, you will build a RAG system over an <strong>employee handbook PDF</strong> and
+    explore each step in the pipeline in a practical way.
+  </p>
+
+  <h2>2. Installation &amp; Setup</h2>
+  <p>
+    First, install the core LangChain 1.0 packages and the libraries needed for PDF loading,
+    text splitting, embeddings, and the Chroma vector store.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>In your <strong>terminal</strong> (not inside the notebook), run the following command to install the required packages for this RAG lab.</p>
+  </div>
+
+  <pre><code>pip install "langchain&gt;=1.0" langchain-openai langchain-community langchain-text-splitters pypdf chromadb</code></pre>
+
+  <h3>2.1 Load Environment Variables</h3>
+  <p>
+    Just like in the earlier labs, you should keep API keys (for example, <code>OPENAI_API_KEY</code>)
+    in a <code>.env</code> file and load them using <code>python-dotenv</code>.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new notebook cell</strong>, paste this code, and run it to load environment variables from your <code>.env</code> file.</p>
+  </div>
+
+  <pre><code>from dotenv import load_dotenv
+load_dotenv()</code></pre>
+
+  <h2>3. Step 1 – Document Loading</h2>
+  <p>
+    <strong>Document Loaders</strong> are components that load data from different sources (PDFs, web pages, text files, databases, etc.)
+    and turn them into LangChain <code>Document</code> objects.
+  </p>
+  <p>A typical <code>Document</code> looks like this:</p>
+
+  <pre><code>Document(
+    page_content="The actual text content",
+    metadata={"source": "filename.pdf", "page": 1}
+)</code></pre>
+
+  <p>Some popular document loaders include:</p>
+  <ul>
+    <li><code>PyPDFLoader</code> – Load PDF files</li>
+    <li><code>WebBaseLoader</code> – Load web pages</li>
+    <li><code>TextLoader</code> – Load plain text files</li>
+    <li><code>CSVLoader</code> – Load CSV data</li>
+    <li>And many more integrations for other data sources</li>
+  </ul>
+  <p>
+    In this lab, we will load an <strong>employee handbook PDF</strong> using <code>PyPDFLoader</code>.
+    This will be the knowledge base for our RAG system.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Place the file <code>employee-handbook.pdf</code> in the same folder as your notebook.
+      Then create a <strong>new cell</strong>, paste the code below, and run it to load the PDF and inspect the first page.
+    </p>
+  </div>
+
+  <pre><code>from langchain_community.document_loaders import PyPDFLoader
+
+# Load the PDF document
+file_path = "employee-handbook.pdf"
+loader = PyPDFLoader(file_path)
+
+# Load all pages
+docs = loader.load()
+
+print(f"Loaded {len(docs)} pages from the PDF")
+print(f"\nFirst page preview (first 500 characters):")
+print(docs[0].page_content[:500])
+print(f"\nMetadata: {docs[0].metadata}")</code></pre>
+
+  <h2>4. Step 2 – Text Splitting</h2>
+  <p>
+    Large documents rarely fit into a single LLM context window. To make retrieval effective,
+    we split documents into <strong>smaller, overlapping chunks</strong>.
+  </p>
+
+  <div class="note info-only">
+    <strong>For your information – text chunking strategies</strong>
+    <p>
+      The following overview explains the main text chunking approaches used in production RAG systems.
+    </p>
+    <p>
+      <strong>In this lab we will implement only size-based chunking</strong> using LangChain’s
+      <code>RecursiveCharacterTextSplitter</code>. The other strategies below are for context and comparison—you do not need to run them now.
+    </p>
+  </div>
+
+  <h3>4.1 Why chunk? The chunking paradox</h3>
+  <p>
+    Chunk size is a trade-off. Chunks that are <strong>too small</strong> lose surrounding context, so retrieval may return
+    fragments that are hard to interpret. Chunks that are <strong>too large</strong> dilute relevance—a single chunk may
+    contain several unrelated topics, making similarity search less precise.
+  </p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 720 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Chunking paradox trade-off">
+      <rect x="10" y="50" width="200" height="50" rx="6" fill="#fecaca" stroke="#ef4444"/>
+      <text x="110" y="80" text-anchor="middle" font-size="13" fill="#991b1b">Too small</text>
+      <text x="110" y="115" text-anchor="middle" font-size="11" fill="#64748b">Misses context</text>
+      <rect x="260" y="50" width="200" height="50" rx="6" fill="#bbf7d0" stroke="#22c55e"/>
+      <text x="360" y="80" text-anchor="middle" font-size="13" fill="#166534">Just right</text>
+      <text x="360" y="115" text-anchor="middle" font-size="11" fill="#64748b">Coherent + retrievable</text>
+      <rect x="510" y="50" width="200" height="50" rx="6" fill="#fecaca" stroke="#ef4444"/>
+      <text x="610" y="80" text-anchor="middle" font-size="13" fill="#991b1b">Too large</text>
+      <text x="610" y="115" text-anchor="middle" font-size="11" fill="#64748b">Adds noise</text>
+      <text x="360" y="28" text-anchor="middle" font-size="14" font-weight="600" fill="#0f172a">The chunking paradox</text>
+    </svg>
+    <p class="diagram-caption">Goal: chunks large enough to be meaningful, small enough to match a specific query.</p>
+  </div>
+
+  <h3>4.2 Text chunking strategies (overview)</h3>
+  <p>
+    Production RAG pipelines typically choose among four strategies. Each balances simplicity, speed, and retrieval quality differently.
+  </p>
+
+  <h3>4.2.1 Size-based (fixed) chunking</h3>
+  <p>
+    The simplest approach: split text every <strong>N characters or tokens</strong>. It is fast and predictable,
+    but ignores sentence, paragraph, and word boundaries—so a chunk can end in the middle of a word.
+  </p>
+
+  <h4>Without overlap</h4>
+  <p>
+    With <strong>zero overlap</strong>, each character belongs to exactly one chunk. Consider a
+    325-character source document split into three chunks of roughly 108 characters each.
+    Notice how words are broken across chunk boundaries—<code>signific</code> / <code>ant</code>,
+    <code>Engineeri</code> / <code>ng</code>—which can hurt retrieval quality.
+  </p>
+
+  <div class="diagram chunk-demo" role="img" aria-label="Size-based chunking without overlap: a 325-character source document split into three chunks of 108, 108, and 109 characters, cutting significant into signific and ant, and Engineering into Engineeri and ng">
+    <p class="chunk-demo-title">Size-based chunking without overlap</p>
+    <p class="chunk-kicker">Source document · 325 characters · cuts after character 108 and 216</p>
+    <div class="split-bar" aria-hidden="true">
+      <span class="bar-a">108</span>
+      <span class="bar-b">108</span>
+      <span class="bar-c">109</span>
+    </div>
+    <p class="source-run">
+      <span class="seg seg-a">Please read this section carefully, now. All employees should note that the updated leave policy is <span class="broken">signific</span></span><span class="cut" aria-hidden="true">|</span><span class="seg seg-b"><span class="broken">ant</span> for every department this quarter. Please contact the central Human Resources offices, and the <span class="broken">Engineeri</span></span><span class="cut" aria-hidden="true">|</span><span class="seg seg-c"><span class="broken">ng</span> team if a request needs a review before the quarter closes. Keep the full written approvals on file today.</span>
+    </p>
+    <p class="chunk-legend">
+      <span><i style="background:#bfdbfe"></i>Chunk 1</span>
+      <span><i style="background:#fde68a"></i>Chunk 2</span>
+      <span><i style="background:#6ee7b7"></i>Chunk 3</span>
+      <span><i style="background:#fca5a5"></i>Word cut at the boundary</span>
+      <span><i style="background:#ef4444"></i>Red bar = split, no shared characters</span>
+    </p>
+    <p class="chunk-kicker">Output · each character belongs to exactly one chunk</p>
+    <div class="chunk-cards">
+      <div class="chunk-card card-a">
+        <div class="chunk-card-h">Chunk 1 <span>108 chars</span></div>
+        <p>Please read this section carefully, now. All employees should note that the updated leave policy is <span class="broken">signific</span></p>
+      </div>
+      <div class="chunk-card card-b">
+        <div class="chunk-card-h">Chunk 2 <span>108 chars</span></div>
+        <p><span class="broken">ant</span> for every department this quarter. Please contact the central Human Resources offices, and the <span class="broken">Engineeri</span></p>
+      </div>
+      <div class="chunk-card card-c">
+        <div class="chunk-card-h">Chunk 3 <span>109 chars</span></div>
+        <p><span class="broken">ng</span> team if a request needs a review before the quarter closes. Keep the full written approvals on file today.</p>
+      </div>
+    </div>
+    <p class="diagram-caption">
+      Source document (325 characters) → 3 output chunks (108, 108, and 109 characters), with no overlap.
+      Words split at arbitrary character positions: signific / ant and Engineeri / ng.
+    </p>
+  </div>
+
+  <h4>With overlap</h4>
+  <p>
+    A common fix is to add a fixed <strong>overlap</strong> so content at chunk boundaries appears in two adjacent
+    chunks. That way, if a query matches text that would have been split, at least one chunk still contains the full phrase.
+  </p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 720 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Fixed-size chunking with overlap">
+      <rect x="20" y="40" width="680" height="24" rx="4" fill="#e2e8f0"/>
+      <rect x="20" y="40" width="180" height="24" rx="4" fill="#93c5fd" opacity="0.9"/>
+      <rect x="160" y="40" width="180" height="24" rx="4" fill="#60a5fa" opacity="0.9"/>
+      <rect x="300" y="40" width="180" height="24" rx="4" fill="#93c5fd" opacity="0.9"/>
+      <rect x="440" y="40" width="180" height="24" rx="4" fill="#60a5fa" opacity="0.9"/>
+      <rect x="580" y="40" width="120" height="24" rx="4" fill="#93c5fd" opacity="0.9"/>
+      <rect x="160" y="40" width="40" height="24" fill="#fbbf24" opacity="0.6"/>
+      <rect x="300" y="40" width="40" height="24" fill="#fbbf24" opacity="0.6"/>
+      <rect x="440" y="40" width="40" height="24" fill="#fbbf24" opacity="0.6"/>
+      <text x="110" y="56" text-anchor="middle" font-size="11" fill="#1e3a8a">Chunk 1</text>
+      <text x="250" y="56" text-anchor="middle" font-size="11" fill="#1e3a8a">Chunk 2</text>
+      <text x="390" y="56" text-anchor="middle" font-size="11" fill="#1e3a8a">Chunk 3</text>
+      <text x="530" y="56" text-anchor="middle" font-size="11" fill="#1e3a8a">Chunk 4</text>
+      <text x="640" y="56" text-anchor="middle" font-size="11" fill="#1e3a8a">Chunk 5</text>
+      <text x="360" y="22" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">Size-based chunking with overlap</text>
+      <text x="360" y="88" text-anchor="middle" font-size="11" fill="#64748b">Yellow regions = overlapping text shared between adjacent chunks</text>
+    </svg>
+  </div>
+
+  <pre><code># Informational example only – fixed-size chunking WITH overlap
+def fixed_size_chunk(text: str, chunk_size: int = 500, overlap: int = 50) -> list[str]:
+    chunks = []
+    start = 0
+    while start &lt; len(text):
+        end = start + chunk_size
+        chunks.append(text[start:end])
+        start = end - overlap  # step back so boundaries overlap
+    return chunks
+
+sample = "Employee vacation policy allows 15 days per year. Sick leave is separate..."
+print(fixed_size_chunk(sample, chunk_size=40, overlap=10))</code></pre>
+
+  <h3>4.2.2 Recursive character splitting</h3>
+  <p>
+    A refinement of size-based chunking: try to split on natural boundaries first (paragraphs, then lines, then words),
+    and only fall back to raw characters when a section still exceeds <code>chunk_size</code>.
+    LangChain’s <code>RecursiveCharacterTextSplitter</code> implements this pattern—it is still fundamentally
+    <strong>size-based</strong>, but respects document flow better than a blind character cut.
+  </p>
+
+  <pre><code># Informational example only – separator hierarchy (concept behind RecursiveCharacterTextSplitter)
+SEPARATORS = ["\n\n", "\n", ". ", " ", ""]
+
+def recursive_split(text: str, chunk_size: int, separators: list[str]) -> list[str]:
+    if not separators or len(text) &lt;= chunk_size:
+        return [text] if text else []
+    sep = separators[0]
+    parts = text.split(sep) if sep else list(text)
+    chunks, current = [], ""
+    for part in parts:
+        candidate = (current + sep + part) if current else part
+        if len(candidate) &lt;= chunk_size:
+            current = candidate
+        else:
+            if current:
+                chunks.append(current)
+            if len(part) &gt; chunk_size:
+                chunks.extend(recursive_split(part, chunk_size, separators[1:]))
+                current = ""
+            else:
+                current = part
+    if current:
+        chunks.append(current)
+    return chunks</code></pre>
+
+  <h3>4.2.3 Document structure-aware chunking</h3>
+  <p>
+    When documents have clear structure—Markdown headings, HTML sections, PDF titles—split at those boundaries
+    instead of arbitrary character counts. Each chunk stays within one logical section, and metadata (section title,
+    heading level) improves filtering and citations at retrieval time.
+  </p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 720 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Document structure chunking">
+      <rect x="20" y="20" width="680" height="120" rx="8" fill="#f1f5f9" stroke="#94a3b8"/>
+      <text x="40" y="45" font-size="13" font-weight="700" fill="#1d4ed8"># Vacation Policy</text>
+      <rect x="30" y="55" width="300" height="35" rx="4" fill="#dbeafe" stroke="#3b82f6"/>
+      <text x="45" y="77" font-size="11" fill="#1e40af">Chunk A – section under H1</text>
+      <text x="40" y="105" font-size="12" font-weight="600" fill="#1d4ed8">## Sick Leave</text>
+      <rect x="30" y="115" width="300" height="20" rx="4" fill="#dbeafe" stroke="#3b82f6"/>
+      <text x="45" y="129" font-size="11" fill="#1e40af">Chunk B – section under H2</text>
+      <text x="400" y="45" font-size="12" font-weight="600" fill="#1d4ed8">## Benefits</text>
+      <rect x="390" y="55" width="300" height="35" rx="4" fill="#dbeafe" stroke="#3b82f6"/>
+      <text x="405" y="77" font-size="11" fill="#1e40af">Chunk C – separate section</text>
+      <text x="360" y="155" text-anchor="middle" font-size="11" fill="#64748b">Split at headings/sections — never mid-paragraph when possible</text>
+    </svg>
+    <p class="diagram-caption">Structure-aware chunking preserves semantic units defined by the document itself.</p>
+  </div>
+
+  <pre><code># Informational example only – LangChain Markdown header splitter
+from langchain_text_splitters import MarkdownHeaderTextSplitter
+
+headers_to_split_on = [
+    ("#", "Header 1"),
+    ("##", "Header 2"),
+    ("###", "Header 3"),
+]
+markdown_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split_on)
+# md_docs = markdown_splitter.split_text(markdown_document)</code></pre>
+
+  <h3>4.2.4 Semantic chunking</h3>
+  <p>
+    Instead of fixed sizes or headings, semantic chunking detects <strong>topic shifts</strong>.
+    Each sentence is embedded; when cosine similarity between adjacent groups drops below a threshold,
+    a new chunk begins. Chunks vary in length but tend to contain one coherent idea—useful for narrative
+    or mixed-topic prose where structure is weak.
+  </p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 720 110" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Semantic chunking at topic boundaries">
+      <rect x="20" y="45" width="680" height="20" rx="4" fill="#e2e8f0"/>
+      <rect x="20" y="45" width="220" height="20" rx="4" fill="#a78bfa"/>
+      <rect x="240" y="45" width="260" height="20" rx="4" fill="#34d399"/>
+      <rect x="500" y="45" width="200" height="20" rx="4" fill="#f472b6"/>
+      <line x1="240" y1="35" x2="240" y2="75" stroke="#ef4444" stroke-width="2" stroke-dasharray="4"/>
+      <line x1="500" y1="35" x2="500" y2="75" stroke="#ef4444" stroke-width="2" stroke-dasharray="4"/>
+      <text x="130" y="58" text-anchor="middle" font-size="10" fill="#fff">Topic: vacation</text>
+      <text x="370" y="58" text-anchor="middle" font-size="10" fill="#fff">Topic: sick leave</text>
+      <text x="600" y="58" text-anchor="middle" font-size="10" fill="#fff">Topic: benefits</text>
+      <text x="360" y="25" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">Semantic chunking – split where meaning shifts</text>
+      <text x="360" y="95" text-anchor="middle" font-size="11" fill="#64748b">Dashed lines = breakpoints detected by embedding similarity drop</text>
+    </svg>
+  </div>
+
+  <pre><code># Informational example only – LangChain semantic chunker (requires embeddings)
+from langchain_experimental.text_splitter import SemanticChunker
+from langchain_openai import OpenAIEmbeddings
+
+# embed_model = OpenAIEmbeddings(model="text-embedding-3-small")
+# semantic_splitter = SemanticChunker(
+#     embed_model,
+#     breakpoint_threshold_type="percentile",  # split at similarity drops
+#     breakpoint_threshold_amount=90,
+# )
+# semantic_chunks = semantic_splitter.split_text(long_document)</code></pre>
+
+  <h3>4.3 Strategy comparison</h3>
+  <pre><code>Strategy                  | Speed   | Respects structure | Best for
+--------------------------|---------|--------------------|----------------------------------
+Size-based (fixed)        | Fast    | No                 | Baselines, uniform text
+Recursive character       | Fast    | Partially          | General-purpose docs (our lab)
+Document structure        | Medium  | Yes                | Markdown, HTML, structured PDFs
+Semantic                  | Slower  | By meaning         | Narrative / mixed-topic prose</code></pre>
+
+  <h3>4.4 What we implement in this lab</h3>
+  <p>
+    For the employee handbook PDF, we use <strong>size-based chunking via</strong>
+    <code>RecursiveCharacterTextSplitter</code>. It enforces a maximum chunk size and overlap while preferring
+    paragraph and sentence boundaries— a practical default before moving to structure-aware or semantic approaches.
+  </p>
+  <p>
+    <strong>Text Splitters</strong> do this job. <code>RecursiveCharacterTextSplitter</code> is recommended because it:
+  </p>
+  <ol>
+    <li>Splits on paragraphs (<code>\n\n</code>)</li>
+    <li>Then lines (<code>\n</code>)</li>
+    <li>Then spaces (<code> </code>)</li>
+    <li>Finally, raw characters</li>
+  </ol>
+  <p>Key parameters:</p>
+  <ul>
+    <li><strong><code>chunk_size</code></strong>: Max characters per chunk (for example, 1000).</li>
+    <li><strong><code>chunk_overlap</code></strong>: Overlap between chunks to preserve context (for example, 200).</li>
+    <li><strong><code>add_start_index</code></strong>: Track where in the original document the chunk came from.</li>
+  </ul>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste the code below, and run it to split the PDF into chunks
+      and inspect an example chunk plus its metadata.
+    </p>
+  </div>
+
+  <pre><code>from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+# Create text splitter
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1000,        # Maximum chunk size
+    chunk_overlap=200,      # Overlap to maintain context
+    add_start_index=True,   # Track position in original doc
+    length_function=len,
+)
+
+# Split documents into chunks
+all_splits = text_splitter.split_documents(docs)
+
+print(f"Split {len(docs)} pages into {len(all_splits)} chunks")
+print(f"\nExample chunk:")
+print(all_splits[0].page_content)
+print(f"\nChunk metadata: {all_splits[0].metadata}")</code></pre>
+
+  <h2>5. Step 3 – Embeddings</h2>
+  <p>
+    <strong>Embeddings</strong> turn text into numerical vectors that capture meaning.
+    Similar texts have vectors that are close to each other in high‑dimensional space.
+  </p>
+
+  <pre><code>Text: "vacation policy"          → [0.23, -0.45, 0.67, ...]
+Text: "time off guidelines"      → [0.25, -0.43, 0.65, ...]  (similar meaning)
+Text: "employee benefits"        → [0.12, -0.89, 0.34, ...]  (different topic)</code></pre>
+
+  <p>Why embeddings matter:</p>
+  <ul>
+    <li><strong>Semantic search</strong>: Find content by meaning, not just exact keywords.</li>
+    <li><strong>Similarity matching</strong>: Compare texts using cosine similarity or related metrics.</li>
+    <li><strong>Better retrieval</strong>: They power the “retrieve” step in RAG.</li>
+  </ul>
+  <p>
+    Here we use OpenAI’s <code>text-embedding-3-small</code> model via <code>OpenAIEmbeddings</code>.
+    You’ll also see a simple cosine similarity function to compare embeddings.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste the code below, and run it to generate embeddings for a few sample texts
+      and compare their similarities. Observe how related sentences have higher similarity scores.
+    </p>
+  </div>
+
+  <pre><code>from langchain_openai import OpenAIEmbeddings
+
+# Initialize OpenAI embeddings
+embeddings = OpenAIEmbeddings(
+    model="text-embedding-3-small"
+)
+
+# Let's create embeddings for sample texts to understand how they work
+sample_texts = [
+    "Employee vacation policy and time off",
+    "Annual leave and holiday guidelines",
+    "Company dress code requirements"
+]
+
+# Generate embeddings
+sample_embeddings = [embeddings.embed_query(text) for text in sample_texts]
+
+print(f"Each embedding has {len(sample_embeddings[0])} dimensions")
+print(f"\nFirst 10 values of embedding 1: {sample_embeddings[0][:10]}")
+
+# Calculate similarity between embeddings (using dot product as approximation)
+import numpy as np
+
+def cosine_similarity(vec1, vec2):
+    return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+
+sim_1_2 = cosine_similarity(sample_embeddings[0], sample_embeddings[1])
+sim_1_3 = cosine_similarity(sample_embeddings[0], sample_embeddings[2])
+
+print(f"\nSimilarity between text 1 and 2 (both about time off): {sim_1_2:.4f}")
+print(f"Similarity between text 1 and 3 (different topics): {sim_1_3:.4f}")
+print("\n✅ Higher similarity = more related content!")</code></pre>
+
+  <h2>6. Step 4 – Vector Store with Chroma</h2>
+  <p>
+    A <strong>Vector Store</strong> (or vector database) stores embeddings and lets you run
+    fast similarity search over thousands or millions of chunks.
+  </p>
+  <p>Conceptually:</p>
+
+  <pre><code>1. Store phase:
+   Document → Embedding → Vector DB
+
+2. Query phase:
+   Question → Embedding → Find similar vectors → Return documents</code></pre>
+
+  <p>
+    In this lab, we use <strong>Chroma</strong>, an easy‑to‑use local vector store that persists data to disk
+    and supports fast similarity search.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste the code below, and run it to create a Chroma vector store
+      from your document chunks and persist it to a local directory.
+    </p>
+  </div>
+
+  <pre><code>from langchain_community.vectorstores import Chroma
+
+# Create Chroma vector store and add documents
+# This will:
+# 1. Generate embeddings for all chunks
+# 2. Store them in Chroma
+# 3. Enable similarity search
+
+vector_store = Chroma.from_documents(
+    documents=all_splits,
+    embedding=embeddings,
+    persist_directory="./chroma_db"  # Save to disk for reuse
+)
+
+print(f"✅ Created vector store with {len(all_splits)} document chunks")
+print(f"📁 Data persisted to: ./chroma_db")</code></pre>
+
+  <h3>6.1 Optional – Standalone Chroma DB (client-server)</h3>
+  <p>
+    The cell above runs Chroma <strong>inside your Python process</strong> (embedded mode) and writes files to
+    <code>./chroma_db</code>. That is the simplest setup for a notebook.
+  </p>
+  <p>
+    You can also run Chroma as a <strong>standalone database server</strong>. LangChain then connects over HTTP.
+    This is closer to production: the vector store lives in its own process, and several notebooks or apps can
+    share the same collections.
+  </p>
+
+  <div class="note info-only">
+    <strong>This section is optional.</strong>
+    <p>
+      Skip it if you already created <code>vector_store</code> in Step 4 and want to go straight to similarity search.
+      If you complete this section, it <strong>replaces</strong> the Step 4 cell: you still end up with a
+      <code>vector_store</code> object, but it talks to a Chroma server in a separate terminal.
+    </p>
+  </div>
+
+  <h4>Start the Chroma server</h4>
+  <p>
+    The <code>chroma</code> CLI is installed with the <code>chromadb</code> package from Step 2.
+    Open a <strong>new terminal</strong> (not a notebook cell), start the server, and <strong>leave it running</strong>:
+  </p>
+
+  <pre><code>chroma run --path ./chroma_server_data --host localhost --port 8000</code></pre>
+
+  <p>
+    You should see the server listening on <code>http://localhost:8000</code>.
+    Use a <strong>different folder</strong> than <code>./chroma_db</code> (the embedded store from Step 4).
+    Embedded persistence and the server’s on-disk format are not interchangeable.
+  </p>
+
+  <p>
+    If you prefer Docker instead of the CLI, this is equivalent:
+  </p>
+
+  <pre><code>docker run --rm -v ./chroma_server_data:/data -p 8000:8000 chromadb/chroma</code></pre>
+
+  <h4>Connect from LangChain and ingest chunks</h4>
+  <p>
+    From Python, connect with Chroma’s <code>HttpClient</code>, then pass that client into LangChain’s
+    <code>Chroma</code> vector store. After this cell, later steps (<code>similarity_search</code>, retrievers, agents)
+    work the same way as with the embedded store.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task (optional)</div>
+    <p>
+      With the Chroma server running, create a <strong>new notebook cell</strong>, paste the code below, and run it.
+      Confirm the heartbeat print and that documents were added to the collection.
+    </p>
+  </div>
+
+  <pre><code>import chromadb
+from langchain_community.vectorstores import Chroma
+
+# Connect to the standalone Chroma server
+chroma_client = chromadb.HttpClient(host="localhost", port=8000)
+
+# Quick health check – should print a small integer (nanoseconds since epoch)
+print(f"Chroma heartbeat: {chroma_client.heartbeat()}")
+print(f"Existing collections: {chroma_client.list_collections()}")
+
+# Create (or open) a collection and ingest the handbook chunks
+vector_store = Chroma.from_documents(
+    documents=all_splits,
+    embedding=embeddings,
+    client=chroma_client,
+    collection_name="employee_handbook",
+)
+
+print(f"✅ Connected to standalone Chroma at localhost:8000")
+print(f"✅ Collection 'employee_handbook' now has {len(all_splits)} chunks")</code></pre>
+
+  <p>
+    On later notebook restarts, you do <strong>not</strong> need to re-embed if the server is still running
+    and the collection already exists. Reconnect only:
+  </p>
+
+  <pre><code># Later sessions: connect without re-ingesting
+vector_store = Chroma(
+    client=chroma_client,
+    collection_name="employee_handbook",
+    embedding_function=embeddings,
+)</code></pre>
+
+  <div class="note">
+    <strong>If the connection fails</strong>
+    <ul>
+      <li>Make sure the <code>chroma run</code> (or Docker) terminal is still open and listening on port 8000.</li>
+      <li>Do not use the same path as the embedded <code>./chroma_db</code> folder from Step 4.</li>
+      <li>
+        Running <code>from_documents</code> again on an existing collection <strong>adds more copies</strong>
+        of the same chunks. Prefer the reconnect snippet above once the collection is populated.
+      </li>
+    </ul>
+  </div>
+
+  <h2>7. Step 5 – Similarity Search</h2>
+  <p>
+    <strong>Similarity Search</strong> (also called semantic search) finds the most relevant chunks for a user query
+    by comparing embeddings.
+  </p>
+  <p>The typical flow is:</p>
+  <ol>
+    <li>Embed the user question.</li>
+    <li>Compare with stored embeddings using a distance metric (often cosine similarity).</li>
+    <li>Return the top‑<code>k</code> most similar chunks.</li>
+  </ol>
+
+  <h3>7.1 Basic Similarity Search</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste the code below, and run it to search the vector store
+      for the company’s vacation policy. Read the returned content and metadata.
+    </p>
+  </div>
+
+  <pre><code># Simple similarity search
+query = "What is the vacation policy?"
+
+# Find top 3 most relevant documents
+results = vector_store.similarity_search(query, k=3)
+
+print(f"Query: '{query}'\n")
+print(f"Found {len(results)} relevant documents:\n")
+
+for i, doc in enumerate(results, 1):
+    print(f"--- Result {i} ---")
+    print(f"Content: {doc.page_content[:300]}...")
+    print(f"Metadata: {doc.metadata}")
+    print()</code></pre>
+
+  <h3>7.2 Similarity Search with Scores</h3>
+  <p>
+    Sometimes you also want the <strong>similarity score</strong> for each result.
+    This helps you understand how confident the search is.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste the code below, and run it to retrieve documents
+      along with their similarity scores for a sick leave question.
+    </p>
+  </div>
+
+  <pre><code># Similarity search with scores
+query = "How many sick days do employees get?"
+
+# Get results with similarity scores
+results_with_scores = vector_store.similarity_search_with_score(query, k=3)
+
+print(f"Query: '{query}'\n")
+
+for i, (doc, score) in enumerate(results_with_scores, 1):
+    print(f"--- Result {i} (Score: {score:.4f}) ---")
+    print(f"Content: {doc.page_content[:200]}...")
+    print()</code></pre>
+
+  <h3>7.3 Trying More Queries</h3>
+  <p>
+    It’s useful to experiment with multiple questions to see how well your index covers different topics
+    (working hours, benefits, dress code, and so on).
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste the code below, and run it to ask several different questions.
+      Observe how the retrieved chunks change for each query.
+    </p>
+  </div>
+
+  <pre><code># Try more queries
+queries = [
+    "What are the working hours?",
+    "Tell me about employee benefits",
+    "What is the dress code policy?"
+]
+
+for query in queries:
+    results = vector_store.similarity_search(query, k=1)
+    print(f"\n{'='*60}")
+    print(f"Query: {query}")
+    print(f"{'='*60}")
+    print(results[0].page_content[:300])
+    print("...")</code></pre>
+
+  <h2>8. Step 6 – Retrievers</h2>
+  <p>
+    A <strong>Retriever</strong> is a higher‑level abstraction that returns documents for a query.
+    It wraps vector stores (and other backends) behind a consistent interface
+    and integrates nicely with LCEL chains and agents.
+  </p>
+  <p>Common retrieval strategies include:</p>
+  <ul>
+    <li><strong>Similarity</strong>: Standard “top‑<code>k</code> by similarity” search.</li>
+    <li><strong>MMR (Maximum Marginal Relevance)</strong>: Balances relevance with diversity between returned chunks.</li>
+    <li><strong>Score threshold</strong>: Only return documents above a certain similarity score.</li>
+  </ul>
+
+  <h3>8.1 Basic Retriever</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste the code below, and run it to turn your vector store
+      into a retriever and use it to answer a question about company holidays.
+    </p>
+  </div>
+
+  <pre><code># Create a retriever from vector store
+retriever = vector_store.as_retriever(
+    search_type="similarity",
+    search_kwargs={"k": 3}  # Return top 3 results
+)
+
+# Test the retriever
+query = "What are the company holidays?"
+docs = retriever.invoke(query)
+
+print(f"Query: '{query}'")
+print(f"\nRetrieved {len(docs)} documents:\n")
+
+for i, doc in enumerate(docs, 1):
+    print(f"Document {i}:")
+    print(doc.page_content[:250])
+    print("...\n")</code></pre>
+
+  <h3>8.2 MMR (Maximum Marginal Relevance) Retriever</h3>
+  <p>
+    MMR encourages <strong>diverse</strong> results: it picks documents that are both highly relevant
+    to the query and not too similar to each other.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste the code below, and run it to use an MMR retriever
+      for a question about employee benefits. Compare the results to basic similarity search.
+    </p>
+  </div>
+
+  <pre><code># MMR (Maximum Marginal Relevance) retriever
+# This balances relevance with diversity
+
+mmr_retriever = vector_store.as_retriever(
+    search_type="mmr",
+    search_kwargs={
+        "k": 3,
+        "fetch_k": 10,  # Fetch 10 candidates, then select 3 diverse ones
+        "lambda_mult": 0.5  # 0=max diversity, 1=max relevance
+    }
+)
+
+query = "What benefits do employees receive?"
+docs = mmr_retriever.invoke(query)
+
+print(f"Query: '{query}'")
+print(f"\nMMR Retrieved documents (diverse + relevant):\n")
+
+for i, doc in enumerate(docs, 1):
+    print(f"Document {i}:")
+    print(doc.page_content[:200])
+    print("...\n")</code></pre>
+
+  <h3>8.3 Batch Retrieval</h3>
+  <p>
+    Retrievers support <strong>batch</strong> APIs, which let you process many questions at once.
+    This is useful for offline analysis or bulk Q&amp;A.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste the code below, and run it to send multiple questions
+      to the retriever in a single call.
+    </p>
+  </div>
+
+  <pre><code># Batch retrieval - process multiple queries efficiently
+questions = [
+    "What is the remote work policy?",
+    "How do I request time off?",
+    "What is the probation period?"
+]
+
+# Batch invoke
+batch_results = retriever.batch(questions)
+
+for question, docs in zip(questions, batch_results):
+    print(f"\nQuestion: {question}")
+    print(f"Top result: {docs[0].page_content[:150]}...\n")</code></pre>
+
+  <h2>9. Step 7 – RAG with Agents</h2>
+  <p>
+    A <strong>RAG Agent</strong> uses tools (like your retriever) and decides when and how to call them.
+    This gives you more flexible, conversational behavior than a simple one‑shot chain.
+  </p>
+  <p>High‑level behavior:</p>
+  <ol>
+    <li>The user asks a question.</li>
+    <li>The agent decides whether to search the handbook.</li>
+    <li>If needed, it calls the retrieval tool (possibly multiple times).</li>
+    <li>It combines the retrieved context with its reasoning to produce a final answer.</li>
+  </ol>
+  <p>
+    This usually means <strong>more LLM calls</strong> (tool decisions + answering) and slightly higher latency,
+    but better behavior for complex, multi‑step queries.
+  </p>
+
+  <h3>9.1 Build a Retrieval Tool and Agent</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste the code below, and run it to define a retrieval tool
+      over your employee handbook and create a LangChain 1.0 agent that can use this tool.
+    </p>
+  </div>
+
+  <pre><code>from langchain_openai import ChatOpenAI
+from langchain.agents import create_agent  # LangChain 1.0 way
+from langchain.tools import tool
+
+# Initialize the LLM
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+
+# Create a retrieval tool using the @tool decorator
+@tool
+def retrieve_employee_handbook(query: str):
+    """
+    Searches the employee handbook for information.
+    Use this tool when you need to find specific information about:
+    - Company policies
+    - Employee benefits
+    - Working hours and time off
+    - Code of conduct
+    - Any other employee-related information
+    
+    Args:
+        query: The question or topic to search for
+    
+    Returns:
+        Relevant information from the employee handbook
+    """
+    # Retrieve relevant documents
+    retrieved_docs = vector_store.similarity_search(query, k=3)
+    
+    # Format and return the content for the LLM
+    return "\n\n".join([
+        f"Source (Page {doc.metadata.get('page', 'N/A')}):\n{doc.page_content}"
+        for doc in retrieved_docs
+    ])
+
+# Create tools list
+tools = [retrieve_employee_handbook]
+
+# Create the agent using LangChain 1.0's create_agent
+# This is simpler than the old create_tool_calling_agent + AgentExecutor approach
+system_prompt = """You are a helpful HR assistant with access to the company employee handbook.
+
+Use the retrieve_employee_handbook tool to search for information when answering questions about:
+- Company policies and procedures
+- Employee benefits and perks  
+- Working hours, holidays, and time off
+- Code of conduct and guidelines
+- Any other employment-related topics
+
+When you receive information from the tool, provide a clear and helpful answer based on that context.
+If you can answer without the tool (like greetings), feel free to do so.
+If the information isn't found, say so honestly."""
+
+agent = create_agent(llm, tools, system_prompt=system_prompt)
+
+print("✅ RAG Agent created successfully using LangChain 1.0!")</code></pre>
+
+  <h3>9.2 Ask the Agent a Vacation Question</h3>
+  <p>
+    Now you will see the agent’s <strong>thought process</strong> as it decides to call the retrieval tool
+    and then answers the question.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste the code below, and run it to stream the agent’s reasoning
+      for a vacation policy question.
+    </p>
+  </div>
+
+  <pre><code># Test the RAG agent
+# In LangChain 1.0, we use stream() with messages format
+question = "What is the vacation policy for employees?"
+
+print("\n" + "="*60)
+print("QUESTION:", question)
+print("="*60)
+print("\nAgent thinking process:")
+print("-"*60)
+
+# Stream the agent's execution
+for event in agent.stream(
+    {"messages": [{"role": "user", "content": question}]},
+    stream_mode="values"
+):
+    event["messages"][-1].pretty_print()
+
+print("="*60)</code></pre>
+
+  <h3>9.3 Complex Question with Multiple Tool Calls</h3>
+  <p>
+    For more complex queries, the agent may call the retrieval tool multiple times
+    (for example, once for sick leave and once for vacation days) and then compare them.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste the code below, and run it to ask a combined question
+      about sick leave and vacation days. Observe how the agent uses the tool more than once.
+    </p>
+  </div>
+
+  <pre><code># Test with a question that needs multiple searches
+complex_question = "What are the sick leave benefits and how do they compare to vacation days?"
+
+print("\n" + "="*60)
+print("COMPLEX QUESTION:", complex_question)
+print("="*60)
+print("\nAgent execution (may do multiple tool calls):")
+print("-"*60)
+
+for event in agent.stream(
+    {"messages": [{"role": "user", "content": complex_question}]},
+    stream_mode="values"
+):
+    event["messages"][-1].pretty_print()
+
+print("="*60)</code></pre>
+
+  <h3>9.4 Handling Simple Chat (No Retrieval)</h3>
+  <p>
+    The agent should also handle simple chat (like greetings) without calling the retrieval tool.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste the code below, and run it to confirm that the agent
+      replies to a greeting without using the handbook retrieval tool.
+    </p>
+  </div>
+
+  <pre><code># Test with a greeting (should NOT use the tool)
+greeting = "Hello! How are you?"
+
+print("\n" + "="*60)
+print("GREETING:", greeting)
+print("="*60)
+print("\n👀 Watch: The agent should respond without using the retrieval tool!")
+print("-"*60)
+
+for event in agent.stream(
+    {"messages": [{"role": "user", "content": greeting}]},
+    stream_mode="values"
+):
+    event["messages"][-1].pretty_print()
+
+print("="*60)
+print("\n✅ Notice: The agent didn't use the retrieval tool for a greeting!")</code></pre>
+
+  <h2>10. Step 8 – RAG with dynamic prompt middleware</h2>
+  <p>
+    A <strong>fixed retrieval‑first pipeline</strong> is a simpler pattern: it <em>always</em> retrieves context
+    and then calls the LLM once with that context.
+  </p>
+  <p>
+    Compared to agents, this pattern is typically:
+  </p>
+  <ul>
+    <li><strong>Faster</strong> – usually one LLM call per query.</li>
+    <li><strong>More predictable</strong> – always retrieves, no tool‑use decisions.</li>
+    <li><strong>Cheaper</strong> – fewer model calls overall.</li>
+  </ul>
+  <p>
+    It is also less flexible: it cannot skip retrieval when retrieval is unnecessary, and it cannot do multi‑step searches on its own.
+  </p>
+
+  <h3>10.1 Build a Retrieval Pipeline with Middleware</h3>
+  <p>
+    Here you use LangChain 1.0’s <strong>middleware</strong> to inject retrieved context
+    into the system prompt right before the LLM is called.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste the code below, and run it to define a dynamic prompt
+      that fetches context from the vector store and to create a <code>rag_pipeline</code>.
+    </p>
+  </div>
+
+  <pre><code>from langchain.agents.middleware import dynamic_prompt, ModelRequest
+
+# Create a dynamic prompt that injects retrieved context
+@dynamic_prompt
+def prompt_with_context(request: ModelRequest) -> str:
+    """Inject context from vector store into the system message."""
+    # Get the last user message
+    last_query = request.state["messages"][-1].content
+    
+    # Retrieve relevant documents
+    retrieved_docs = vector_store.similarity_search(last_query, k=3)
+    
+    # Format the context
+    docs_content = "\n\n---\n\n".join([
+        f"Page {doc.metadata.get('page', 'N/A')}:\n{doc.page_content}"
+        for doc in retrieved_docs
+    ])
+    
+    # Create system message with context
+    system_message = (
+        "You are a helpful HR assistant. Use the following context from the employee handbook to answer the question.\n\n"
+        "If the answer is not in the context, say \"I don't have that information in the employee handbook.\"\n"
+        "Be specific and cite relevant policies when possible.\n\n"
+        f"Context:\n{docs_content}"
+    )
+    
+    return system_message
+
+# Create the RAG pipeline using create_agent with middleware
+rag_pipeline = create_agent(llm, tools=[], middleware=[prompt_with_context])
+
+print("✅ RAG pipeline created successfully!")
+print("\nHow it works:")
+print("1. User asks a question")
+print("2. Middleware retrieves relevant context from vector store")
+print("3. Context is injected into system prompt")
+print("4. LLM generates answer with context (single call)")</code></pre>
+
+  <h3>10.2 Ask the RAG Pipeline a Question</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste the code below, and run it to ask about working hours.
+      Observe that the pipeline streams the final answer (no explicit tool‑call traces).
+    </p>
+  </div>
+
+  <pre><code># Test the RAG pipeline
+question = "What are the working hours at the company?"
+
+print("\n" + "="*60)
+print("QUESTION:", question)
+print("="*60)
+print("\nResponse:")
+print("-"*60)
+
+for event in rag_pipeline.stream(
+    {"messages": [{"role": "user", "content": question}]},
+    stream_mode="values"
+):
+    event["messages"][-1].pretty_print()
+
+print("="*60)</code></pre>
+
+  <h3>10.3 Test the RAG Pipeline with Multiple Questions</h3>
+  <p>
+    Asking multiple questions helps you see how the same RAG pipeline behaves across different topics
+    like holidays, dress code, and benefits.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste the code below, and run it.
+      Watch how each question is answered based on retrieved context.
+    </p>
+  </div>
+
+  <pre><code># Test with multiple questions
+questions = [
+    "How many paid holidays do employees get?",
+    "What is the dress code policy?",
+    "What benefits are offered to employees?"
+]
+
+print("\n" + "="*70)
+print("TESTING MULTIPLE QUESTIONS")
+print("="*70)
+
+for q in questions:
+    print(f"\nQ: {q}")
+    print("-" * 60)
+    
+    # Get the response
+    for event in rag_pipeline.stream(
+        {"messages": [{"role": "user", "content": q}]},
+        stream_mode="values"
+    ):
+        last_msg = event["messages"][-1]
+        if hasattr(last_msg, 'content') and last_msg.content:
+            print(f"A: {last_msg.content[:300]}...")
+            break
+    print()</code></pre>
+
+  <h2>11. Wrap-Up</h2>
+  <p>In this RAG lab you have:</p>
+  <ul>
+    <li>Loaded a real‑world PDF (an employee handbook) into LangChain <code>Document</code> objects.</li>
+    <li>Split documents into semantic chunks and generated embeddings with OpenAI.</li>
+    <li>Stored embeddings in a Chroma vector store and used similarity search and retrievers.</li>
+    <li>Built a RAG agent that decides when to call a retrieval tool.</li>
+    <li>Built RAG chains that always retrieve context via middleware.</li>
+  </ul>
+  <p>
+    You can now adapt this pattern to your own PDFs, wikis, and knowledge bases—
+    and combine agents and chains to design the RAG experience that best fits your application.
+  </p>
+
+</main>
+</body>
+</html>
+
+

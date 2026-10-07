@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>05 · Explore and Specify: Search – OpenSpec ShopLite</title>
+  <style>
+:root {
+  --ink: #0f172a;
+  --muted: #475569;
+  --accent: #1d4ed8;
+  --line: rgba(37, 99, 235, 0.18);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.65;
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+  color: #111827;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(15, 23, 42, 0.94);
+  color: #e5e7eb;
+  backdrop-filter: blur(8px);
+}
+
+.topbar-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0.7rem 1.25rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.topbar a {
+  color: #bfdbfe;
+  text-decoration: none;
+  font-size: 0.88rem;
+}
+
+.topbar a:hover { color: #fff; text-decoration: underline; }
+
+.brand {
+  font-weight: 700;
+  color: #fff !important;
+  letter-spacing: -0.02em;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+main {
+  max-width: 960px;
+  margin: 1.5rem auto 3rem;
+  padding: 2.25rem 2rem 3rem;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(148, 163, 184, 0.12);
+}
+
+h1 {
+  font-size: 2.05rem;
+  margin: 0 0 1.1rem;
+  letter-spacing: -0.03em;
+  text-align: center;
+  color: #0f172a;
+  padding: 1rem 1.4rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+  box-shadow:
+    0 10px 25px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(148, 163, 184, 0.35);
+}
+
+h2 {
+  font-size: 1.55rem;
+  margin-top: 2.15rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 0.35rem;
+  color: #0f172a;
+}
+
+h3 {
+  font-size: 1.2rem;
+  margin-top: 1.6rem;
+  color: #0f172a;
+}
+
+p { margin: 0.5rem 0 0.75rem; }
+
+code {
+  font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+  background-color: #f3f4ff;
+  padding: 0.12rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.95em;
+  color: #1d4ed8;
+}
+
+pre {
+  background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+  color: #e5e7eb;
+  padding: 2.25rem 4.75rem 1rem 1.1rem;
+  border-radius: 10px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+  margin: 0.75rem 0 1.5rem;
+  border: 1px solid rgba(15, 23, 42, 0.6);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.note, .exercise, .warn, .concept, .checkpoint, .behind, .think {
+  padding: 0.9rem 1.1rem;
+  margin: 1rem 0 1.5rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+}
+
+.note {
+  border-left: 4px solid #2563eb;
+  background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+  border-color: rgba(37, 99, 235, 0.4);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(191, 219, 254, 0.9);
+}
+
+.exercise {
+  border-left: 4px solid #16a34a;
+  background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+  border-color: rgba(22, 163, 74, 0.4);
+}
+
+.warn {
+  border-left: 4px solid #d97706;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: rgba(217, 119, 6, 0.4);
+}
+
+.concept {
+  border-left: 4px solid #7c3aed;
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+  border-color: rgba(124, 58, 237, 0.35);
+}
+
+.checkpoint {
+  border-left: 4px solid #0f766e;
+  background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+  border-color: rgba(15, 118, 110, 0.35);
+}
+
+.behind {
+  border-left: 4px solid #0e7490;
+  background: linear-gradient(135deg, #ecfeff, #cffafe);
+  border-color: rgba(14, 116, 144, 0.35);
+}
+
+.think {
+  border-left: 4px solid #c2410c;
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border-color: rgba(194, 65, 12, 0.35);
+}
+
+.exercise-title, .warn-title, .concept-title, .checkpoint-title, .behind-title, .think-title {
+  font-weight: 650;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+}
+
+.exercise-title { color: #166534; }
+.warn-title { color: #92400e; }
+.concept-title { color: #5b21b6; }
+.checkpoint-title { color: #115e59; }
+.behind-title { color: #155e75; }
+.think-title { color: #9a3412; }
+
+ol, ul { padding-left: 1.4rem; }
+li { margin: 0.25rem 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.95rem;
+}
+
+th, td {
+  border: 1px solid #e2e8f0;
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #eff6ff;
+  color: #0f172a;
+}
+
+tr:nth-child(even) td { background: #f8fafc; }
+
+.meta {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0 0 1.25rem;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.kicker {
+  text-align: center;
+  color: var(--muted);
+  margin-top: -0.35rem;
+  margin-bottom: 1.1rem;
+}
+
+.toc a { color: #1d4ed8; }
+
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.lesson-nav a {
+  color: #1d4ed8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.lesson-nav a:hover { text-decoration: underline; }
+
+.sample-output-title {
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+  color: #0f172a;
+}
+
+.code-wrapper { position: relative; }
+
+.copy-btn {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.5rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.55rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  color: #9ca3af;
+  font-family: system-ui, sans-serif;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  user-select: none;
+}
+
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #f9fafb;
+}
+
+.copy-btn.copied {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.45);
+}
+
+.progress {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.progress span {
+  display: block;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  background: #f1f5f9;
+  font-size: 0.82rem;
+  color: #334155;
+  text-align: center;
+}
+
+.progress span.done {
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 600;
+}
+
+.progress span.now {
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 700;
+}
+
+footer.site {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-bottom: 2rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.85rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.95rem 1rem;
+  background: #f8fafc;
+}
+
+.card h3 { margin-top: 0; font-size: 1.05rem; }
+.card a { color: #1d4ed8; font-weight: 650; text-decoration: none; }
+.card a:hover { text-decoration: underline; }
+.card p { margin: 0.35rem 0 0; font-size: 0.92rem; color: #475569; }
+
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="00-index.html">OpenSpec · ShopLite</a>
+    <nav>
+      <a href="00-index.html">Home</a>
+      <a href="01-why-spec-driven-development.html">01</a>
+      <a href="02-install-and-initialize.html">02</a>
+      <a href="03-core-concepts.html">03</a>
+      <a href="04-first-cycle-catalog.html">04</a>
+      <a href="05-explore-and-specify-search.html">05</a>
+      <a href="06-review-artifacts-cart.html">06</a>
+      <a href="07-apply-debug-checkout.html">07</a>
+      <a href="08-expanded-workflow-orders.html">08</a>
+      <a href="09-spec-evolution-inventory.html">09</a>
+      <a href="10-spec-management-and-beyond.html">10</a>
+    </nav>
+  </div>
+</div>
+
+<main>
+  <h1>05 · Explore and Specify: Search</h1>
+  <p class="kicker">If you cannot yet say the change in one sentence, talk it through first. Then write the search spec, and a test for each scenario.</p>
+  <div class="meta">
+    <span class="pill">Lesson 05 of 10</span>
+    <span class="pill">~70 minutes</span>
+    <span class="pill">Explore + RFC 2119</span>
+  </div>
+
+  <div class="progress">
+    <span class="done">Catalog</span><span class="now">Search</span><span>Cart</span>
+    <span>Checkout</span><span>Orders</span><span>Inventory</span>
+  </div>
+
+  <div class="note">
+    <strong>What you will do</strong>
+    <ul>
+      <li>Use <code>/opsx:explore</code> as a no-stakes thinking partner.</li>
+      <li>Turn a fuzzy “we need search” into scoped requirements.</li>
+      <li>Write and review Given / When / Then scenarios, including a search with no results.</li>
+      <li>Make sure the spec asks for one test per scenario, then propose, apply, and archive search on top of the catalog.</li>
+    </ul>
+  </div>
+
+  <div class="behind">
+    <div class="behind-title">Why the thinking step writes no files</div>
+    <p>
+      The important line in this command is: do not create a change folder, and do not write shop code.
+      The assistant may read the project, compare options, and sketch ideas in chat.
+      The moment those ideas land in <code>proposal.md</code>, they start to look like decisions.
+    </p>
+    <p>
+      That is why you start a new chat before propose. Take the one-sentence plan with you. Leave the options you already rejected in the old chat.
+      The slash command only sets the assistant’s job. Starting a clean chat is still your habit.
+    </p>
+    <p>
+      Search is a good feature for this lesson. “Search like Amazon” can grow into a huge system. This step is where we shrink it to a box that filters product names, before propose writes a ranking platform we do not want.
+    </p>
+  </div>
+  <div class="think">
+    <div class="think-title">Think</div>
+    <p>
+      Could you fake explore with a normal chat that says “don’t write files”? Yes. The value of the command is that
+      every teammate’s agent loads the <em>same</em> “don’t write files” skill, instead of a prompt people forget to paste.
+    </p>
+  </div>
+
+  <h2>1. Why explore exists</h2>
+  <p>
+    In lesson 04 the ticket was clear. Real work often starts as a worry: “shoppers will not find anything if we get
+    more than six products.” That is not yet a change. If you propose too early, the AI will invent a design
+    (Elasticsearch, filters, autocomplete, “people also buy”) because Amazon has those things.
+  </p>
+  <div class="concept">
+    <div class="concept-title">Explore</div>
+    <p>
+      <code>/opsx:explore</code> reads the codebase, compares options, and sharpens a fuzzy idea. It creates
+      <strong>no</strong> change folder and writes <strong>no</strong> production feature. When the picture is clear,
+      you switch to propose in a cleaner chat.
+    </p>
+  </div>
+  <p>Use explore when:</p>
+  <ul>
+    <li>You cannot state the change in one sentence.</li>
+    <li>Several implementations could work and you have not chosen.</li>
+    <li>You need to know how the current catalog actually stores products.</li>
+  </ul>
+  <p>Skip explore when the intent, scope, and out-of-scope are already obvious — like lesson 04.</p>
+
+  <h2>2. Explore the catalog you already have</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New chat. Start explore (Cursor: <code>/opsx-explore</code>).</p>
+  </div>
+  <pre><code>/opsx-explore
+
+Shoppers will need to find products by name, like Amazon's search bar.
+
+Please inspect the current ShopLite catalog (code + openspec/specs).
+I am NOT asking you to build yet.
+
+Help me decide:
+1. Where products live today (file, API, HTML).
+2. The smallest search that still feels like amazon.com: a single query box that filters the catalog.
+3. What we should explicitly NOT build (autocomplete, facets, ranking ML, search-as-you-type).
+4. Edge cases: empty query, no matches, case differences, extra spaces.
+
+End with a one-sentence propose statement I could paste into /opsx-propose.</code></pre>
+  <p>Read the answer. Push back if it recommends Elasticsearch for six products. ShopLite should filter in the app (query parameter on the existing list API, or equivalent).</p>
+
+  <div class="warn">
+    <div class="warn-title">Start a clean chat before you propose</div>
+    <p>
+      Explore chats are messy on purpose. When you are ready to propose, <strong>start a new chat</strong>. Take with
+      you only the one-sentence intent plus the edge cases you care about — not the three discarded architectures.
+    </p>
+  </div>
+
+  <h2>3. What “good search” means here</h2>
+  <p>Amazon search is a company. ShopLite search is a box. Be explicit so the spec cannot balloon.</p>
+  <table>
+    <thead>
+      <tr><th>In scope</th><th>Out of scope</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>A search box on the home page</td>
+        <td>Autocomplete / typeahead</td>
+      </tr>
+      <tr>
+        <td>Filter by name (case-insensitive, trim spaces)</td>
+        <td>Search inside reviews, “customers also bought”</td>
+      </tr>
+      <tr>
+        <td>Show matches; show a no-results message</td>
+        <td>Facets (brand, price slider), sort by relevance ML</td>
+      </tr>
+      <tr>
+        <td>Clearing the query restores the full catalog</td>
+        <td>Separate search index, Elasticsearch, typo-tolerance engine</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>4. Propose from a clean window</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New chat. Propose. Paste a tight prompt; do not paste the entire explore transcript.</p>
+  </div>
+  <pre><code>/opsx-propose add-product-search
+
+Add a catalog search box to ShopLite (Amazon-like find-a-product, tiny).
+
+Behavior:
+- Home page has a search box.
+- Submitting a query shows only products whose name contains the query, case-insensitive, ignoring surrounding whitespace.
+- Empty query (or clear) shows the full catalog.
+- Zero matches: a message that no products matched, and the shopper can search again.
+- Search does not create a new product database.
+
+Out of scope: autocomplete, facets, ranking, cart, spelling correction, accounts.
+
+Read existing openspec/specs/catalog so the delta fits the current catalog.
+Name the change add-product-search.
+Every scenario needs one automated test. The test name includes the scenario title.
+The spec must say that. tasks.md must list those tests.</code></pre>
+
+  <h2>5. Review the artifacts like a spec author</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Open the change folder and walk each artifact. Use this checklist.</p>
+  </div>
+
+  <h3>5.1 Proposal: four parts of a useful “why”</h3>
+  <ol>
+    <li><strong>Intent</strong> — shoppers can find a product by name.</li>
+    <li><strong>Scope</strong> — box + filter + empty states.</li>
+    <li><strong>Out of scope</strong> — autocomplete, facets, cart.</li>
+    <li><strong>Approach</strong> — one sentence, not a framework dump.</li>
+  </ol>
+  <p>If any of those four is missing, add it before apply.</p>
+
+  <h3>5.2 Specs: requirements you could test</h3>
+  <p>Reject these if they appear:</p>
+  <ul>
+    <li>“Search SHALL feel fast and intuitive.”</li>
+    <li>“Use SQL LIKE in SQLite.”</li>
+    <li>A requirement that also adds filters by category (scope creep).</li>
+  </ul>
+  <p>Insist on scenarios like:</p>
+  <pre><code>#### Scenario: Match ignores case
+- GIVEN a product named "USB-C Cable"
+- WHEN the shopper searches for "usb-c"
+- THEN that product is included in the results
+
+#### Scenario: No matches
+- GIVEN the catalog has products
+- WHEN the shopper searches for a string that matches no name
+- THEN the page explains that no products matched
+- AND it does not show unrelated products as if they matched
+
+#### Scenario: Empty query
+- GIVEN the shopper has filtered the list
+- WHEN the shopper submits an empty query (or clears search)
+- THEN the full catalog is shown again
+
+### Requirement: Test for each scenario
+The project SHALL include one automated test for each scenario in this spec.
+The test name SHALL include the scenario title.
+The test SHALL fail when that scenario's THEN is not met.</code></pre>
+  <p>
+    <strong>Delta type:</strong> search is new behavior. You should see <code>## ADDED Requirements</code>, probably
+    under a new <code>search</code> capability (or added onto catalog — either can be valid). Prefer a separate
+    <code>search</code> spec if the files went that way; do not fight the AI if catalog grew a search requirement
+    as long as archive will stay readable.
+  </p>
+
+  <h3>5.3 Design vs spec</h3>
+  <p>
+    Query strings, <code>GET /api/products?q=</code>, and client-side filter belong in <code>design.md</code>.
+    If they leaked into the spec, move them. The spec should still be true if you later switch from client filter
+    to server filter.
+  </p>
+
+  <h3>5.4 Tasks</h3>
+  <p>You want small checkboxes: add the input, wire the query, the empty state, keep the catalog listing intact, and one test per scenario. If one task says “implement search,” split it with <code>/opsx-update</code>.</p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Make at least one improvement to the generated specs (add a missing scenario, split a fat requirement, or delete an implementation SHALL). Then, if you used the agent to edit, skim design and tasks for consistency.</p>
+  </div>
+
+  <h2>6. Apply, run, archive</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New chat. Apply, then click through the running app.</p>
+  </div>
+  <pre><code>/opsx-apply add-product-search</code></pre>
+  <p>With the server running:</p>
+  <ol>
+    <li>Search <code>lamp</code> — only matching items.</li>
+    <li>Search <code>LAMP</code> — same matches (case-insensitive).</li>
+    <li>Search <code>zzzz-no-product</code> — no-results message.</li>
+    <li>Clear / empty search — full grid returns.</li>
+    <li>Open a result’s detail page — still works (catalog spec still holds).</li>
+  </ol>
+  <pre><code>/opsx-archive add-product-search</code></pre>
+  <p>Confirm <code>openspec/specs/</code> now includes search behavior (its own folder or merged into catalog).</p>
+
+  <h2>7. Cross-spec thinking</h2>
+  <p>
+    You now have more than one spec. Search must not break catalog’s “list all available products” — except when a
+    query is active. If those two requirements fight, that is a spec bug, not a CSS bug. We will hit a louder version
+    of this in checkout (lesson 07).
+  </p>
+  <p>Optional CLI:</p>
+  <pre><code>openspec validate --all
+openspec view</code></pre>
+
+  <h2>8. Challenge (optional)</h2>
+  <div class="exercise">
+    <div class="exercise-title">Challenge</div>
+    <p>
+      Decide whether searching by <em>description</em> as well as name is in scope. If you want it, do not silently
+      “just code it.” Either update the change before archive, or create a tiny follow-up change
+      <code>search-matches-description</code> after archive. Practice the rule: behavior changes go through specs.
+    </p>
+  </div>
+
+  <h2>9. Common issues</h2>
+  <table>
+    <thead>
+      <tr><th>Symptom</th><th>Fix</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Explore started writing files</td><td>Stop. Explore should not create a change. Copy the one-sentence intent and propose in a new chat.</td></tr>
+      <tr><td>Agent added Elasticsearch</td><td>Reject in design review. Update artifacts: in-process filter only.</td></tr>
+      <tr><td>Empty search shows no products</td><td>Spec gap or impl bug. If the spec never said empty query = full catalog, add it, then apply.</td></tr>
+      <tr><td>Search is a new page that hides navigation</td><td>Fine if specified; if not, it drifted. Align with “box on the home page.”</td></tr>
+    </tbody>
+  </table>
+
+  <h2>10. Reflection</h2>
+  <ol>
+    <li>What did explore change about your propose prompt?</li>
+    <li>Name one requirement you rejected for being implementation or vagueness.</li>
+    <li>Why archive search as its own change instead of stuffing it into the catalog change from lesson 04?</li>
+  </ol>
+
+  <div class="checkpoint">
+    <div class="checkpoint-title">Lesson 05 complete</div>
+    <p>ShopLite now has an Amazon-like search box, and you have practiced explore → specify → review. Next: the cart, where reviewing artifacts is the whole lesson.</p>
+  </div>
+
+  <div class="lesson-nav">
+    <a href="04-first-cycle-catalog.html">← 04 Catalog</a>
+    <a href="06-review-artifacts-cart.html">Next: 06 Cart (review artifacts) →</a>
+  </div>
+</main>
+<script>
+(function () {
+  const COPY_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  const CHECK_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  function copyText(text, onDone) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(onDone).catch(fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      onDone();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("pre").forEach((pre) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "code-wrapper";
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "copy-btn";
+      btn.innerHTML = COPY_ICON + " Copy";
+      wrapper.appendChild(btn);
+
+      btn.addEventListener("click", () => {
+        const code = pre.querySelector("code");
+        const text = (code ? code.innerText : pre.innerText).trimEnd();
+        copyText(text, () => {
+          btn.innerHTML = CHECK_ICON + " Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.innerHTML = COPY_ICON + " Copy";
+            btn.classList.remove("copied");
+          }, 2000);
+        });
+      });
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

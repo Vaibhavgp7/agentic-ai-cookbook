@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Debate and Judge Pattern Lab: A Loan on the UPI Pay Screen</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6; margin: 0; padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 980px; margin: 2rem auto 3rem; padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff; border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.05rem; margin: 0 0 1.25rem; letter-spacing: -0.03em; text-align: center;
+      color: #0f172a; padding: 1rem 1.5rem; border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.55rem; margin-top: 2.25rem; margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18); padding-bottom: 0.35rem; color: #0f172a;
+    }
+    h3 { font-size: 1.2rem; margin-top: 1.6rem; color: #0f172a; }
+    p { margin: 0.45rem 0 0.7rem; }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff; padding: 0.12rem 0.3rem; border-radius: 4px;
+      font-size: 0.92em; color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb; padding: 1rem 1.1rem; border-radius: 10px; overflow-x: auto;
+      font-size: 0.86rem; margin: 0.7rem 0 1.3rem; border: 1px solid rgba(15, 23, 42, 0.6); line-height: 1.45;
+    }
+    pre code { background: none; padding: 0; color: inherit; }
+    .diagram pre, pre.mermaid {
+      background: #ffffff; color: #111827; border: none; margin: 0;
+      padding: 0.35rem 0.2rem 0.1rem; box-shadow: none;
+    }
+    .note, .exercise, .instructor, .predict, .case {
+      padding: 0.9rem 1.1rem; margin: 1rem 0 1.4rem; border-radius: 10px;
+      font-size: 0.95rem; border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .instructor {
+      border-left: 4px solid #d97706;
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: rgba(217, 119, 6, 0.35);
+    }
+    .predict {
+      border-left: 4px solid #9333ea;
+      background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+      border-color: rgba(147, 51, 234, 0.35);
+    }
+    .case {
+      border-left: 4px solid #b45309;
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: rgba(180, 83, 9, 0.35);
+    }
+    .exercise-title, .instructor-title, .predict-title, .case-title {
+      font-weight: 650; margin-bottom: 0.25rem; text-transform: uppercase;
+      letter-spacing: 0.06em; font-size: 0.8rem;
+    }
+    .exercise-title { color: #166534; }
+    .instructor-title { color: #92400e; }
+    .predict-title { color: #6b21a8; }
+    .case-title { color: #92400e; }
+    .glossary dt { font-weight: 650; margin-top: 0.75rem; }
+    .glossary dd { margin: 0.15rem 0 0.3rem 0; }
+    ol, ul { padding-left: 1.35rem; }
+    li { margin: 0.28rem 0; }
+    table { border-collapse: collapse; width: 100%; margin: 0.7rem 0 1.2rem; font-size: 0.92rem; }
+    th, td { border: 1px solid #e5e7eb; padding: 0.45rem 0.6rem; text-align: left; vertical-align: top; }
+    th { background: #eff6ff; }
+    .diagram {
+      background: #fafafa; border: 1px solid #e5e7eb; border-radius: 12px;
+      padding: 0.4rem 0.6rem 0.2rem; margin: 0.5rem 0 0.4rem; overflow-x: auto;
+    }
+    .caption { font-size: 0.85rem; color: #475569; margin: 0 0 1rem; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Debate and Judge Pattern Lab: A Loan on the UPI Pay Screen</h1>
+
+  <div class="note">
+    <strong>How to use this guide</strong>
+    <ol>
+      <li>Open this page beside a Jupyter notebook named <code>09c-debate-and-judge.ipynb</code> in the <code>03-langgraph</code> folder.</li>
+      <li>Use the <code>.env</code> already in that folder.</li>
+      <li>Whenever you see <strong>Your Task</strong>, paste the code into a <strong>new notebook cell</strong> and run it.</li>
+      <li>You should see the bull speak, then the bear, then the same pair a second time, then the judge. The second speeches must answer the other side.</li>
+    </ol>
+    <p>Pattern 3 of 5. Overview: <code>09-more-multi-agent-patterns.html</code>.</p>
+  </div>
+
+  <h2>1. Why this lab exists</h2>
+  <p>
+    Some decisions are not a pass or a fail. Both sides have real evidence, and the useful answer is a launch with conditions. A score that averages the two sides cannot write that note. It also cannot force the second round to answer what the other side just said.
+  </p>
+  <p>
+    Bull and bear do not choose the next node. If they could, one of them would try to skip the other or skip the judge. A small Python node, <code>turn_gate</code>, counts the rounds and owns the loop.
+  </p>
+
+  <h3>What you will build</h3>
+  <ol>
+    <li>A <strong>bull</strong> that argues for offering a small credit line on the UPI pay screen.</li>
+    <li>A <strong>bear</strong> that argues against offering it to everyone.</li>
+    <li>A <strong>turn gate</strong> that is plain Python. It sends the case back to the bull once, then to the judge.</li>
+    <li>A <strong>judge</strong> that may use only claims already in the debate, and must end with conditions.</li>
+  </ol>
+
+  <h2>2. The business story</h2>
+  <div class="case">
+    <div class="case-title">The question in front of the product committee</div>
+    <p>Should Horizon Bank show a pre-approved credit line when an existing customer pays with UPI?</p>
+  </div>
+  <ul>
+    <li>The product team wants a credit line (a pre-approved borrowing limit) on the pay screen. Fraud, customer complaints, and the bank’s own money that would cover losses all matter. Both sides have real evidence.</li>
+    <li><code>bull</code> argues for the launch: other apps already offer it, customers who receive salary in this bank have a low loss rate, and a small cap (a limit on one payment) keeps the risk down.</li>
+    <li><code>bear</code> argues against offering it to everyone: mule accounts (accounts opened to pass stolen money along) can still show a salary credit, complaints jump when an automatic payment fails, and the loss numbers cover only six months.</li>
+    <li>Each side speaks twice. The second turn must answer the other side. It must not repeat the opening.</li>
+    <li><code>judge</code> reads the whole exchange and writes the decision: launch only for salary customers, cap the amount, and look at the loss numbers again after three months. It must say which of the bear’s points it accepted and which of the bull’s points it set aside.</li>
+  </ul>
+
+  <h3>Words you need</h3>
+  <div class="note glossary">
+    <dl>
+      <dt>Credit line</dt>
+      <dd>A limit the customer can borrow up to, already approved, without a new application at the moment of payment.</dd>
+      <dt>Cap</dt>
+      <dd>The largest amount one UPI payment may put on that credit line. In this brief it is ₹5,000.</dd>
+      <dt>Mule account</dt>
+      <dd>An account opened so stolen money can pass through it. A salary credit on that account does not make it safe.</dd>
+      <dt>Round</dt>
+      <dd>One bull speech plus the bear speech that follows it. This lab runs two rounds.</dd>
+      <dt>Turn gate</dt>
+      <dd>The Python node that increments <code>round</code> and chooses <code>bull</code> or <code>judge</code>. It does not argue.</dd>
+    </dl>
+  </div>
+
+  <h2>3. Why an agent has to do this</h2>
+  <ul>
+    <li>Both sides can be right at the same time. The answer is a decision with conditions, not a pass or fail score.</li>
+    <li>The second round helps only if each side actually replies to what the other side just said.</li>
+    <li>The judge has to tie each condition to a specific argument. A form that averages two scores cannot write that note.</li>
+  </ul>
+
+  <h2>4. The graph</h2>
+  <div class="diagram">
+    <pre class="mermaid">
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	bull(bull)
+	bear(bear)
+	turn_gate(turn_gate)
+	judge(judge)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> bull;
+	bull --> bear;
+	bear --> turn_gate;
+	turn_gate -.-> bull;
+	turn_gate -.-> judge;
+	judge --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+    </pre>
+  </div>
+  <p class="caption"><code>bull</code>, <code>bear</code>, and <code>judge</code> are model calls. <code>turn_gate</code> is plain Python: it only counts rounds. The only dotted arrows leave the turn gate.</p>
+  <ul>
+    <li>One round always goes <code>bull</code>, then <code>bear</code>, then <code>turn_gate</code>. Those are solid arrows. Neither speaker can skip the other.</li>
+    <li><code>turn_gate</code> adds 1 to <code>round</code>. While the new value is less than 2, it sends the case back to <code>bull</code>. Bull can now see what bear just said.</li>
+    <li>After the second round it sends the case to <code>judge</code>. A solid arrow then ends the graph.</li>
+    <li>Two rounds is a choice for this lesson. You can also stop early if the bear says it has nothing new. Keep a hard stop either way. This lab uses the hard stop only.</li>
+  </ul>
+
+  <div class="predict">
+    <div class="predict-title">Predict before you code</div>
+    <p><code>round</code> starts at 0. After the first bull–bear pair, what does <code>turn_gate</code> set <code>round</code> to, and which node does it choose? After the second pair? Write both answers before you run.</p>
+  </div>
+
+  <h2>5. Setup</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Terminal, from <code>03-langgraph</code>, if needed:</p>
+  </div>
+  <pre><code>pip install langgraph langchain langchain-openai python-dotenv</code></pre>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>import os
+import operator
+from typing_extensions import TypedDict, Annotated
+from pydantic import BaseModel, Field
+from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langgraph.graph import StateGraph, START, END
+
+load_dotenv()
+model_name = os.getenv("MODEL_NAME", "gpt-4.1-mini")
+llm = ChatOpenAI(model=model_name, temperature=0.3)
+print("Model:", model_name)</code></pre>
+  <p>Temperature is 0.3 so the two sides do not sound identical. The gate is still deterministic, because it is Python.</p>
+
+  <h2>6. The brief both sides must use</h2>
+  <p>Put the evidence in state, not in only one prompt. A side that invents a loss rate the brief does not contain is cheating, and the judge is told to ignore new facts.</p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. Read the brief. You will use it to check the judge’s conditions.</p>
+  </div>
+  <pre><code>QUESTION = "Should Horizon Bank show a pre-approved credit line when an existing customer pays with UPI?"
+
+BRIEF = """
+PROPOSAL
+- Credit line appears on the UPI pay screen for existing customers.
+- Cap: ₹5,000 on one payment.
+- Customer must already have an account. No new-to-bank customers.
+
+EVIDENCE THE BULL MAY USE
+- Three large Indian payment apps already show a credit line on UPI pay.
+- Customers who received salary in this bank: 90-day loss rate 0.4 percent on a six-month pilot.
+- The ₹5,000 cap keeps one payment small.
+
+EVIDENCE THE BEAR MAY USE
+- 11 percent of mule accounts closed last quarter had also received a salary credit.
+- Complaint rate doubles when an automatic payment from this kind of credit line fails.
+- The 0.4 percent loss study covers only six months, and those months included a festival season with unusually low fraud.
+
+NO OTHER FIGURES ARE IN THIS BRIEF. Do not invent a loss rate, a complaint count, or a competitor's default rate.
+"""
+
+print(QUESTION)
+print(BRIEF)</code></pre>
+
+  <h2>7. State</h2>
+  <p>
+    <code>messages</code> uses <code>operator.add</code>. Each speech is one <code>AIMessage</code> with <code>name="bull"</code> or <code>name="bear"</code>, so the other side can see who spoke.
+    <code>round</code> is a plain integer. The gate replaces it. Do not put a reducer on <code>round</code>, or the count will be added twice.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>class State(TypedDict):
+    question: str
+    brief: str
+    messages: Annotated[list, operator.add]
+    round: int
+    next: str
+    decision: str
+
+print("State schema ready.")</code></pre>
+
+  <h2>8. Bull and bear</h2>
+  <p>
+    The prompts are different. Each side is told which evidence it may use, and both are told: on the second turn, quote the other side before you add a point. Do not repeat your opening.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>BULL_PROMPT = """You are the bull on a product committee at Horizon Bank.
+Argue FOR showing the credit line on the UPI pay screen.
+
+Use only the QUESTION, the BRIEF, and the debate so far.
+You may use the bull evidence. You may answer the bear, but you may not invent numbers.
+
+If you have not spoken yet, give a short opening: three points, under 120 words.
+If you have spoken already, this is your second turn:
+- Quote one sentence from the latest bear message.
+- Answer that sentence.
+- Do not repeat your opening points.
+"""
+
+BEAR_PROMPT = """You are the bear on a product committee at Horizon Bank.
+Argue AGAINST offering the credit line to every existing customer.
+
+Use only the QUESTION, the BRIEF, and the debate so far.
+You may use the bear evidence. You may answer the bull, but you may not invent numbers.
+
+If you have not spoken yet, give a short opening: three points, under 120 words.
+If you have spoken already, this is your second turn:
+- Quote one sentence from the latest bull message.
+- Answer that sentence.
+- Do not repeat your opening points.
+"""
+
+def speaker_chain(system_prompt):
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", system_prompt),
+        ("human", "QUESTION:\n{question}\n\nBRIEF:\n{brief}"),
+        MessagesPlaceholder("messages"),
+    ])
+    return prompt | llm
+
+bull_chain = speaker_chain(BULL_PROMPT)
+bear_chain = speaker_chain(BEAR_PROMPT)
+
+def bull(state):
+    reply = bull_chain.invoke(state)
+    text = reply.content if isinstance(reply.content, str) else str(reply.content)
+    print(f"\n[bull] round so far {state['round']}\n{text}\n")
+    return {"messages": [AIMessage(content=text, name="bull")]}
+
+def bear(state):
+    reply = bear_chain.invoke(state)
+    text = reply.content if isinstance(reply.content, str) else str(reply.content)
+    print(f"\n[bear] round so far {state['round']}\n{text}\n")
+    return {"messages": [AIMessage(content=text, name="bear")]}
+
+print("Speakers ready.")</code></pre>
+
+  <h2>9. The turn gate</h2>
+  <p>
+    This node does not call the model. It adds 1 to <code>round</code>.
+    The value you store is the number of completed rounds.
+    Start at 0. After the first pair, the value is 1, and 1 is still less than 2, so the next node is <code>bull</code>.
+    After the second pair, the value is 2, which is not less than 2, so the next node is <code>judge</code>.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. Trace it on paper with <code>round</code> starting at 0 before you run the graph.</p>
+  </div>
+  <pre><code>def turn_gate(state):
+    nxt = state["round"] + 1
+    choice = "another_round" if nxt &lt; 2 else "enough"
+    print(f"\n[turn_gate] completed rounds = {nxt} -> {choice}")
+    return {"round": nxt, "next": choice}
+
+print("Turn gate ready.")</code></pre>
+
+  <div class="note">
+    <strong>Why the speakers do not set <code>next</code>.</strong>
+    Bull and bear return only a message. If the bull node could return <code>next="judge"</code>, it could skip the bear. The solid edges <code>bull → bear → turn_gate</code> make that impossible. Only the gate has conditional edges.
+  </div>
+
+  <h2>10. The judge</h2>
+  <p>
+    The judge is told not to add a new fact. It may use only claims already in the debate. It must name one bear point it accepts and one bull point it sets aside. The decision has to include the conditions, not a bare yes or no.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>class Ruling(BaseModel):
+    accepted_from_bear: str = Field(description="One bear point you accept, in the bear's words as closely as you can.")
+    set_aside_from_bull: str = Field(description="One bull point you do not treat as enough, and why.")
+    conditions: list[str] = Field(description="The conditions on any launch. At least two.")
+    decision: str = Field(description="The ruling in 4 to 6 sentences. No new numbers.")
+
+judge_prompt = ChatPromptTemplate.from_messages([
+    ("system", """You are the judge. You do not add a new fact and you do not invent a number.
+Use only claims that already appear in the debate messages.
+If a speaker used a figure that is not in the brief, ignore that figure.
+
+Write a decision with conditions. A reasonable reading of this brief is:
+launch only for customers who receive salary in this bank, keep the ₹5,000 cap,
+and review the loss numbers after three more months.
+You may differ if the debate supports it, but you must say which bear point you accepted
+and which bull point you set aside.
+Do not end with only "yes" or only "no".
+"""),
+    ("human", "QUESTION:\n{question}\n\nBRIEF:\n{brief}"),
+    MessagesPlaceholder("messages"),
+])
+judge_chain = judge_prompt | llm.with_structured_output(Ruling)
+
+def judge(state):
+    ruling = judge_chain.invoke(state)
+    text = (
+        f"ACCEPTED FROM BEAR: {ruling.accepted_from_bear}\n"
+        f"SET ASIDE FROM BULL: {ruling.set_aside_from_bull}\n"
+        f"CONDITIONS: {'; '.join(ruling.conditions)}\n\n"
+        f"{ruling.decision}"
+    )
+    print("\n[judge]\n" + text)
+    return {
+        "decision": text,
+        "messages": [AIMessage(content=text, name="judge")],
+    }
+
+print("Judge ready.")</code></pre>
+
+  <h2>11. Wire the graph</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. Confirm there is no conditional edge on <code>bull</code> or <code>bear</code>.</p>
+  </div>
+  <pre><code>g = StateGraph(State)
+g.add_node("bull", bull)
+g.add_node("bear", bear)
+g.add_node("turn_gate", turn_gate)
+g.add_node("judge", judge)
+
+g.add_edge(START, "bull")
+g.add_edge("bull", "bear")
+g.add_edge("bear", "turn_gate")
+g.add_conditional_edges("turn_gate", lambda state: state["next"], {
+    "another_round": "bull",
+    "enough": "judge",
+})
+g.add_edge("judge", END)
+
+graph = g.compile()
+print("Graph compiled.")</code></pre>
+
+  <h2>12. Draw the graph</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. You want a loop from <code>turn_gate</code> back to <code>bull</code>, and a separate arrow from <code>turn_gate</code> to <code>judge</code>.</p>
+  </div>
+  <pre><code>from IPython.display import Image
+Image(graph.get_graph().draw_mermaid_png())</code></pre>
+
+  <h2>13. Run the debate</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. You should see two <code>[bull]</code> blocks and two <code>[bear]</code> blocks before <code>[judge]</code>.</p>
+  </div>
+  <pre><code>def run_debate():
+    result = graph.invoke(
+        {
+            "question": QUESTION,
+            "brief": BRIEF,
+            "messages": [HumanMessage(content="Open the debate.", name="chair")],
+            "round": 0,
+            "next": "",
+            "decision": "",
+        },
+        config={"recursion_limit": 15},
+    )
+    print("\n" + "=" * 70)
+    print("COMPLETED ROUNDS:", result["round"])
+    names = [m.name for m in result["messages"] if m.name in ("bull", "bear", "judge")]
+    print("SPEAKING ORDER:", " -> ".join(names))
+    return result
+
+result = run_debate()</code></pre>
+
+  <h3>What you should see</h3>
+  <table>
+    <thead>
+      <tr><th>Order</th><th>Node</th><th>What “round so far” means</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>bull</td><td>0. Opening. No quote of the bear yet, because the bear has not spoken.</td></tr>
+      <tr><td>2</td><td>bear</td><td>0. Opening against offering it to everyone.</td></tr>
+      <tr><td>3</td><td>turn_gate</td><td>Prints <code>completed rounds = 1 -&gt; another_round</code>.</td></tr>
+      <tr><td>4</td><td>bull</td><td>1. Must quote the bear. Must not repeat the opening.</td></tr>
+      <tr><td>5</td><td>bear</td><td>1. Must quote the bull’s second speech.</td></tr>
+      <tr><td>6</td><td>turn_gate</td><td>Prints <code>completed rounds = 2 -&gt; enough</code>.</td></tr>
+      <tr><td>7</td><td>judge</td><td>A ruling with conditions. Then the graph ends.</td></tr>
+    </tbody>
+  </table>
+  <p><code>SPEAKING ORDER</code> should be:</p>
+  <pre><code>bull -> bear -> bull -> bear -> judge</code></pre>
+  <p><code>COMPLETED ROUNDS</code> should be <strong>2</strong>.</p>
+  <p>Check the judge’s text against the brief:</p>
+  <ul>
+    <li>It accepts something the bear actually said (mule accounts with a salary credit, complaints when autopay fails, or the six-month study).</li>
+    <li>It sets aside something the bull said, usually “other apps already do this” or the 0.4 percent figure treated as if it were a full year.</li>
+    <li>The conditions include who may see the line (salary customers), the ₹5,000 cap, and a later look at the loss numbers.</li>
+    <li>It does not introduce a new percentage.</li>
+  </ul>
+
+  <h3>If the run looks wrong</h3>
+  <ul>
+    <li><strong>Only one round.</strong> The gate went straight to <code>judge</code>. Check that the initial state sets <code>round</code> to <code>0</code>, and that the comparison is <code>nxt &lt; 2</code>, not <code>nxt &lt; 1</code>.</li>
+    <li><strong>Three rounds.</strong> The comparison is too loose. After the increment, <code>nxt &lt; 2</code> is true only when <code>nxt</code> is 1, so the gate loops back once and you get two rounds. <code>nxt &lt; 3</code> loops back twice and you get three rounds.</li>
+    <li><strong>The second bull speech repeats the opening.</strong> The model ignored the second-turn rule. The graph is still correct. In the exercise section you will add a check.</li>
+    <li><strong>The judge cites a figure you cannot find in the brief or the speeches.</strong> That breaks the judge prompt. Quote the sentence back in a follow-up cell and ask which message it came from. If it came from nowhere, the judge added a fact.</li>
+  </ul>
+
+  <h2>14. Key takeaways</h2>
+  <ul>
+    <li><strong>The arguers do not own the loop.</strong> Solid edges force bull then bear. The gate decides whether the round is over.</li>
+    <li><strong>A second turn is only useful if it is a reply.</strong> The prompt has to say “quote the other side.” The graph cannot check English by itself.</li>
+    <li><strong>The judge is a different job from a third debater.</strong> It does not add evidence. It ties conditions to points already made.</li>
+    <li><strong>The hard stop is the gate’s comparison, not a hope that the model will get tired.</strong> Two rounds is a lesson choice. A production gate can also stop early, and it still needs a maximum.</li>
+    <li><strong>Shared <code>messages</code> are the debate.</strong> <code>operator.add</code> is what lets the second bull see the first bear.</li>
+  </ul>
+
+  <div class="instructor">
+    <div class="instructor-title">Try this on your own</div>
+    <ol>
+      <li>Change the gate so three rounds run (<code>nxt &lt; 3</code>). Read the third bull speech. Did it still have a new answer, or did it start repeating? Put the gate back to two rounds.</li>
+      <li>After a run, check the second bull message in Python: it should contain a stretch of words that also appear in the first bear message. If it does not, the second turn failed the “quote the other side” rule even though the graph looped.</li>
+      <li>Add a second exit on the gate: if the latest bear message contains the phrase “nothing new”, choose <code>judge</code> even when <code>round</code> is still 1. Keep the “two rounds” stop as well, so a bear that never says that cannot debate forever.</li>
+    </ol>
+  </div>
+</main>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: "base",
+    securityLevel: "loose",
+    flowchart: { curve: "linear", htmlLabels: true, padding: 14, nodeSpacing: 40, rankSpacing: 45 },
+    themeVariables: {
+      fontFamily: "system-ui, Segoe UI, sans-serif",
+      fontSize: "15px",
+      primaryColor: "#f2f0ff",
+      primaryTextColor: "#111827",
+      primaryBorderColor: "#a78bfa",
+      lineColor: "#64748b",
+    },
+  });
+</script>
+</body>
+</html>

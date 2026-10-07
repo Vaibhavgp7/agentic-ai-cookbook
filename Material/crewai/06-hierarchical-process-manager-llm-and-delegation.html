@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A Manager Assigns the Work</title>
+  <style>
+    :root {
+      --bg-gradient-start: #eef2ff;
+      --bg-gradient-mid: #f9fafb;
+      --bg-gradient-end: #fdf2ff;
+      --text-primary: #111827;
+      --text-heading: #0f172a;
+      --accent-blue: #2563eb;
+      --accent-green: #16a34a;
+      --accent-amber: #d97706;
+      --accent-red: #dc2626;
+      --card-bg: #ffffff;
+      --border-subtle: rgba(148, 163, 184, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, var(--bg-gradient-start) 0, var(--bg-gradient-mid) 40%, var(--bg-gradient-end) 100%);
+      color: var(--text-primary);
+    }
+
+    main {
+      max-width: 980px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08), 0 0 0 1px var(--border-subtle);
+    }
+
+    h1 {
+      font-size: 2.05rem;
+      margin: 0 0 1rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: var(--text-heading);
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12), 0 0 0 1px var(--border-subtle);
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: var(--text-heading);
+    }
+
+    h3 { font-size: 1.18rem; margin-top: 1.75rem; color: var(--text-heading); }
+
+    p { margin: 0.5rem 0 0.75rem; }
+
+    a { color: var(--accent-blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.93em;
+      color: #1d4ed8;
+    }
+
+    pre {
+      background: linear-gradient(145deg, #020617, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.86rem;
+      line-height: 1.5;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+
+    pre code { background: none; padding: 0; color: inherit; }
+
+    .note, .exercise, .warning, .tip, .student-edit {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+
+    .note {
+      border-left: 4px solid var(--accent-blue);
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+    }
+
+    .exercise {
+      border-left: 4px solid var(--accent-green);
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+
+    .warning {
+      border-left: 4px solid var(--accent-red);
+      background: linear-gradient(135deg, #fef2f2, #fee2e2);
+      border-color: rgba(220, 38, 38, 0.4);
+    }
+
+    .tip {
+      border-left: 4px solid var(--accent-amber);
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: rgba(217, 119, 6, 0.4);
+    }
+
+    .student-edit {
+      border-left: 4px solid var(--accent-green);
+      background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+      border-color: rgba(22, 163, 74, 0.45);
+    }
+
+    .exercise-title, .label {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.78rem;
+    }
+
+    .exercise-title { color: #166534; }
+    .label-amber { color: #92400e; }
+    .label-green { color: #166534; }
+
+    ol, ul { padding-left: 1.4rem; }
+    li { margin: 0.3rem 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.93rem;
+    }
+
+    table th {
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      color: var(--text-heading);
+      font-weight: 600;
+      padding: 0.7rem 0.9rem;
+      text-align: left;
+      border-bottom: 2px solid var(--accent-blue);
+    }
+
+    table td {
+      padding: 0.7rem 0.9rem;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+
+    table tr:hover { background-color: #f8fafc; }
+
+    .subtitle {
+      text-align: center;
+      color: #64748b;
+      margin-bottom: 1.5rem;
+      font-size: 1.05rem;
+    }
+
+    .file-tree {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      margin: 0.75rem 0 1.5rem;
+      font-family: "Fira Code", Menlo, Monaco, Consolas, monospace;
+      font-size: 0.86rem;
+      white-space: pre;
+      overflow-x: auto;
+      line-height: 1.55;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>A Manager Assigns the Work</h1>
+  <p class="subtitle">The same Suraksha chat. The same two specialists. A manager now decides which worker does each job.</p>
+
+  <div class="note">
+    <strong>How to follow this page.</strong>
+    You already have two agents and two tasks that run in a fixed order. Do the steps in order. Copy the new lines exactly. Do not add a third agent file. After Step 4, read the terminal before you trust the chat. New words are explained in parentheses the first time they appear.
+  </div>
+
+  <h2>The story, in plain words</h2>
+  <p>You are still the <strong>claims officer</strong> (the human at the keyboard). The <strong>coverage officer agent</strong> writes the <strong>coverage opinion</strong> (the first reading of the file). The <strong>examiner brief agent</strong> writes the <strong>brief</strong> (the short note for the senior examiner, who is a person outside this chat). Right now each task is pinned to one agent. The process is <strong>sequential</strong> (the tasks run in the order they are written, and the named agent does that task). Nobody chooses the worker.</p>
+  <p>A claims desk does choose. The person who opens the policy is not the person who writes the note for the senior examiner. CrewAI can add a third worker for that choice. You do not write a third agent file. You change the process to <strong>hierarchical</strong> (a manager receives each task and hands it to one specialist). You name a model for the manager. CrewAI then creates an agent whose role is <strong>Crew Manager</strong>. The manager does not open the database. The manager's only job is to <strong>delegate</strong> (hand the job to one of the two agents you already have).</p>
+  <p>The task list is still walked from top to bottom. The coverage opinion still runs before the brief, because the brief's <code>context</code> (the earlier answer it is allowed to read) names <code>coverage_opinion</code>. What changes is who is handed the work. Leave <code>allow_delegation</code> set to <code>false</code> on both specialists. If they can hand work to each other, the manager is no longer the only one assigning it.</p>
+
+  <div class="note">
+    <strong>The manager must not pay or decline.</strong>
+    The senior examiner is still the human who binds a payment or a denial. The manager only assigns the coverage opinion and the brief. Both answers stay non-binding.
+  </div>
+
+  <div class="warning">
+    <strong>Hierarchical needs a manager model.</strong>
+    If <code>process</code> is <code>hierarchical</code> and you do not set <code>manager_llm</code>, the crew fails before the first task. The message says that <code>manager_llm</code> or <code>manager_agent</code> is required. Use <code>manager_llm</code>. Do not add a manager to the <code>agents</code> list, and do not give the manager a tool.
+  </div>
+
+  <h2>Where you are working</h2>
+  <p>Stay inside <code>suraksha_claims_desk</code>. If the chat is running, stop it with Ctrl+C. On Windows PowerShell, set this once in that terminal:</p>
+  <pre><code>$env:PYTHONUTF8="1"</code></pre>
+  <p>Leave both agent files as they are, including <code>allow_delegation</code> set to <code>false</code>. Keep <code>coverage_officer</code> first in the <code>agents</code> list of <code>crew.jsonc</code>. Keep the coverage opinion task first in the <code>tasks</code> list.</p>
+
+  <h2>Step 1: Let a manager assign the tasks</h2>
+  <p>In this step you change who is allowed to choose the worker. Open <code>crew.jsonc</code>. Set the process to hierarchical and add <code>manager_llm</code> (the model the manager uses) next to it. Then delete the <code>"agent"</code> line from <strong>both</strong> tasks. If that line stays, the manager can hand the task only to the agent already named there, so the choice is not real. Leave the brief's <code>context</code>, the task names, the output files, and tracing. Save the file.</p>
+  <div class="student-edit">
+    <div class="label label-green">Change crew.jsonc</div>
+    <p>Set the process to hierarchical and add <code>manager_llm</code> next to it. Use the same model string the agents already use. Delete the <code>"agent"</code> line from <strong>both</strong> tasks. Leave <code>"context": ["coverage_opinion"]</code> on the brief. Leave the task names, the output files, and <code>"tracing": true</code>.</p>
+  </div>
+  <pre><code>"process": "hierarchical",
+"manager_llm": "openai/gpt-4o-mini",
+"verbose": true,
+"tracing": true,</code></pre>
+  <p>With <code>"agent"</code> still on a task, the manager can hand that task only to the agent already named there. The choice is not real. With the line removed, the manager may hand the task to either specialist. The task text below tells the manager which role to pick, and it tells the manager to use the role exactly. A shortened name does not match, and the handoff fails.</p>
+  <p>The first task is still the coverage opinion. The second is still the brief. Hierarchical does not let the brief run first.</p>
+
+  <h2>Step 2: Tell the manager who does the work</h2>
+  <p>In this step you write the instruction the manager reads before it hands the work over. The coworker name must match the role exactly, including the claim id. A shortened name does not match, and the handoff fails. Paste the first block at the top of the <strong>coverage opinion</strong> description, above the line that starts <code>A claims officer asked</code>. Paste the second block at the top of the <strong>examiner brief</strong> description, in the same place. Save the file.</p>
+  <pre><code>MANAGER:
+- You are the Crew Manager. Do not write the coverage opinion yourself.
+- Delegate this task to the coworker whose role is exactly: Coverage Officer for claim {claim_id}
+- Do not shorten that role. Do not delegate it to the examiner brief writer.
+- Do not call Policy Record or Earlier Claims yourself. That coworker has those tools.
+- Do not say the claim is paid, approved, or declined.</code></pre>
+  <p>Paste this block at the top of the <strong>examiner brief</strong> description, above the line that starts <code>A claims officer asked</code>.</p>
+  <pre><code>MANAGER:
+- You are the Crew Manager. Do not write the brief yourself.
+- Delegate this task to the coworker whose role is exactly: Examiner brief writer for claim {claim_id}
+- Do not shorten that role. Do not delegate it to the coverage officer.
+- Pass the finished coverage opinion as the context.
+- Do not call a tool. Do not say the claim is paid, approved, or declined.</code></pre>
+
+  <h2>Step 3: Put Earlier Claims on the coverage officer agent</h2>
+  <p>In this step you move the garage lookup onto the coverage officer, so it still works after a handoff. Today <code>desk.py</code> pins Earlier Claims to the first task. That worked while the coverage officer ran that task directly. It does not survive a handoff. When the manager delegates, CrewAI builds a fresh task for the coworker. Tools that were pinned only to <code>coverage_opinion</code> do not travel with that fresh task. Policy Record is already on the coverage officer, so it does travel. Earlier Claims has to sit on that agent as well. Change only the marked block. Leave <code>respond</code> and <code>app.py</code> as they are.</p>
+  <div class="student-edit">
+    <div class="label label-green">Change the marked block in desk.py</div>
+    <p>In <code>_get_crew</code>, stop adding Earlier Claims to the task. Add it to the first agent. That first agent is the coverage officer, as long as <code>coverage_officer</code> stays first in <code>crew.jsonc</code>. Leave <code>respond</code> and <code>app.py</code> as they are. The chat still joins both task answers.</p>
+  </div>
+  <pre><code>def _get_crew():
+    global _crew, _defaults
+    if _crew is None:
+        _crew, _defaults = load_crew(Path(__file__).parent / "crew.jsonc")
+        coverage_officer = _crew.agents[0]
+        # The manager hands this agent a fresh task.
+        # A tool pinned only to coverage_opinion does not travel with that handoff.
+        coverage_officer.tools = list(coverage_officer.tools or []) + [earlier_claims]
+    return _crew, _defaults</code></pre>
+
+  <div class="warning">
+    <strong>Restart the chat after this change.</strong> The desk loads the crew once. Stop Streamlit with Ctrl+C, then start it again. A manager turn is longer than a sequential run, because the manager calls the model and then each specialist calls it again.
+  </div>
+
+  <h2>Step 4: Watch the manager hand the work over</h2>
+  <p>In this step you read the handoff in the terminal. Do not start the chat yet. A manager turn is longer than a sequential run, because the manager calls the model and then each specialist calls it again. Stay inside <code>suraksha_claims_desk</code>.</p>
+  <pre><code>uv run python desk.py</code></pre>
+  <p>The terminal should show the role <code>Crew Manager</code>, then an action named <code>Delegate work to coworker</code>. The coworker for the first task must be <code>Coverage Officer for claim CLM-20481</code>. That agent calls Policy Record and Earlier Claims. Then the manager delegates the second task to <code>Examiner brief writer for claim CLM-20481</code>. The brief writer does not call a tool.</p>
+  <p>The printed answer still has both headings, Coverage opinion and Examiner brief. The opinion starts with <code>PRELIMINARY COVERAGE OPINION — NON-BINDING</code>. The brief starts with <code>EXAMINER BRIEF — NON-BINDING</code>. Exclusion 4 and circular CL-17 still come from Policy Record. The 12-day licence lapse stays a referral. Neither part marks the claim paid or declined. Records opened names Policy Record and Earlier Claims.</p>
+  <p>Tracing is already on. If the terminal asks whether to share the trace, answer <code>y</code> within 20 seconds. Open the link it prints, or the Traces list at <code>https://app.crewai.com</code>. You should see Crew Manager before either specialist, then the coverage officer with the two records, then the brief writer with no tool. If you are not signed in, run <code>crewai login</code>, then <code>crewai traces enable</code>, and run <code>uv run python desk.py</code> again. Traces include the claim text. Keep using these fictional files.</p>
+
+  <h2>Step 5: Ask from the chat</h2>
+  <p>In this step you ask in the browser. The manager is not a third bubble. The chat still shows the two task answers. The terminal, beside the chat, is where you see Crew Manager delegate. Start the chat:</p>
+  <pre><code>uv run streamlit run app.py</code></pre>
+  <p>Select <strong>CLM-20481</strong> and ask <strong>Is this loss covered?</strong> You should see the same two headings and the same Records opened section. The manager is not a third bubble. The chat still shows the two task answers. The terminal, beside the chat, is where you see Crew Manager delegate.</p>
+  <p>Then select <strong>CLM-10021</strong> and ask the same question. The manager must delegate to <code>Coverage Officer for claim CLM-10021</code> and then to <code>Examiner brief writer for claim CLM-10021</code>. The roles contain the claim id, so a handoff that still says CLM-20481 is the wrong coworker. City Shine Garage has no older-claim rows. The opinion may say a rules check could settle this simple file, and it must not mark it paid.</p>
+
+  <h2>What just happened</h2>
+  <div class="file-tree">The claims officer asks a question
+        │
+        ▼
+Crew Manager receives the coverage opinion task
+        │
+        ▼
+Delegates it to the coverage officer agent
+        │
+        ▼
+That agent opens Policy Record and Earlier Claims
+        │
+        ▼
+Crew Manager receives the brief task
+        │
+        ▼
+Delegates it to the examiner brief agent
+        │
+        ▼
+The chat shows both answers</div>
+  <ul>
+    <li><code>"process": "hierarchical"</code> needs <code>"manager_llm"</code>. CrewAI creates the Crew Manager. You do not add a third file under <code>agents</code>.</li>
+    <li>The tasks stay in order. The brief still has <code>"context": ["coverage_opinion"]</code>. The <code>"agent"</code> line is removed so the manager can choose.</li>
+    <li>Earlier Claims sits on the coverage officer agent, because a delegated task is a fresh task and does not keep tools that were pinned only to <code>coverage_opinion</code>.</li>
+    <li>The manager's action in the terminal is <code>Delegate work to coworker</code>. The coworker string has to match the role, including the claim id.</li>
+  </ul>
+
+  <h2>If something goes wrong</h2>
+  <table>
+    <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td><code>manager_llm</code> or <code>manager_agent</code> is required</td><td>Add <code>"manager_llm": "openai/gpt-4o-mini"</code> next to <code>"process": "hierarchical"</code>. Restart the chat.</td></tr>
+      <tr><td>The manager writes the opinion and the terminal shows no Policy Record call</td><td>The MANAGER block is missing from the top of the coverage task, or the chat was not restarted. The manager must delegate, and Earlier Claims must be on <code>_crew.agents[0]</code>, not only on the task.</td></tr>
+      <tr><td><code>No agent found</code> with a role that is almost right</td><td>The coworker must be the full role: <code>Coverage Officer for claim CLM-20481</code> or <code>Examiner brief writer for claim CLM-20481</code>. A short name does not match. Put the MANAGER blocks back.</td></tr>
+      <tr><td>The brief writer calls Policy Record</td><td>The manager delegated the coverage task to the brief writer, or Earlier Claims was added to the wrong agent. <code>coverage_officer</code> must stay first in the agents list. The brief's MANAGER block must name the examiner brief writer.</td></tr>
+      <tr><td>The brief runs before the opinion</td><td>The coverage opinion task must stay first. The brief's <code>context</code> must stay <code>["coverage_opinion"]</code>.</td></tr>
+      <tr><td>Manager agent should not have tools</td><td>You added a manager file and gave it a tool. Remove that. <code>manager_llm</code> is enough. The specialists keep their own tools.</td></tr>
+      <tr><td>The trace has no Crew Manager span</td><td>The process is still <code>sequential</code>, or the chat was started before the JSON was saved. Stop it, run <code>uv run python desk.py</code>, and open the new trace.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="exercise">
+    <div class="exercise-title">Try this on your own</div>
+    <ol>
+      <li>On CLM-10044, ask whether the loss is covered. The manager must delegate using the roles for CLM-10044. The opinion should still say the police report is not on file. The brief should repeat that and should not call a tool.</li>
+      <li>In the terminal, confirm two delegations: first the coverage officer, then the examiner brief writer. The terminal should show Policy Record. Earlier Claims should run only if the story names a garage that the coverage officer looks up.</li>
+      <li>Put the <code>"agent"</code> lines back for one run, still with <code>"process": "hierarchical"</code>. The manager can now hand each task only to the agent named on that task. Take the lines off again so the manager is the one who chooses.</li>
+    </ol>
+  </div>
+</main>
+</body>
+</html>

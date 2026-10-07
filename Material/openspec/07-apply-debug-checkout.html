@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>07 · Apply and Debug: Checkout – OpenSpec ShopLite</title>
+  <style>
+:root {
+  --ink: #0f172a;
+  --muted: #475569;
+  --accent: #1d4ed8;
+  --line: rgba(37, 99, 235, 0.18);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.65;
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+  color: #111827;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(15, 23, 42, 0.94);
+  color: #e5e7eb;
+  backdrop-filter: blur(8px);
+}
+
+.topbar-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0.7rem 1.25rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.topbar a {
+  color: #bfdbfe;
+  text-decoration: none;
+  font-size: 0.88rem;
+}
+
+.topbar a:hover { color: #fff; text-decoration: underline; }
+
+.brand {
+  font-weight: 700;
+  color: #fff !important;
+  letter-spacing: -0.02em;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+main {
+  max-width: 960px;
+  margin: 1.5rem auto 3rem;
+  padding: 2.25rem 2rem 3rem;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(148, 163, 184, 0.12);
+}
+
+h1 {
+  font-size: 2.05rem;
+  margin: 0 0 1.1rem;
+  letter-spacing: -0.03em;
+  text-align: center;
+  color: #0f172a;
+  padding: 1rem 1.4rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+  box-shadow:
+    0 10px 25px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(148, 163, 184, 0.35);
+}
+
+h2 {
+  font-size: 1.55rem;
+  margin-top: 2.15rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 0.35rem;
+  color: #0f172a;
+}
+
+h3 {
+  font-size: 1.2rem;
+  margin-top: 1.6rem;
+  color: #0f172a;
+}
+
+p { margin: 0.5rem 0 0.75rem; }
+
+code {
+  font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+  background-color: #f3f4ff;
+  padding: 0.12rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.95em;
+  color: #1d4ed8;
+}
+
+pre {
+  background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+  color: #e5e7eb;
+  padding: 2.25rem 4.75rem 1rem 1.1rem;
+  border-radius: 10px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+  margin: 0.75rem 0 1.5rem;
+  border: 1px solid rgba(15, 23, 42, 0.6);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.note, .exercise, .warn, .concept, .checkpoint, .behind, .think {
+  padding: 0.9rem 1.1rem;
+  margin: 1rem 0 1.5rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+}
+
+.note {
+  border-left: 4px solid #2563eb;
+  background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+  border-color: rgba(37, 99, 235, 0.4);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(191, 219, 254, 0.9);
+}
+
+.exercise {
+  border-left: 4px solid #16a34a;
+  background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+  border-color: rgba(22, 163, 74, 0.4);
+}
+
+.warn {
+  border-left: 4px solid #d97706;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: rgba(217, 119, 6, 0.4);
+}
+
+.concept {
+  border-left: 4px solid #7c3aed;
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+  border-color: rgba(124, 58, 237, 0.35);
+}
+
+.checkpoint {
+  border-left: 4px solid #0f766e;
+  background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+  border-color: rgba(15, 118, 110, 0.35);
+}
+
+.behind {
+  border-left: 4px solid #0e7490;
+  background: linear-gradient(135deg, #ecfeff, #cffafe);
+  border-color: rgba(14, 116, 144, 0.35);
+}
+
+.think {
+  border-left: 4px solid #c2410c;
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border-color: rgba(194, 65, 12, 0.35);
+}
+
+.exercise-title, .warn-title, .concept-title, .checkpoint-title, .behind-title, .think-title {
+  font-weight: 650;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+}
+
+.exercise-title { color: #166534; }
+.warn-title { color: #92400e; }
+.concept-title { color: #5b21b6; }
+.checkpoint-title { color: #115e59; }
+.behind-title { color: #155e75; }
+.think-title { color: #9a3412; }
+
+ol, ul { padding-left: 1.4rem; }
+li { margin: 0.25rem 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.95rem;
+}
+
+th, td {
+  border: 1px solid #e2e8f0;
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #eff6ff;
+  color: #0f172a;
+}
+
+tr:nth-child(even) td { background: #f8fafc; }
+
+.meta {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0 0 1.25rem;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.kicker {
+  text-align: center;
+  color: var(--muted);
+  margin-top: -0.35rem;
+  margin-bottom: 1.1rem;
+}
+
+.toc a { color: #1d4ed8; }
+
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.lesson-nav a {
+  color: #1d4ed8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.lesson-nav a:hover { text-decoration: underline; }
+
+.sample-output-title {
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+  color: #0f172a;
+}
+
+.code-wrapper { position: relative; }
+
+.copy-btn {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.5rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.55rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  color: #9ca3af;
+  font-family: system-ui, sans-serif;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  user-select: none;
+}
+
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #f9fafb;
+}
+
+.copy-btn.copied {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.45);
+}
+
+.progress {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.progress span {
+  display: block;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  background: #f1f5f9;
+  font-size: 0.82rem;
+  color: #334155;
+  text-align: center;
+}
+
+.progress span.done {
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 600;
+}
+
+.progress span.now {
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 700;
+}
+
+footer.site {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-bottom: 2rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.85rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.95rem 1rem;
+  background: #f8fafc;
+}
+
+.card h3 { margin-top: 0; font-size: 1.05rem; }
+.card a { color: #1d4ed8; font-weight: 650; text-decoration: none; }
+.card a:hover { text-decoration: underline; }
+.card p { margin: 0.35rem 0 0; font-size: 0.92rem; color: #475569; }
+
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="00-index.html">OpenSpec · ShopLite</a>
+    <nav>
+      <a href="00-index.html">Home</a>
+      <a href="01-why-spec-driven-development.html">01</a>
+      <a href="02-install-and-initialize.html">02</a>
+      <a href="03-core-concepts.html">03</a>
+      <a href="04-first-cycle-catalog.html">04</a>
+      <a href="05-explore-and-specify-search.html">05</a>
+      <a href="06-review-artifacts-cart.html">06</a>
+      <a href="07-apply-debug-checkout.html">07</a>
+      <a href="08-expanded-workflow-orders.html">08</a>
+      <a href="09-spec-evolution-inventory.html">09</a>
+      <a href="10-spec-management-and-beyond.html">10</a>
+    </nav>
+  </div>
+</div>
+
+<main>
+  <h1>07 · Apply and Debug: Checkout</h1>
+  <p class="kicker">When the total looks wrong, open the spec before you open the code. Then write a test for the rule you were missing.</p>
+  <div class="meta">
+    <span class="pill">Lesson 07 of 10</span>
+    <span class="pill">~90 minutes</span>
+    <span class="pill">Spec bugs vs code bugs</span>
+  </div>
+
+  <div class="progress">
+    <span class="done">Catalog</span><span class="done">Search</span><span class="done">Cart</span>
+    <span class="now">Checkout</span><span>Orders</span><span>Inventory</span>
+  </div>
+
+  <div class="note">
+    <strong>What you will do</strong>
+    <ul>
+      <li>See how <code>/opsx:apply</code> actually works (tasks + specs + design).</li>
+      <li>Propose checkout that <em>depends</em> on the cart spec.</li>
+      <li>Hit a surprising total, and trace it to spec ambiguity (tax / shipping).</li>
+      <li>Patch the spec, re-apply, and only then treat remaining issues as code bugs.</li>
+    </ul>
+  </div>
+
+  <div class="behind">
+    <div class="behind-title">Apply follows the folder, not your first sentence</div>
+    <p>
+      Apply does not start over from “make it like Amazon.” It treats the change folder as the only description of the work.
+      If tax is vague, and a task says “show tax,” the assistant will still invent a number. A careful apply of a vague spec is how you get a surprising total.
+      When that happens, go back to the spec. Do not start by poking at the page.
+    </p>
+    <p>
+      <code>/opsx:update</code> rewrites the related files so they still agree. Then you apply again, and the new tasks include a test for each new scenario.
+      By hand you would edit the spec, fix the task list, and say “do the new tax tasks only.”
+    </p>
+    <p>
+      Checkout has to use the cart subtotal you already wrote down. That only works if the assistant reads <code>openspec/specs/</code>.
+      The project context from lesson 02 helps. Pointing at the files is still your job.
+    </p>
+  </div>
+  <div class="think">
+    <div class="think-title">Think</div>
+    <p>
+      Why must merge/archive wait until the tax rule is written down? If you archive a vague spec, the next agent
+      inherits the guess as truth. Archive is how silence becomes “company policy.”
+    </p>
+  </div>
+
+  <h2>1. How apply works</h2>
+  <p>When you invoke apply, the agent is supposed to read three things — not improvise from chat vibes:</p>
+  <ol>
+    <li><strong><code>tasks.md</code></strong> — ordered checklist. Work sequentially, tick boxes.</li>
+    <li><strong><code>specs/</code></strong> (the change’s delta) — what the code must do.</li>
+    <li><strong><code>design.md</code></strong> — how to structure the code.</li>
+  </ol>
+  <p>
+    Clear specs produce correct implementations. Vague specs produce confident assumptions. Checkout is where money
+    math makes that painful, the same way a coffee receipt with mystery tax does in other courses.
+  </p>
+  <p>Apply does not invent a new plan. If the plan is wrong, apply will faithfully build the wrong store.</p>
+
+  <h2>2. Dependent changes</h2>
+  <p>
+    Checkout is not a green field. It must use the cart subtotal you already specified. Before proposing, feed the
+    agent the existing specs on purpose. That is <strong>cross-spec referencing</strong>.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Skim <code>openspec/specs/cart/spec.md</code> (path may vary). Note the exact words for line subtotal and cart subtotal. Checkout must not redefine those formulas differently.</p>
+  </div>
+
+  <h2>3. Propose checkout — with a deliberate hole</h2>
+  <p>
+    We will <em>not</em> fully specify tax in the first prompt. That is on purpose. You need to feel the “oh, the spec
+    was incomplete” moment. This is not sloppy teaching; it is the debugging lesson.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New chat. Propose. Then apply in a <strong>later</strong> chat after a reasonable review — but do <strong>not</strong> add tax rules even if you notice they are thin. Leave the hole.</p>
+  </div>
+  <pre><code>/opsx-propose add-checkout
+
+Add ShopLite checkout, analogous to Amazon's place-order step (mock payment only).
+
+Please read openspec/specs/cart (and catalog) before drafting.
+
+In scope:
+- From the cart, the shopper can start checkout if the cart is not empty.
+- Checkout collects a shipping name, address line, city, and postal code (all required).
+- The order summary shows: cart subtotal (MUST match the cart spec), a shipping charge, a tax amount, and a grand total.
+- Shipping is a flat fee. Tax is a percentage of something — use a simple teaching rule.
+- Place order simulates payment success, empties the cart, and shows a confirmation with an order id and the same money breakdown.
+- Empty cart cannot start checkout.
+
+Out of scope:
+- Real payment processors, promo codes, multiple addresses, accounts, order tracking lifecycle (later lesson), inventory.
+
+Change name: add-checkout.</code></pre>
+  <p>
+    Review as usual for scope creep (accounts, Stripe, 1-Click). You may tighten address fields. Leave tax as whatever
+    the AI drafted if it is vague — we will use that vagueness.
+  </p>
+  <pre><code>/opsx-apply add-checkout</code></pre>
+
+  <h2>4. Reproduce a surprising total</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Put two different products in the cart. Go to checkout. Write down:</p>
+    <ul>
+      <li>Cart subtotal</li>
+      <li>Shipping</li>
+      <li>Tax</li>
+      <li>Grand total</li>
+    </ul>
+    <p>Then answer: <strong>tax is a percentage of what?</strong> Subtotal only? Subtotal + shipping? Inclusive in prices already? Is rounding half-up to two decimals?</p>
+  </div>
+  <p>
+    Compare that answer to the spec. In almost every class, one of these is true:
+  </p>
+  <ul>
+    <li>The spec never said whether shipping is taxed.</li>
+    <li>The spec said “add tax” with no rate.</li>
+    <li>The spec said 10% but the UI rounds differently from the API.</li>
+    <li>The confirmation page uses a different formula than the checkout page.</li>
+  </ul>
+  <div class="concept">
+    <div class="concept-title">The pedagogical moment</div>
+    <p>
+      The agent did not maliciously break your store. It made a reasonable guess from silence. That guess is now
+      “the product.” If you jump into Python, you might “fix” a number without ever recording the business rule.
+      Next session the agent will guess again.
+    </p>
+  </div>
+
+  <h2>5. Debug by identifying spec gaps</h2>
+  <p>Use this triage every time behavior surprises you:</p>
+  <table>
+    <thead>
+      <tr><th>Question</th><th>If yes</th><th>If no</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Is the surprising behavior forbidden by a SHALL?</td>
+        <td>Implementation bug — fix code (re-apply or targeted patch against the spec).</td>
+        <td>Continue.</td>
+      </tr>
+      <tr>
+        <td>Do two specs / two screens disagree?</td>
+        <td>Spec contradiction — pick a winner, MODIFY or clarify, then code.</td>
+        <td>Continue.</td>
+      </tr>
+      <tr>
+        <td>Was the rule never written?</td>
+        <td><strong>Spec gap.</strong> Write the requirement, the scenario, and a test for that scenario. Then implement.</td>
+        <td>You do not understand the spec yet — re-read before touching code.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task — close the gap in the still-open change</div>
+    <p>
+      Do not archive yet. Edit the checkout delta specs (by hand or with <code>/opsx-update</code>) so the following
+      teaching rules are explicit. These are Nile Retail rules, not real tax law:
+    </p>
+    <ul>
+      <li>Shipping SHALL be a flat <strong>5.00</strong> in store currency, waived when cart subtotal is <strong>50.00 or more</strong>.</li>
+      <li>Tax SHALL be <strong>10%</strong> of (cart subtotal + shipping after any waiver), rounded half-up to two decimals.</li>
+      <li>Grand total SHALL equal cart subtotal + shipping + tax.</li>
+      <li>Confirmation SHALL repeat the same four numbers; they MUST match checkout.</li>
+    </ul>
+  </div>
+  <pre><code>/opsx-update add-checkout
+
+Replace vague tax/shipping requirements with Nile Retail's teaching rules:
+- Flat shipping 5.00, waived at cart subtotal &gt;= 50.00
+- Tax = 10% of (subtotal + shipping), round half-up to 2 decimals
+- Grand total = subtotal + shipping + tax
+- Confirmation repeats the same numbers
+
+Add scenarios:
+1) Subtotal 20.00 → shipping 5.00, tax 2.50, total 27.50
+2) Subtotal 50.00 → shipping 0.00, tax 5.00, total 55.00
+
+Also include this requirement, and a task for each scenario's test:
+### Requirement: Test for each scenario
+The project SHALL include one automated test for each scenario in this spec.
+The test name SHALL include the scenario title.
+The test SHALL fail when that scenario's THEN is not met.
+
+Keep cart subtotal defined by the existing cart spec.
+Then update design.md and tasks.md to match.
+Do not implement until I run apply.</code></pre>
+  <p>Read the new scenarios. If the numbers in the spec are internally inconsistent, fix them before apply. If “Test for each scenario” is already in the spec, do not add a second copy. Add a test task for each new scenario.</p>
+  <pre><code>/opsx-apply add-checkout
+
+Implement the updated tax and shipping tasks. Do not change catalog or search.</code></pre>
+
+  <h3>5.1 Worked arithmetic</h3>
+  <p>Use a simple cart you can compute by hand (prices that sum cleanly):</p>
+  <pre><code>Subtotal 20.00
+Shipping 5.00          (under 50)
+Tax      2.50          (10% of 25.00)
+Total    27.50
+
+Subtotal 50.00
+Shipping 0.00          (waiver)
+Tax      5.00          (10% of 50.00)
+Total    55.00</code></pre>
+  <p>If the UI shows 2.499999 or 2.4, you have a rounding spec/implementation issue. Specify half-up, then fix code.</p>
+
+  <h2>6. Spec bug vs code bug</h2>
+  <table>
+    <thead>
+      <tr><th>Clue</th><th>Likely kind</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Two reasonable developers would disagree what the total “should” be</td><td>Spec</td></tr>
+      <tr><td>Everyone agrees the total should be 27.50; the page shows 22.00</td><td>Code</td></tr>
+      <tr><td>Checkout and confirmation disagree</td><td>Often spec didn’t require them to match; still a spec gap until you say SHALL</td></tr>
+      <tr><td>Cart subtotal on checkout ≠ cart page</td><td>Code, or checkout reimplemented math instead of reusing cart rules</td></tr>
+    </tbody>
+  </table>
+  <p>Never “just tweak the template” to hide a wrong total. The confirmation is part of the contract.</p>
+
+  <h2>7. Place order and empty cart</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Place an order. Confirm:</p>
+    <ul>
+      <li>You see an order id.</li>
+      <li>Cart is empty afterward.</li>
+      <li>Checkout is blocked from an empty cart.</li>
+      <li>Required address fields cannot be skipped (check at least one missing field).</li>
+    </ul>
+  </div>
+  <p>If “empty cart after order” was never specified, you now know why the agent might have left items in the cart. Add it and re-apply. That is the same muscle as tax.</p>
+
+  <h2>8. Archive when the numbers are boring</h2>
+  <p>Boring numbers mean the contract is doing its job.</p>
+  <pre><code>/opsx-archive add-checkout</code></pre>
+
+  <h2>9. When to start a new chat</h2>
+  <p>This lesson had several phases: propose, apply, discover gap, update, apply again. Recommended rhythm:</p>
+  <pre><code>Chat A  propose + review artifacts
+Chat B  apply (first implementation)
+Chat C  update specs for tax rules + apply the gap fill
+        archive (C or a short Chat D)</code></pre>
+  <p>
+    Do not clear context <em>mid-task</em> while apply is halfway through a file. Do clear between features, and
+    after a long failed exploration. If you must hand off, ask the agent to write a short “decisions so far” note
+    into the change’s proposal before you start the new chat.
+  </p>
+
+  <h2>10. Challenge (optional)</h2>
+  <div class="exercise">
+    <div class="exercise-title">Challenge</div>
+    <p>
+      Add a scenario: shipping waiver uses cart subtotal before tax, never after. Add a test whose name includes that scenario title. If your implementation
+      accidentally used grand-total thresholds, the test will catch it. Do this as an update to a still-open change, or as
+      a tiny new change <code>clarify-shipping-waiver-base</code> if you already archived.
+    </p>
+  </div>
+
+  <h2>11. Common issues</h2>
+  <table>
+    <thead>
+      <tr><th>Symptom</th><th>Fix</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>You started rewriting JavaScript before opening specs</td><td>Stop. Run the triage table. This lesson failed if you only patched code.</td></tr>
+      <tr><td>Agent debates real GST/VAT</td><td>Redirect: teaching rates only. Real tax policy is not in scope.</td></tr>
+      <tr><td>Floating point 2.5000001</td><td>Specify rounding; use integer cents in design if needed.</td></tr>
+      <tr><td>Checkout created user accounts</td><td>Scope creep. Remove, update artifacts.</td></tr>
+      <tr><td>Orders disappear on server reload</td><td>Fine for in-memory if design said so; if you need them in lesson 08, persist now in a follow-up change.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>12. Reflection</h2>
+  <ol>
+    <li>What rule was missing from the first spec, and how did the agent fill the silence?</li>
+    <li>Why feed cart specs into the checkout proposal?</li>
+    <li>When is a wrong total a code bug?</li>
+  </ol>
+
+  <div class="checkpoint">
+    <div class="checkpoint-title">Lesson 07 complete</div>
+    <p>
+      You can place a mock Amazon-style order with totals you could defend to a teammate. Next: order status
+      (placed → shipped → delivered) using the expanded workflow, because too many interlocking decisions do not
+      belong in a single propose blast.
+    </p>
+  </div>
+
+  <div class="lesson-nav">
+    <a href="06-review-artifacts-cart.html">← 06 Cart</a>
+    <a href="08-expanded-workflow-orders.html">Next: 08 Orders (expanded workflow) →</a>
+  </div>
+</main>
+<script>
+(function () {
+  const COPY_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  const CHECK_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  function copyText(text, onDone) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(onDone).catch(fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      onDone();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("pre").forEach((pre) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "code-wrapper";
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "copy-btn";
+      btn.innerHTML = COPY_ICON + " Copy";
+      wrapper.appendChild(btn);
+
+      btn.addEventListener("click", () => {
+        const code = pre.querySelector("code");
+        const text = (code ? code.innerText : pre.innerText).trimEnd();
+        copyText(text, () => {
+          btn.innerHTML = CHECK_ICON + " Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.innerHTML = COPY_ICON + " Copy";
+            btn.classList.remove("copied");
+          }, 2000);
+        });
+      });
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

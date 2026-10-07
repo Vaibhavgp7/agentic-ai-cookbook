@@ -1,0 +1,14 @@
+schema: spec-driven
+
+# Shown to the AI when it plans and implements.
+context: |
+  ShopLite is Nile Retail's teaching store (mini-Amazon).
+  Stack: Python 3.11+, FastAPI, vanilla HTML/CSS/JS (no React).
+  Run with: uvicorn app.main:app --reload --port 8000
+  Persist data in  SQLite — keep it simple.
+  Do not add real payment processors. Checkout is a mock "Place order".
+  One intent per change. Prefer small, reviewable deltas.
+  Specs describe what a shopper or staff member can see, not framework choices.
+  Every scenario in a spec SHALL have one automated test.
+  The test name includes the scenario title.
+  A scenario with no passing test is not done.

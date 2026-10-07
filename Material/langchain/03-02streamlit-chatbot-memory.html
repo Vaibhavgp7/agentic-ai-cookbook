@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Streamlit Chatbot with SqliteSaver Memory – Hands-on Guide</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+      color: #0f172a;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 2.25rem 4.75rem 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .note, .exercise {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .exercise-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #166534;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+    .sample-output-title {
+      font-weight: 600;
+      margin-top: 0.75rem;
+      margin-bottom: 0.25rem;
+      color: #0f172a;
+    }
+    .code-wrapper {
+      position: relative;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 0.45rem;
+      right: 0.5rem;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.22rem 0.55rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 6px;
+      color: #9ca3af;
+      font-family: system-ui, sans-serif;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: #f9fafb;
+    }
+    .copy-btn.copied {
+      color: #4ade80;
+      border-color: rgba(74, 222, 128, 0.45);
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Streamlit Chatbot with Persistent Memory</h1>
+
+  <p>
+    This lab has two parts. First you learn <strong>Streamlit basics</strong> (assuming you have never used it before).
+    Then you build a <strong>chatbot with persistent memory</strong> using the <code>SqliteSaver</code> checkpointer
+    from Section 5 of <code>03using-agents-part1.html</code>.
+  </p>
+  <p>
+    By the end you will have a Streamlit app that:
+  </p>
+  <ul>
+    <li>Can answer questions using <strong>Tavily web search</strong> for up-to-date information.</li>
+    <li>Uses <code>SqliteSaver</code> for persistent agent memory.</li>
+    <li>Creates a <strong>unique <code>thread_id</code></strong> for every new chat.</li>
+    <li>Shows a <strong>sidebar</strong> with a <em>New Chat</em> button and a dropdown of previous threads.</li>
+    <li>Loads the correct chat history when you switch threads.</li>
+  </ul>
+
+  <div class="note">
+    <strong>How to use this guide</strong>
+    <ol>
+      <li>Open your code editor and a terminal (PowerShell or Command Prompt).</li>
+      <li>Keep this HTML guide open beside your editor.</li>
+      <li>Start with the warmup file <code>hello_streamlit.py</code> (Sections 1–5).</li>
+      <li>Then create <code>streamlit_chatbot.py</code> for the chatbot (Section 6 onward).</li>
+      <li>After each step, <strong>save the file</strong> — Streamlit auto-reloads the browser when the file changes.</li>
+    </ol>
+  </div>
+
+  <h2>1. What Is Streamlit?</h2>
+
+  <p>
+    <strong>Streamlit</strong> is a Python library for building web apps quickly. You write normal Python —
+    no HTML, CSS, or JavaScript required. Streamlit turns your script into a live webpage in the browser.
+  </p>
+  <p>
+    Typical use cases: dashboards, data explorers, internal tools, and chatbots (like we will build).
+  </p>
+
+  <h3>1.1 How Streamlit Works (Important!)</h3>
+  <p>
+    Every time you click a button, type in a box, or send a chat message, Streamlit <strong>reruns your entire Python file
+    from top to bottom</strong>. That sounds strange at first, but it keeps apps simple: you always describe
+    what the UI should look like <em>right now</em>.
+  </p>
+  <p>
+    Because the script reruns constantly, regular Python variables are reset. To remember data between reruns
+    (like a click count or chat history), you use <code>st.session_state</code> — you will practice that in Section 4.
+  </p>
+
+  <h3>1.2 Streamlit Vocabulary</h3>
+  <ul>
+    <li><code>import streamlit as st</code> — always import Streamlit as <code>st</code>.</li>
+    <li><code>st.title(...)</code>, <code>st.write(...)</code> — display text on the page.</li>
+    <li><code>st.button(...)</code>, <code>st.text_input(...)</code> — widgets the user can interact with.</li>
+    <li><code>st.sidebar</code> — a panel on the left side of the page.</li>
+    <li><code>st.chat_message(...)</code>, <code>st.chat_input(...)</code> — built-in chat UI components.</li>
+    <li><code>st.session_state</code> — a dict that survives reruns within the same browser tab.</li>
+    <li><code>st.rerun()</code> — tell Streamlit to rerun the script immediately (useful after updating state).</li>
+  </ul>
+
+  <h2>2. Install Streamlit and Run Your First App</h2>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Install Streamlit in your terminal:</p>
+  </div>
+
+  <pre><code>pip install streamlit</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a new file named <code>hello_streamlit.py</code>. Paste the code below, save it, then run the
+      command underneath in your terminal.
+    </p>
+  </div>
+
+  <pre><code>import streamlit as st
+
+st.title("Hello, Streamlit!")
+st.write("If you can read this in your browser, Streamlit is working.")</code></pre>
+
+  <pre><code>streamlit run hello_streamlit.py</code></pre>
+
+  <p class="sample-output-title">What you should see</p>
+  <ul>
+    <li>The terminal prints a local URL, usually <code>http://localhost:8501</code>.</li>
+    <li>Your browser opens (or you open that URL manually).</li>
+    <li>The page shows a big heading: <strong>Hello, Streamlit!</strong></li>
+  </ul>
+
+  <div class="note">
+    <strong>Keep the terminal open</strong>
+    <p>
+      Streamlit runs as a small web server. Leave that terminal window running while you work.
+      To stop the app later, click in the terminal and press <code>Ctrl+C</code>.
+    </p>
+  </div>
+
+  <h2>3. Basic Widgets — Button and Text Input</h2>
+
+  <p>
+    Widgets let the user interact with your app. When someone clicks a button, Streamlit reruns the script.
+    Code inside <code>if st.button(...):</code> runs only when the button was clicked on that rerun.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Replace the contents of <code>hello_streamlit.py</code> with the code below. Save and watch the browser update.</p>
+  </div>
+
+  <pre><code>import streamlit as st
+
+st.title("Streamlit Widgets Demo")
+
+name = st.text_input("What is your name?")
+
+if st.button("Say hello"):
+    if name.strip():
+        st.write(f"Hello, {name}! 👋")
+    else:
+        st.warning("Please type your name first.")</code></pre>
+
+  <p class="sample-output-title">Try this</p>
+  <ol>
+    <li>Type your name in the text box.</li>
+    <li>Click <strong>Say hello</strong>.</li>
+    <li>A greeting appears below the button.</li>
+    <li>Click the button again without a name — you should see a yellow warning.</li>
+  </ol>
+
+  <h2>4. Session State — Remember Data Between Reruns</h2>
+
+  <p>
+    Without <code>st.session_state</code>, a counter would always reset to zero on every rerun.
+    Session state is how Streamlit apps remember things like chat history, selected thread, or a click count.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Replace <code>hello_streamlit.py</code> with this counter example. Save and test the button several times.</p>
+  </div>
+
+  <pre><code>import streamlit as st
+
+st.title("Session State Demo")
+
+# Create the counter once; keep it across reruns
+if "count" not in st.session_state:
+    st.session_state.count = 0
+
+st.write(f"Button clicked **{st.session_state.count}** time(s).")
+
+if st.button("Click me"):
+    st.session_state.count += 1
+    st.rerun()</code></pre>
+
+  <p class="sample-output-title">What to notice</p>
+  <ul>
+    <li>Each click increases the count — the value is <strong>not</strong> lost when Streamlit reruns.</li>
+    <li><code>st.rerun()</code> refreshes the page so the new count shows immediately.</li>
+    <li>Our chatbot will store the active <code>thread_id</code> in session state the same way.</li>
+  </ul>
+
+  <h2>5. Sidebar and Chat UI</h2>
+
+  <p>
+    Most chat apps put controls (new chat, thread list) in a <strong>sidebar</strong> and messages in the main area.
+    Streamlit has ready-made chat components so you do not have to build bubbles from scratch.
+  </p>
+
+  <h3>5.1 Sidebar</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Add a sidebar to <code>hello_streamlit.py</code> (you can replace the counter demo):</p>
+  </div>
+
+  <pre><code>import streamlit as st
+
+st.set_page_config(page_title="Streamlit Warmup", layout="wide")
+st.title("Main area — chat goes here")
+
+with st.sidebar:
+    st.header("Sidebar")
+    st.write("Buttons and dropdowns go here.")
+    if st.button("Example button"):
+        st.sidebar.success("You clicked the sidebar button!")</code></pre>
+
+  <p>
+    <code>layout="wide"</code> uses the full browser width — helpful when the sidebar is on the left
+    and the chat is on the right.
+  </p>
+
+  <h3>5.2 Chat messages (echo bot, no AI yet)</h3>
+
+  <p>
+    <code>st.chat_message</code> draws a message bubble. <code>st.chat_input</code> is the text box at the bottom.
+    This mini echo bot stores messages in session state — the same pattern our real chatbot will use.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Replace <code>hello_streamlit.py</code> with this echo chatbot. Save and send a few messages.</p>
+  </div>
+
+  <pre><code>import streamlit as st
+
+st.set_page_config(page_title="Echo Chat", layout="wide")
+st.title("Echo Chat (no AI — just Streamlit UI practice)")
+
+with st.sidebar:
+    st.header("Sidebar")
+    if st.button("Clear chat"):
+        st.session_state.messages = []
+        st.rerun()
+
+# Remember messages between reruns
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# Show all past messages
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# Read new input from the user
+if prompt := st.chat_input("Type a message..."):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    st.session_state.messages.append({"role": "assistant", "content": f"You said: {prompt}"})
+    st.rerun()</code></pre>
+
+  <p class="sample-output-title">Try this</p>
+  <ol>
+    <li>Send a few messages — they stay visible (session state).</li>
+    <li>Click <strong>Clear chat</strong> in the sidebar — history disappears.</li>
+    <li>This is the same UI pattern we will connect to a LangChain agent next.</li>
+  </ol>
+
+  <div class="note">
+    <strong>Streamlit basics — done!</strong>
+    <p>
+      You now know how to run an app, use widgets, keep state with <code>st.session_state</code>,
+      build a sidebar, and render a chat UI. Stop the echo app (<code>Ctrl+C</code>) when you are ready,
+      and continue with the memory chatbot in a new file.
+    </p>
+  </div>
+
+  <h2>6. Build the Memory Chatbot</h2>
+
+  <p>
+    Now connect Streamlit to a LangChain agent with <code>SqliteSaver</code> and a
+    <strong>Tavily web search tool</strong>. Create a new file:
+    <code>streamlit_chatbot.py</code> (separate from the warmup file).
+  </p>
+
+  <div class="note">
+    <strong>Key idea — two pieces of storage</strong>
+    <ul>
+      <li><strong><code>checkpoints.sqlite</code></strong> — LangGraph stores full agent state (messages) per <code>thread_id</code>.</li>
+      <li><strong><code>chat_threads.json</code></strong> — a tiny list of thread ids for the sidebar dropdown (we keep this separate so the UI stays simple).</li>
+    </ul>
+    <p>
+      When you switch threads in the dropdown, Streamlit reads messages from the checkpointer using
+      <code>agent.get_state(...)</code> and redraws the chat on the right.
+    </p>
+  </div>
+
+  <h3>6.1 Install LangChain Packages</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Run this in your terminal:</p>
+  </div>
+
+  <pre><code>pip install langchain langchain-openai langchain-tavily python-dotenv langgraph-checkpoint-sqlite</code></pre>
+
+  <p>
+    Make sure your <code>.env</code> file contains both keys (same as earlier labs):
+  </p>
+  <pre><code>OPENAI_API_KEY=your_openai_key_here
+TAVILY_API_KEY=your_tavily_key_here</code></pre>
+
+  <h3>6.2 Step 1 — Empty Chatbot Page</h3>
+
+  <p>
+    Start with the smallest possible chatbot file so you know the new app runs.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create <code>streamlit_chatbot.py</code> with only this code, save, and run:</p>
+  </div>
+
+  <pre><code>import streamlit as st
+
+st.set_page_config(page_title="Memory Chatbot", layout="wide")
+st.title("Chatbot with Memory")</code></pre>
+
+  <pre><code>streamlit run streamlit_chatbot.py</code></pre>
+
+  <p class="sample-output-title">What you should see</p>
+  <p>A browser tab with the title <strong>Chatbot with Memory</strong>. Nothing else yet — that is expected.</p>
+
+  <h3>6.3 Step 2 — Create the Agent with SqliteSaver and Tavily</h3>
+
+  <p>
+    Add imports and build one agent backed by SQLite. We also attach the LangChain
+    <strong>Tavily search tool</strong> so the agent can look up current information on the web.
+    We use <code>@st.cache_resource</code> so the agent is created only once (Streamlit reruns the whole script on every click).
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Replace the contents of <code>streamlit_chatbot.py</code> with the code below. Save and refresh the browser.</p>
+  </div>
+
+  <pre><code>import sqlite3
+import streamlit as st
+from dotenv import load_dotenv
+from langchain.agents import create_agent
+from langchain_openai import ChatOpenAI
+from langchain_tavily import TavilySearch
+from langgraph.checkpoint.sqlite import SqliteSaver
+
+load_dotenv()
+
+CHECKPOINT_DB = "checkpoints.sqlite"
+
+@st.cache_resource
+def get_agent():
+    conn = sqlite3.connect(CHECKPOINT_DB, check_same_thread=False)
+    checkpointer = SqliteSaver(conn=conn)
+    checkpointer.setup()  # create tables if needed
+
+    model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+
+    tavily_tool = TavilySearch(
+        max_results=3,
+        search_depth="advanced",
+        include_answer=True,
+        include_raw_content=False,
+        include_images=False,
+    )
+
+    return create_agent(
+        model=model,
+        tools=[tavily_tool],
+        system_prompt=(
+            "You are a helpful assistant with access to web search. "
+            "Use web search when the user asks about current events, recent news, "
+            "live data, or anything that needs up-to-date information from the internet. "
+            "For personal facts the user told you earlier in the same chat, use memory — do not search the web."
+        ),
+        checkpointer=checkpointer,
+    )
+
+st.set_page_config(page_title="Memory Chatbot", layout="wide")
+st.title("Chatbot with Memory")
+
+agent = get_agent()
+st.success("Agent ready. SqliteSaver + Tavily web search connected.")</code></pre>
+
+  <p class="sample-output-title">What you should see</p>
+  <p>A green success message: <strong>Agent ready. SqliteSaver + Tavily web search connected.</strong></p>
+  <p>A file named <code>checkpoints.sqlite</code> appears in your project folder.</p>
+
+  <h3>6.4 Step 3 — Chat on One Thread (Memory Works)</h3>
+
+  <p>
+    Before adding multiple chats, prove that memory works on a <strong>single fixed thread</strong>.
+    Every message uses the same <code>thread_id</code>. The checkpointer remembers prior turns.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Add the chat UI below the line <code>agent = get_agent()</code>. Remove the success message line.</p>
+  </div>
+
+  <pre><code># --- Single-thread demo (fixed thread_id) ---
+THREAD_ID = "demo-thread-1"
+config = {"configurable": {"thread_id": THREAD_ID}}
+
+st.caption(f"Using thread: `{THREAD_ID}`")
+
+# Load existing messages from the checkpointer
+snapshot = agent.get_state(config)
+stored_messages = snapshot.values.get("messages", [])
+
+# Show history
+for msg in stored_messages:
+    if msg.type == "human":
+        with st.chat_message("user"):
+            st.markdown(msg.content)
+    elif msg.type == "ai" and msg.content:
+        with st.chat_message("assistant"):
+            st.markdown(msg.content)
+
+# New user input
+if prompt := st.chat_input("Say something..."):
+    agent.invoke(
+        {"messages": [{"role": "user", "content": prompt}]},
+        config,
+    )
+    st.rerun()</code></pre>
+
+  <p class="sample-output-title">Try this</p>
+  <ol>
+    <li>Type: <code>Hi! My name is Alex.</code></li>
+    <li>Then type: <code>What is my name?</code></li>
+    <li>The assistant should answer <strong>Alex</strong> — memory is working.</li>
+    <li>Ask a current-events question, for example: <code>What are the latest AI news headlines this week?</code></li>
+    <li>The agent should call the Tavily search tool and summarize what it finds.</li>
+    <li>Stop Streamlit (<code>Ctrl+C</code>), run it again, and ask <code>What is my name?</code> once more. It should still remember — that is SqliteSaver persistence.</li>
+  </ol>
+
+  <h3>6.5 Step 4 — Generate a Unique Thread ID</h3>
+
+  <p>
+    Real apps give each conversation its own id. We use Python's <code>uuid</code> module.
+    <code>st.session_state</code> keeps the current thread id while Streamlit reruns the script.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      At the top, add <code>import uuid</code>. Replace the fixed <code>THREAD_ID = "demo-thread-1"</code> block
+      with the session-state version below.
+    </p>
+  </div>
+
+  <pre><code>import uuid</code></pre>
+
+  <pre><code># --- One thread per browser session (unique id) ---
+if "thread_id" not in st.session_state:
+    st.session_state.thread_id = str(uuid.uuid4())
+
+config = {"configurable": {"thread_id": st.session_state.thread_id}}
+st.caption(f"Thread ID: `{st.session_state.thread_id}`")</code></pre>
+
+  <p class="sample-output-title">What you should see</p>
+  <p>
+    A random UUID shown under the title (for example <code>a3f1b2c4-...</code>).
+    Refreshing the browser keeps the same id; opening a new incognito window gets a new id.
+  </p>
+
+  <h3>6.6 Step 5 — Sidebar: New Chat Button</h3>
+
+  <p>
+    Add a left sidebar. Clicking <strong>New Chat</strong> creates a fresh UUID and clears the main chat area.
+    We also save thread ids to <code>chat_threads.json</code> so the dropdown can list them later.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Add <code>import json</code> and <code>import os</code> at the top. Add the helper functions and sidebar code below, <em>before</em> the chat UI section.</p>
+  </div>
+
+  <pre><code>import json
+import os</code></pre>
+
+  <pre><code>THREADS_FILE = "chat_threads.json"
+
+def load_threads():
+    if os.path.exists(THREADS_FILE):
+        with open(THREADS_FILE, encoding="utf-8") as f:
+            return json.load(f)
+    return []
+
+def save_threads(threads):
+    with open(THREADS_FILE, "w", encoding="utf-8") as f:
+        json.dump(threads, f)
+
+def add_thread(thread_id):
+    threads = load_threads()
+    if any(t["id"] == thread_id for t in threads):
+        return
+    threads.insert(0, {"id": thread_id, "label": f"Chat {thread_id[:8]}"})
+    save_threads(threads)
+
+# Pick a thread when the app first opens
+if "thread_id" not in st.session_state:
+    threads = load_threads()
+    if threads:
+        st.session_state.thread_id = threads[0]["id"]
+    else:
+        st.session_state.thread_id = str(uuid.uuid4())
+        add_thread(st.session_state.thread_id)
+
+# --- Sidebar ---
+with st.sidebar:
+    st.header("Chats")
+
+    if st.button("➕ New Chat", use_container_width=True):
+        new_id = str(uuid.uuid4())
+        add_thread(new_id)
+        st.session_state.thread_id = new_id
+        st.rerun()
+
+    st.caption(f"Active thread:\n`{st.session_state.thread_id}`")</code></pre>
+
+  <p>
+    Remove the old <code>if "thread_id" not in st.session_state</code> block from Step 6.5 — the new block above replaces it.
+    Also remove the standalone <code>st.caption(f"Thread ID: ...")</code> line; the sidebar now shows the active thread.
+  </p>
+
+  <p class="sample-output-title">Try this</p>
+  <ol>
+    <li>Send a message in the main chat.</li>
+    <li>Click <strong>New Chat</strong> in the sidebar — the chat area should be empty.</li>
+    <li>Send a different message in the new chat.</li>
+  </ol>
+
+  <h3>6.7 Step 6 — Dropdown to Switch Threads</h3>
+
+  <p>
+    This is the core lesson: when you pick another thread from the dropdown, Streamlit changes
+    <code>st.session_state.thread_id</code> and reloads messages from the checkpointer.
+    Each thread has its own isolated history in <code>checkpoints.sqlite</code>.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Inside the <code>with st.sidebar:</code> block, add the selectbox code below (after the New Chat button).</p>
+  </div>
+
+  <pre><code>    threads = load_threads()
+    if threads:
+        labels = [t["label"] for t in threads]
+        ids = [t["id"] for t in threads]
+
+        current_index = ids.index(st.session_state.thread_id)
+        picked_label = st.selectbox(
+            "Previous chats",
+            labels,
+            index=current_index,
+        )
+        picked_id = ids[labels.index(picked_label)]
+
+        if picked_id != st.session_state.thread_id:
+            st.session_state.thread_id = picked_id
+            st.rerun()</code></pre>
+
+  <p class="sample-output-title">Try this — the memory demo</p>
+  <ol>
+    <li>In <strong>Chat A</strong>, say: <code>My favorite color is blue.</code></li>
+    <li>Click <strong>New Chat</strong> to open <strong>Chat B</strong>.</li>
+    <li>In Chat B, say: <code>My favorite color is green.</code></li>
+    <li>Use the dropdown to switch back to Chat A.</li>
+    <li>Ask: <code>What is my favorite color?</code> — the answer should be <strong>blue</strong>, not green.</li>
+    <li>Switch to Chat B and ask the same question — the answer should be <strong>green</strong>.</li>
+    <li>In either chat, ask something that needs the web, e.g. <code>Search the web: who won the latest Formula 1 race?</code> — Tavily should run and the agent should summarize results.</li>
+  </ol>
+
+  <div class="note">
+    <strong>What just happened?</strong>
+    <p>
+      Both chats use the <strong>same agent</strong>, but different <code>thread_id</code> values in
+      <code>config = {"configurable": {"thread_id": ...}}</code>.
+      SqliteSaver stores separate checkpoint rows per thread. When you change the dropdown,
+      <code>agent.get_state(config)</code> reads the messages for that thread only.
+    </p>
+  </div>
+
+  <h3>6.8 Final Code — Complete App</h3>
+
+  <p>
+    Below is the full, minimal app. Compare it with your file — every piece should match if you followed each step.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Optionally replace your entire file with this version to verify everything is correct.
+      Save, refresh, and run the memory demo from Step 6.7 again.
+    </p>
+  </div>
+
+  <pre><code>import json
+import os
+import sqlite3
+import uuid
+
+import streamlit as st
+from dotenv import load_dotenv
+from langchain.agents import create_agent
+from langchain_openai import ChatOpenAI
+from langchain_tavily import TavilySearch
+from langgraph.checkpoint.sqlite import SqliteSaver
+
+load_dotenv()
+
+CHECKPOINT_DB = "checkpoints.sqlite"
+THREADS_FILE = "chat_threads.json"
+
+
+@st.cache_resource
+def get_agent():
+    conn = sqlite3.connect(CHECKPOINT_DB, check_same_thread=False)
+    checkpointer = SqliteSaver(conn=conn)
+    checkpointer.setup()
+
+    model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+
+    tavily_tool = TavilySearch(
+        max_results=3,
+        search_depth="advanced",
+        include_answer=True,
+        include_raw_content=False,
+        include_images=False,
+    )
+
+    return create_agent(
+        model=model,
+        tools=[tavily_tool],
+        system_prompt=(
+            "You are a helpful assistant with access to web search. "
+            "Use web search when the user asks about current events, recent news, "
+            "live data, or anything that needs up-to-date information from the internet. "
+            "For personal facts the user told you earlier in the same chat, use memory — do not search the web."
+        ),
+        checkpointer=checkpointer,
+    )
+
+
+def load_threads():
+    if os.path.exists(THREADS_FILE):
+        with open(THREADS_FILE, encoding="utf-8") as f:
+            return json.load(f)
+    return []
+
+
+def save_threads(threads):
+    with open(THREADS_FILE, "w", encoding="utf-8") as f:
+        json.dump(threads, f)
+
+
+def add_thread(thread_id):
+    threads = load_threads()
+    if any(t["id"] == thread_id for t in threads):
+        return
+    threads.insert(0, {"id": thread_id, "label": f"Chat {thread_id[:8]}"})
+    save_threads(threads)
+
+
+# --- Page setup ---
+st.set_page_config(page_title="Memory Chatbot", layout="wide")
+st.title("Chatbot with Memory")
+
+agent = get_agent()
+
+# --- Pick active thread ---
+if "thread_id" not in st.session_state:
+    threads = load_threads()
+    if threads:
+        st.session_state.thread_id = threads[0]["id"]
+    else:
+        st.session_state.thread_id = str(uuid.uuid4())
+        add_thread(st.session_state.thread_id)
+
+# --- Sidebar: new chat + thread picker ---
+with st.sidebar:
+    st.header("Chats")
+
+    if st.button("➕ New Chat", use_container_width=True):
+        new_id = str(uuid.uuid4())
+        add_thread(new_id)
+        st.session_state.thread_id = new_id
+        st.rerun()
+
+    threads = load_threads()
+    if threads:
+        labels = [t["label"] for t in threads]
+        ids = [t["id"] for t in threads]
+        current_index = ids.index(st.session_state.thread_id)
+        picked_label = st.selectbox("Previous chats", labels, index=current_index)
+        picked_id = ids[labels.index(picked_label)]
+        if picked_id != st.session_state.thread_id:
+            st.session_state.thread_id = picked_id
+            st.rerun()
+
+    st.caption(f"Active thread:\n`{st.session_state.thread_id}`")
+
+# --- Main chat area (right side) ---
+config = {"configurable": {"thread_id": st.session_state.thread_id}}
+snapshot = agent.get_state(config)
+
+for msg in snapshot.values.get("messages", []):
+    if msg.type == "human":
+        with st.chat_message("user"):
+            st.markdown(msg.content)
+    elif msg.type == "ai" and msg.content:
+        with st.chat_message("assistant"):
+            st.markdown(msg.content)
+
+if prompt := st.chat_input("Say something..."):
+    agent.invoke(
+        {"messages": [{"role": "user", "content": prompt}]},
+        config,
+    )
+    st.rerun()</code></pre>
+
+  <h2>7. Quick Reference — Run and Reset</h2>
+
+  <pre><code># Warmup app (Sections 2–5)
+streamlit run hello_streamlit.py
+
+# Memory chatbot (Section 6 onward)
+streamlit run streamlit_chatbot.py
+
+# Stop any running app
+# Press Ctrl+C in the terminal
+
+# Reset all chats (optional — deletes saved memory)
+# Delete checkpoints.sqlite and chat_threads.json, then restart Streamlit</code></pre>
+
+  <div class="note">
+    <strong>You built it!</strong>
+    <p>
+      You learned Streamlit from scratch — widgets, session state, sidebar, and chat UI — then built a multi-thread
+      chatbot with Tavily web search, where Streamlit manages thread ids, SqliteSaver stores conversation state,
+      and switching the dropdown reloads the correct history.
+    </p>
+  </div>
+
+</main>
+
+<script>
+  const COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+  </svg>`;
+  const CHECK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="20 6 9 17 4 12"></polyline>
+  </svg>`;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("pre").forEach(pre => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "code-wrapper";
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "copy-btn";
+      btn.innerHTML = COPY_ICON + " Copy";
+      wrapper.appendChild(btn);
+
+      btn.addEventListener("click", () => {
+        const code = pre.querySelector("code");
+        const text = (code ? code.innerText : pre.innerText).trimEnd();
+
+        const showCopied = () => {
+          btn.innerHTML = CHECK_ICON + " Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.innerHTML = COPY_ICON + " Copy";
+            btn.classList.remove("copied");
+          }, 2000);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(showCopied).catch(() => {
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            ta.style.position = "fixed";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+            showCopied();
+          });
+        } else {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          showCopied();
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>

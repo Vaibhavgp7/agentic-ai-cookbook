@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>06 · Review Artifacts: Shopping Cart – OpenSpec ShopLite</title>
+  <style>
+:root {
+  --ink: #0f172a;
+  --muted: #475569;
+  --accent: #1d4ed8;
+  --line: rgba(37, 99, 235, 0.18);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.65;
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+  color: #111827;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(15, 23, 42, 0.94);
+  color: #e5e7eb;
+  backdrop-filter: blur(8px);
+}
+
+.topbar-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0.7rem 1.25rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.topbar a {
+  color: #bfdbfe;
+  text-decoration: none;
+  font-size: 0.88rem;
+}
+
+.topbar a:hover { color: #fff; text-decoration: underline; }
+
+.brand {
+  font-weight: 700;
+  color: #fff !important;
+  letter-spacing: -0.02em;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+main {
+  max-width: 960px;
+  margin: 1.5rem auto 3rem;
+  padding: 2.25rem 2rem 3rem;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(148, 163, 184, 0.12);
+}
+
+h1 {
+  font-size: 2.05rem;
+  margin: 0 0 1.1rem;
+  letter-spacing: -0.03em;
+  text-align: center;
+  color: #0f172a;
+  padding: 1rem 1.4rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+  box-shadow:
+    0 10px 25px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(148, 163, 184, 0.35);
+}
+
+h2 {
+  font-size: 1.55rem;
+  margin-top: 2.15rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 0.35rem;
+  color: #0f172a;
+}
+
+h3 {
+  font-size: 1.2rem;
+  margin-top: 1.6rem;
+  color: #0f172a;
+}
+
+p { margin: 0.5rem 0 0.75rem; }
+
+code {
+  font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+  background-color: #f3f4ff;
+  padding: 0.12rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.95em;
+  color: #1d4ed8;
+}
+
+pre {
+  background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+  color: #e5e7eb;
+  padding: 2.25rem 4.75rem 1rem 1.1rem;
+  border-radius: 10px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+  margin: 0.75rem 0 1.5rem;
+  border: 1px solid rgba(15, 23, 42, 0.6);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.note, .exercise, .warn, .concept, .checkpoint, .behind, .think {
+  padding: 0.9rem 1.1rem;
+  margin: 1rem 0 1.5rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+}
+
+.note {
+  border-left: 4px solid #2563eb;
+  background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+  border-color: rgba(37, 99, 235, 0.4);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(191, 219, 254, 0.9);
+}
+
+.exercise {
+  border-left: 4px solid #16a34a;
+  background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+  border-color: rgba(22, 163, 74, 0.4);
+}
+
+.warn {
+  border-left: 4px solid #d97706;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: rgba(217, 119, 6, 0.4);
+}
+
+.concept {
+  border-left: 4px solid #7c3aed;
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+  border-color: rgba(124, 58, 237, 0.35);
+}
+
+.checkpoint {
+  border-left: 4px solid #0f766e;
+  background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+  border-color: rgba(15, 118, 110, 0.35);
+}
+
+.behind {
+  border-left: 4px solid #0e7490;
+  background: linear-gradient(135deg, #ecfeff, #cffafe);
+  border-color: rgba(14, 116, 144, 0.35);
+}
+
+.think {
+  border-left: 4px solid #c2410c;
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border-color: rgba(194, 65, 12, 0.35);
+}
+
+.exercise-title, .warn-title, .concept-title, .checkpoint-title, .behind-title, .think-title {
+  font-weight: 650;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+}
+
+.exercise-title { color: #166534; }
+.warn-title { color: #92400e; }
+.concept-title { color: #5b21b6; }
+.checkpoint-title { color: #115e59; }
+.behind-title { color: #155e75; }
+.think-title { color: #9a3412; }
+
+ol, ul { padding-left: 1.4rem; }
+li { margin: 0.25rem 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.95rem;
+}
+
+th, td {
+  border: 1px solid #e2e8f0;
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #eff6ff;
+  color: #0f172a;
+}
+
+tr:nth-child(even) td { background: #f8fafc; }
+
+.meta {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0 0 1.25rem;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.kicker {
+  text-align: center;
+  color: var(--muted);
+  margin-top: -0.35rem;
+  margin-bottom: 1.1rem;
+}
+
+.toc a { color: #1d4ed8; }
+
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.lesson-nav a {
+  color: #1d4ed8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.lesson-nav a:hover { text-decoration: underline; }
+
+.sample-output-title {
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+  color: #0f172a;
+}
+
+.code-wrapper { position: relative; }
+
+.copy-btn {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.5rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.55rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  color: #9ca3af;
+  font-family: system-ui, sans-serif;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  user-select: none;
+}
+
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #f9fafb;
+}
+
+.copy-btn.copied {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.45);
+}
+
+.progress {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.progress span {
+  display: block;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  background: #f1f5f9;
+  font-size: 0.82rem;
+  color: #334155;
+  text-align: center;
+}
+
+.progress span.done {
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 600;
+}
+
+.progress span.now {
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 700;
+}
+
+footer.site {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-bottom: 2rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.85rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.95rem 1rem;
+  background: #f8fafc;
+}
+
+.card h3 { margin-top: 0; font-size: 1.05rem; }
+.card a { color: #1d4ed8; font-weight: 650; text-decoration: none; }
+.card a:hover { text-decoration: underline; }
+.card p { margin: 0.35rem 0 0; font-size: 0.92rem; color: #475569; }
+
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="00-index.html">OpenSpec · ShopLite</a>
+    <nav>
+      <a href="00-index.html">Home</a>
+      <a href="01-why-spec-driven-development.html">01</a>
+      <a href="02-install-and-initialize.html">02</a>
+      <a href="03-core-concepts.html">03</a>
+      <a href="04-first-cycle-catalog.html">04</a>
+      <a href="05-explore-and-specify-search.html">05</a>
+      <a href="06-review-artifacts-cart.html">06</a>
+      <a href="07-apply-debug-checkout.html">07</a>
+      <a href="08-expanded-workflow-orders.html">08</a>
+      <a href="09-spec-evolution-inventory.html">09</a>
+      <a href="10-spec-management-and-beyond.html">10</a>
+    </nav>
+  </div>
+</div>
+
+<main>
+  <h1>06 · Review Artifacts: Shopping Cart</h1>
+  <p class="kicker">The useful skill is reading the plan and sending a bad sentence back, before it becomes code. Each scenario still needs a test.</p>
+  <div class="meta">
+    <span class="pill">Lesson 06 of 10</span>
+    <span class="pill">~80 minutes</span>
+    <span class="pill">Review discipline</span>
+  </div>
+
+  <div class="progress">
+    <span class="done">Catalog</span><span class="done">Search</span><span class="now">Cart</span>
+    <span>Checkout</span><span>Orders</span><span>Inventory</span>
+  </div>
+
+  <div class="note">
+    <strong>What you will do</strong>
+    <ul>
+      <li>Propose a shopping cart (Amazon’s cart, without saved-for-later).</li>
+      <li>Review proposal, specs, design, and tasks with a strict checklist.</li>
+      <li>Practice behavior vs implementation on quantity and persistence.</li>
+      <li>Apply and archive only after the plan would survive a teammate’s questions.</li>
+    </ul>
+  </div>
+
+  <div class="behind">
+    <div class="behind-title">Review is the step the tool does not do for you</div>
+    <p>
+      OpenSpec is happy to draft files and then write code. The quiet middle step is you, reading the folder.
+      The tool cannot know whether the cart should survive a refresh in the browser or only in the server’s memory. The assistant will pick one.
+      Review is where you catch a code decision hiding inside a SHALL, or an Amazon-sized extra hiding in the scope.
+    </p>
+    <p>
+      <code>/opsx:update</code> exists because the four files depend on each other. If you delete checkout from the proposal, the spec, design, and tasks may still mention it until something rewrites them together.
+      By hand, you would open all four and fix them. The command does that pass after you decide the edit.
+    </p>
+    <p>
+      The cart is the review lesson because it hides a lot of questions. Does a second add make a new line? What does the header count? What happens on refresh?
+      Each unanswered question becomes a guess in the code. And each scenario you keep needs a test.
+    </p>
+  </div>
+  <div class="think">
+    <div class="think-title">Think</div>
+    <p>
+      If propose is “draft the PR description” and apply is “write the code,” what job is review? It is the same job
+      as refusing to approve a design doc that says “handle edge cases appropriately.”
+    </p>
+  </div>
+
+  <h2>1. Why the cart is the review lesson</h2>
+  <p>
+    A cart looks obvious until you write it down. Amazon’s cart answers dozens of questions: merge quantities, persist
+    after refresh, line subtotals, remove, empty cart, what happens if the product disappears. If you skip review, the
+    agent will pick answers you may not want — and those answers will calcify in code.
+  </p>
+  <p>This lesson slows down on purpose. Applying early is the failure mode.</p>
+
+  <h2>2. Optional short explore</h2>
+  <p>If you do not remember how products are identified in code, explore for five minutes:</p>
+  <pre><code>/opsx-explore
+
+How is a product identified today (id, slug, sku)?
+Where would a cart reasonably live for a single-browser teaching app?
+Do not propose and do not write code.</code></pre>
+  <p>Then new chat for propose. If you already know products have an id, skip explore.</p>
+
+  <h2>3. Propose the cart</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New chat. Use this prompt. Notice how many decisions are named up front — that is how you steer the draft.</p>
+  </div>
+  <pre><code>/opsx-propose add-shopping-cart
+
+Add a ShopLite shopping cart, analogous to Amazon's cart (simplified).
+
+Shopper-visible behavior:
+- From product detail (and optionally the grid), the shopper can add a product to the cart.
+- Adding a product already in the cart increases its quantity by one (does not create a duplicate line).
+- The cart page lists each line: name, unit price, quantity, line subtotal (unit price × quantity).
+- The cart shows a cart subtotal equal to the sum of line subtotals. No tax yet (checkout is a later change).
+- The shopper can increase/decrease quantity. Quantity 0, or a Remove action, removes the line.
+- An empty cart explains that it is empty and links back to the catalog.
+- Cart contents persist across page refresh in the same browser. They do not need to persist across devices or logins (we have no accounts).
+- A header cart indicator shows how many items are in the cart (sum of quantities).
+
+Out of scope:
+- Checkout, tax, shipping, promo codes, saved-for-later, wishlists, inventory reservation, accounts.
+
+Read existing catalog and search specs so we do not contradict them.
+Change name: add-shopping-cart.
+Every scenario needs one automated test. The test name includes the scenario title.
+The spec must say that. tasks.md must list those tests.</code></pre>
+
+  <h2>4. Deep review: proposal.md</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Open <code>openspec/changes/add-shopping-cart/proposal.md</code>. Mark each question yes/no. Fix any “no.”</p>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Check</th><th>Why it matters</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>One intent you can say in a sentence?</td><td>“And also checkout” is lesson 07 leaking in.</td></tr>
+      <tr><td>Out of scope lists tax / checkout / accounts?</td><td>Otherwise apply will “helpfully” add them.</td></tr>
+      <tr><td>Persistence story is explicit?</td><td>Otherwise one agent uses memory and the next uses localStorage.</td></tr>
+      <tr><td>No Amazon-scale features (Subscribe &amp; Save, 1-Click)?</td><td>Hallucinated requirements.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>5. Deep review: specs (the contract)</h2>
+  <p>Open the delta under <code>openspec/changes/add-shopping-cart/specs/</code>.</p>
+
+  <h3>5.1 One SHALL per requirement</h3>
+  <p>If you see a paragraph with three “and also” clauses, split it. Example of a fat requirement to reject:</p>
+  <pre><code>The system SHALL let users add products, change quantities, persist the cart
+in Redis, and display tax-inclusive totals in a React modal.</code></pre>
+  <p>Split into add, quantity, persist, totals — and throw Redis/React out of the spec entirely.</p>
+
+  <h3>5.2 Behavior, not storage</h3>
+  <table>
+    <thead>
+      <tr><th>Keep in spec</th><th>Move to design.md</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Cart survives refresh in the same browser</td><td>localStorage vs cookie vs server session</td></tr>
+      <tr><td>Duplicate add increments quantity</td><td>Hash map keyed by product id</td></tr>
+      <tr><td>Line subtotal = price × qty</td><td>Whether math happens in JS or Python</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.3 Scenarios that earn their keep</h3>
+  <p>You want at least these cases. Add any that are missing:</p>
+  <pre><code>#### Scenario: Add from detail
+- GIVEN a product detail page
+- WHEN the shopper adds the product to the cart
+- THEN the cart contains that product with quantity 1
+
+#### Scenario: Add duplicate
+- GIVEN the product is already in the cart with quantity 1
+- WHEN the shopper adds it again
+- THEN the cart still has one line for that product
+- AND the quantity is 2
+
+#### Scenario: Line subtotal
+- GIVEN a line with unit price 10.00 and quantity 3
+- WHEN the shopper views the cart
+- THEN the line subtotal is 30.00
+- AND the cart subtotal includes that 30.00
+
+#### Scenario: Quantity zero removes
+- GIVEN a line with quantity 1
+- WHEN the shopper sets quantity to 0 (or removes the line)
+- THEN that product is no longer in the cart
+
+#### Scenario: Empty cart
+- GIVEN the cart has no lines
+- WHEN the shopper opens the cart
+- THEN the page states the cart is empty
+- AND the shopper can return to the catalog
+
+#### Scenario: Refresh
+- GIVEN the cart has at least one line
+- WHEN the shopper refreshes the browser
+- THEN those lines are still present
+
+### Requirement: Test for each scenario
+The project SHALL include one automated test for each scenario in this spec.
+The test name SHALL include the scenario title.
+The test SHALL fail when that scenario's THEN is not met.</code></pre>
+  <p>If the AI only wrote the happy-path add, it drafted a demo script, not a spec. Fix it before apply.</p>
+
+  <h3>5.4 The two-developer test</h3>
+  <p>
+    Read the spec once more. Could two implementers produce the same observable cart? Ambiguous spots to tighten:
+  </p>
+  <ul>
+    <li>Is the header count number of lines or sum of quantities? Pick one in the spec (we asked for sum of quantities).</li>
+    <li>Can quantity go above some max? If unspecified, the agent may invent 99. Either specify or explicitly leave it unbounded for ShopLite.</li>
+    <li>Does add from the grid exist, or only from detail? Align spec with the proposal.</li>
+  </ul>
+
+  <h2>6. Deep review: design.md</h2>
+  <p>Design is allowed to name FastAPI routes, localStorage keys, and HTML pages. Watch for:</p>
+  <ul>
+    <li><strong>Too much:</strong> user accounts “so the cart can sync.” Out of scope.</li>
+    <li><strong>Too little:</strong> “we will add a cart.” That is not a design.</li>
+    <li><strong>Contradiction:</strong> spec says persist across refresh; design uses an in-memory Python dict (lost on uvicorn reload). Call that out — for a teaching app, localStorage or a JSON file is fine; pick one and make spec+design agree.</li>
+  </ul>
+  <div class="concept">
+    <div class="concept-title">Abstraction level</div>
+    <p>
+      Design should say <em>where</em> state lives and <em>which</em> endpoints exist, not paste 200 lines of imagined
+      Python. If design.md is a novel, ask the agent to shorten it to decisions and rejected alternatives.
+    </p>
+  </div>
+
+  <h2>7. Deep review: tasks.md</h2>
+  <p>Good tasks are checkable. Poor tasks hide work:</p>
+  <pre><code>- [ ] 1.1 Implement cart   ← too big
+- [ ] 1.1 Cart model / storage
+- [ ] 1.2 Add-to-cart endpoint or client action
+- [ ] 1.3 Cart page with lines and subtotals
+- [ ] 1.4 Quantity update and remove
+- [ ] 1.5 Header count
+- [ ] 1.6 Empty state
+- [ ] 1.7 Persistence across refresh
+- [ ] 1.8 One test per scenario, named with the scenario title</code></pre>
+  <p>Use update if you need a rewrite:</p>
+  <pre><code>/opsx-update add-shopping-cart
+
+Split tasks.md into small checkboxes matching the scenarios.
+Include one test task per scenario. The test name includes the scenario title.
+Do not add checkout. Do not write application code yet.</code></pre>
+
+  <h2>8. Apply, verify in the browser, archive</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Only after the checklist is green: new chat, apply, then click like a shopper.</p>
+  </div>
+  <pre><code>/opsx-apply add-shopping-cart</code></pre>
+  <p>Browser script:</p>
+  <ol>
+    <li>Add headphones twice — one line, quantity 2.</li>
+    <li>Change quantity to 3 — line subtotal updates.</li>
+    <li>Refresh — cart remains.</li>
+    <li>Set quantity 0 or Remove — line gone.</li>
+    <li>Empty cart message appears.</li>
+    <li>Header count matches sum of quantities.</li>
+    <li>Search still works (old specs still true).</li>
+    <li>The tests pass. Each scenario title from the spec appears in a test name.</li>
+  </ol>
+  <pre><code>/opsx-archive add-shopping-cart</code></pre>
+
+  <h2>9. You now have a spec suite</h2>
+  <p>Pause and open <code>openspec/specs/</code>. You should see catalog, search, and cart living together. This is the “product” OpenSpec is building besides the app. Future checkout must respect cart subtotals — lesson 07 will depend on that.</p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Skim all main specs (not the archive). Write one sentence: “ShopLite today can …” If you cannot, the suite is not yet a useful onboarding doc — tighten a Purpose section.</p>
+  </div>
+
+  <h2>10. Challenge (optional)</h2>
+  <p>
+    Amazon shows “Saved for later.” That is a new capability, not a cart tweak. If you want it, it deserves its own
+    change after this one is archived — do not bolt it onto <code>add-shopping-cart</code> mid-flight unless it was
+    always in scope (it was not).
+  </p>
+
+  <h2>11. Common issues</h2>
+  <table>
+    <thead>
+      <tr><th>Symptom</th><th>Fix</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Cart vanishes on refresh</td><td>Spec said persist; implementation didn’t. Fix code, or you failed review on design. Apply again.</td></tr>
+      <tr><td>Two lines of the same product</td><td>Duplicate-add scenario missing or ignored. Add scenario, then fix.</td></tr>
+      <tr><td>Agent added checkout</td><td>You skipped out-of-scope in review. Delete checkout UI, update artifacts, re-apply cart only.</td></tr>
+      <tr><td>Subtotal is a string concat (“1010” instead of 20)</td><td>Classic type bug. Spec is fine; code is not. This one really is a code bug.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>12. Reflection</h2>
+  <ol>
+    <li>Which review question caught something the AI got wrong?</li>
+    <li>Give one line that belonged in design.md, not the spec.</li>
+    <li>Why is “header count = sum of quantities” worth specifying instead of leaving it implied?</li>
+  </ol>
+
+  <div class="checkpoint">
+    <div class="checkpoint-title">Lesson 06 complete</div>
+    <p>Cart is in. Next lesson is checkout money math — where the bug is often in the spec, not the code.</p>
+  </div>
+
+  <div class="lesson-nav">
+    <a href="05-explore-and-specify-search.html">← 05 Search</a>
+    <a href="07-apply-debug-checkout.html">Next: 07 Checkout (apply &amp; debug) →</a>
+  </div>
+</main>
+<script>
+(function () {
+  const COPY_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  const CHECK_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  function copyText(text, onDone) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(onDone).catch(fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      onDone();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("pre").forEach((pre) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "code-wrapper";
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "copy-btn";
+      btn.innerHTML = COPY_ICON + " Copy";
+      wrapper.appendChild(btn);
+
+      btn.addEventListener("click", () => {
+        const code = pre.querySelector("code");
+        const text = (code ? code.innerText : pre.innerText).trimEnd();
+        copyText(text, () => {
+          btn.innerHTML = CHECK_ICON + " Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.innerHTML = COPY_ICON + " Copy";
+            btn.classList.remove("copied");
+          }, 2000);
+        });
+      });
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

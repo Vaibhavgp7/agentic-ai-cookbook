@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Voting Ensemble Pattern Lab: Three Examiners, One Letter of Credit</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6; margin: 0; padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 980px; margin: 2rem auto 3rem; padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff; border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.05rem; margin: 0 0 1.25rem; letter-spacing: -0.03em; text-align: center;
+      color: #0f172a; padding: 1rem 1.5rem; border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.55rem; margin-top: 2.25rem; margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18); padding-bottom: 0.35rem; color: #0f172a;
+    }
+    h3 { font-size: 1.2rem; margin-top: 1.6rem; color: #0f172a; }
+    p { margin: 0.45rem 0 0.7rem; }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff; padding: 0.12rem 0.3rem; border-radius: 4px;
+      font-size: 0.92em; color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb; padding: 1rem 1.1rem; border-radius: 10px; overflow-x: auto;
+      font-size: 0.86rem; margin: 0.7rem 0 1.3rem; border: 1px solid rgba(15, 23, 42, 0.6); line-height: 1.45;
+    }
+    pre code { background: none; padding: 0; color: inherit; }
+    .diagram pre, pre.mermaid {
+      background: #ffffff; color: #111827; border: none; margin: 0;
+      padding: 0.35rem 0.2rem 0.1rem; box-shadow: none;
+    }
+    .note, .exercise, .instructor, .predict, .case {
+      padding: 0.9rem 1.1rem; margin: 1rem 0 1.4rem; border-radius: 10px;
+      font-size: 0.95rem; border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .instructor {
+      border-left: 4px solid #d97706;
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: rgba(217, 119, 6, 0.35);
+    }
+    .predict {
+      border-left: 4px solid #9333ea;
+      background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+      border-color: rgba(147, 51, 234, 0.35);
+    }
+    .case {
+      border-left: 4px solid #b45309;
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: rgba(180, 83, 9, 0.35);
+    }
+    .exercise-title, .instructor-title, .predict-title, .case-title {
+      font-weight: 650; margin-bottom: 0.25rem; text-transform: uppercase;
+      letter-spacing: 0.06em; font-size: 0.8rem;
+    }
+    .exercise-title { color: #166534; }
+    .instructor-title { color: #92400e; }
+    .predict-title { color: #6b21a8; }
+    .case-title { color: #92400e; }
+    .glossary dt { font-weight: 650; margin-top: 0.75rem; }
+    .glossary dd { margin: 0.15rem 0 0.3rem 0; }
+    ol, ul { padding-left: 1.35rem; }
+    li { margin: 0.28rem 0; }
+    table { border-collapse: collapse; width: 100%; margin: 0.7rem 0 1.2rem; font-size: 0.92rem; }
+    th, td { border: 1px solid #e5e7eb; padding: 0.45rem 0.6rem; text-align: left; vertical-align: top; }
+    th { background: #eff6ff; }
+    .diagram {
+      background: #fafafa; border: 1px solid #e5e7eb; border-radius: 12px;
+      padding: 0.4rem 0.6rem 0.2rem; margin: 0.5rem 0 0.4rem; overflow-x: auto;
+    }
+    .caption { font-size: 0.85rem; color: #475569; margin: 0 0 1rem; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Voting Ensemble Pattern Lab: Three Examiners, One Letter of Credit</h1>
+
+  <div class="note">
+    <strong>How to use this guide</strong>
+    <ol>
+      <li>Open this page beside a Jupyter notebook named <code>09d-voting-ensemble.ipynb</code> in the <code>03-langgraph</code> folder.</li>
+      <li>Use the <code>.env</code> already in that folder.</li>
+      <li>Whenever you see <strong>Your Task</strong>, paste the code into a <strong>new notebook cell</strong> and run it.</li>
+      <li>The three examiners print in whatever order they finish. That order is not a bug. They run in one parallel step.</li>
+    </ol>
+    <p>Pattern 4 of 5. Overview: <code>09-more-multi-agent-patterns.html</code>. This lab reuses the fan-out / fan-in and reducer ideas from <code>03_parallelization.html</code>.</p>
+  </div>
+
+  <h2>1. Why this lab exists</h2>
+  <p>
+    Sometimes the right answer is to have several people read the same document <strong>before</strong> anyone sees the others’ answers. If the second reader sees the first draft, the second opinion is no longer independent.
+  </p>
+  <p>
+    The graph has no conditional edges at all. Nobody chooses the next node. The three examiners always run, at the same time, and the chair always runs after them. The judgment lives in the votes and in the chair’s note.
+  </p>
+
+  <h3>What you will build</h3>
+  <ol>
+    <li>Three examiners with the same papers and different instructions: strict, commercial, and the buyer’s view.</li>
+    <li>A <code>votes</code> list with a reducer, so three parallel writes become one list.</li>
+    <li>A <strong>chair</strong> that counts the labels in Python, then asks the model to write either a majority note or a split note for the human officer.</li>
+  </ol>
+
+  <h2>2. The business story</h2>
+  <div class="case">
+    <div class="case-title">The papers on the trade desk</div>
+    <p>The letter of credit says “100% cotton yarn.” The invoice says “100% cotton yarns, carded.” The bill of lading shortens the port name. Two dates are one day apart.</p>
+  </div>
+  <ul>
+    <li>A trade desk (the team that pays sellers in overseas trade) receives papers under a letter of credit (the bank’s promise to pay the seller if the papers match the deal).</li>
+    <li>Three examiners see the same papers at the same time. None of them can see the others’ answers.</li>
+    <li><code>strict_examiner</code> checks the papers the way a clerk does under UCP 600 (the rulebook banks use for letters of credit). A small difference in wording can be enough to refuse payment.</li>
+    <li><code>commercial_examiner</code> asks whether a banker who knows this goods trade would treat the two descriptions as the same shipment.</li>
+    <li><code>applicant_examiner</code> looks at it from the applicant’s side (the buyer who asked the bank to open the letter of credit). Can that buyer fairly refuse to pay, or would a refusal just be an excuse?</li>
+    <li>Each examiner returns one label — <code>complying</code>, <code>discrepant</code>, or <code>waive</code> — and a short reason tied to the actual words.</li>
+    <li>If two or three agree, <code>chair</code> records that label and writes one paragraph on the examiner who disagreed. If all three differ, <code>chair</code> does not pick a winner. It writes a short note that tells the human officer what they disagree about.</li>
+  </ul>
+
+  <h3>Words you need</h3>
+  <div class="note glossary">
+    <dl>
+      <dt>Letter of credit (LC)</dt>
+      <dd>The bank promises to pay the seller if the documents match the terms of the LC.</dd>
+      <dt>Bill of lading</dt>
+      <dd>The shipping receipt from the carrier. It names the port of loading and the goods.</dd>
+      <dt>UCP 600</dt>
+      <dd>The international rulebook banks use to examine LC documents.</dd>
+      <dt>complying</dt>
+      <dd>The papers match the LC. The bank can pay.</dd>
+      <dt>discrepant</dt>
+      <dd>The papers do not match. The bank may refuse.</dd>
+      <dt>waive</dt>
+      <dd>There is a mismatch, but the bank can set it aside, usually with the applicant’s agreement.</dd>
+      <dt>Reducer</dt>
+      <dd>The rule for merging several writes to one state field. Here <code>operator.add</code> joins three one-item lists into one list of three votes.</dd>
+    </dl>
+  </div>
+
+  <h2>3. Why an agent has to do this</h2>
+  <ul>
+    <li>“Yarn” versus “yarns, carded” is a question of language and of the goods. A rule that compares the two strings flags every plural and every extra word, including ones that do not matter.</li>
+    <li>The three answers are judgments. They are useful because the examiners do not see each other’s draft.</li>
+    <li>Counting the votes is a few lines of Python. Writing the note from three different reasons, or explaining a three-way split to an officer, still needs a model.</li>
+  </ul>
+
+  <h2>4. The graph</h2>
+  <div class="diagram">
+    <pre class="mermaid">
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	strict_examiner(strict_examiner)
+	commercial_examiner(commercial_examiner)
+	applicant_examiner(applicant_examiner)
+	chair(chair)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> strict_examiner;
+	__start__ --> commercial_examiner;
+	__start__ --> applicant_examiner;
+	strict_examiner --> chair;
+	commercial_examiner --> chair;
+	applicant_examiner --> chair;
+	chair --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+    </pre>
+  </div>
+  <p class="caption">Every arrow is solid. The three examiners always run in one parallel step. They do not choose the next node. Each one writes a vote into state.</p>
+  <ul>
+    <li>Three arrows leave <code>__start__</code>. LangGraph runs those three nodes in the same step. The chair waits until all three have written.</li>
+    <li>Each examiner returns <code>{"votes": [one_vote]}</code>. The reducer joins them into one list of three.</li>
+    <li>Without the reducer, three nodes write the same key in one step, and LangGraph raises <code>InvalidUpdateError</code>. That is the same error you saw in the fan-in lab.</li>
+    <li>The chair counts in Python. Majority: the model writes a note from the winning reasons and mentions the dissent. 1–1–1: the model writes a split note and does not choose.</li>
+  </ul>
+
+  <div class="predict">
+    <div class="predict-title">Predict before you code</div>
+    <p>For each examiner, write the label you expect: <code>complying</code>, <code>discrepant</code>, or <code>waive</code>. Is your prediction a majority or a three-way split? You will compare after the run. (The prompts are written so a three-way split is likely, but the model may still agree with itself.)</p>
+  </div>
+
+  <h2>5. Setup</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Terminal, from <code>03-langgraph</code>, if needed:</p>
+  </div>
+  <pre><code>pip install langgraph langchain langchain-openai python-dotenv</code></pre>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>import os
+import operator
+from collections import Counter
+from typing import Literal
+from typing_extensions import TypedDict, Annotated
+from pydantic import BaseModel, Field
+from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+from langgraph.graph import StateGraph, START, END
+
+load_dotenv()
+model_name = os.getenv("MODEL_NAME", "gpt-4.1-mini")
+llm = ChatOpenAI(model=model_name, temperature=0)
+print("Model:", model_name)</code></pre>
+
+  <h2>6. The document packet</h2>
+  <p>Every examiner receives exactly this text. The only difference between examiners is the instruction.</p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. Find the three differences before you run the examiners.</p>
+  </div>
+  <pre><code>PACKET = """
+LETTER OF CREDIT LC-HZ-24-0918 (issued by Horizon Bank, Mumbai)
+- Goods: 100% cotton yarn
+- Quantity: 18,000 kg
+- Port of loading: Jawaharlal Nehru Port, Nhava Sheva
+- Latest shipment date: 15 Sep 2026
+- Documents: commercial invoice, bill of lading
+- Subject to UCP 600
+
+COMMERCIAL INVOICE INV-SR-4471
+- Goods: 100% cotton yarns, carded
+- Quantity: 18,000 kg
+- Invoice date: 14 Sep 2026
+
+BILL OF LADING BL-MSK-90021
+- Goods: cotton yarn
+- Port of loading: JNPT Nhava Sheva
+- Shipped on board: 15 Sep 2026
+
+DIFFERENCES TO JUDGE
+1. LC "yarn" vs invoice "yarns, carded"
+2. LC port name in full vs bill of lading "JNPT Nhava Sheva"
+3. Invoice dated 14 Sep, shipment 15 Sep (one day apart)
+"""
+
+print(PACKET)</code></pre>
+
+  <h2>7. State with a reducer</h2>
+  <p>
+    <code>votes</code> is the field all three examiners write in the same step. It must have <code>operator.add</code>.
+    <code>packet</code> is read-only. <code>decision_note</code> is written once, by the chair.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>class Vote(BaseModel):
+    examiner: str
+    stance: Literal["complying", "discrepant", "waive"]
+    reason: str = Field(description="Two sentences. Quote the exact words from the papers that decide it.")
+
+class State(TypedDict):
+    packet: str
+    votes: Annotated[list, operator.add]
+    decision_note: str
+
+print("Vote and State ready.")</code></pre>
+
+  <h2>8. Three examiner prompts</h2>
+  <p>
+    The prompts share one instruction block and add one stance each. They do not mention the other examiners’ answers, because those answers do not exist yet when the three nodes start.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>BASE = """You examine trade documents for Horizon Bank under a letter of credit.
+You will see only the packet. You cannot see any other examiner.
+Return one stance: complying, discrepant, or waive. Quote the words from the papers that decide it.
+Do not invent a fact that is not in the packet.
+"""
+
+STRICT = BASE + """
+Your view: strict document checker under UCP 600.
+An extra descriptive word on the invoice that is not in the LC, such as "carded", is a description mismatch.
+If any difference could let the bank refuse, your stance is discrepant.
+"""
+
+COMMERCIAL = BASE + """
+Your view: a banker who knows the cotton yarn trade.
+"Carded" is an ordinary process term for cotton yarn and does not describe different goods.
+"JNPT Nhava Sheva" is the common short name for Jawaharlal Nehru Port.
+If a banker in this trade would treat the papers as the same shipment, your stance is complying.
+"""
+
+APPLICANT = BASE + """
+Your view: the applicant, the buyer who asked the bank to open this LC.
+Ask whether the buyer would be fairly harmed. If the goods are what the buyer ordered and the
+differences are wording only, a refusal would just be an excuse.
+When there IS a wording difference but the buyer is not harmed, your stance is waive:
+the mismatch exists, and the bank can set it aside with the applicant's agreement.
+"""
+
+def examiner_chain(system_prompt):
+    return ChatPromptTemplate.from_messages([
+        ("system", system_prompt),
+        ("human", "Packet:\n{packet}"),
+    ]) | llm.with_structured_output(Vote)
+
+strict_chain = examiner_chain(STRICT)
+commercial_chain = examiner_chain(COMMERCIAL)
+applicant_chain = examiner_chain(APPLICANT)
+print("Examiner chains ready.")</code></pre>
+
+  <h2>9. Three examiner nodes</h2>
+  <p>
+    Each node returns a list with <strong>one</strong> vote. The reducer adds lists together.
+    Set <code>examiner</code> in Python after the model call, so a model typo cannot change who voted.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>def make_examiner(name, chain):
+    def node(state):
+        vote = chain.invoke({"packet": state["packet"]})
+        vote.examiner = name
+        print(f"\n[{name}] {vote.stance}\n   {vote.reason}")
+        return {"votes": [vote.model_dump()]}
+    return node
+
+strict_examiner = make_examiner("strict_examiner", strict_chain)
+commercial_examiner = make_examiner("commercial_examiner", commercial_chain)
+applicant_examiner = make_examiner("applicant_examiner", applicant_chain)
+print("Examiner nodes ready.")</code></pre>
+
+  <h2>10. The chair</h2>
+  <p>
+    Counting the labels is Python: <code>Counter</code>. The model never decides what the majority is.
+    The model only writes the note. A majority gets a recorded label plus a paragraph on the dissent. A 1–1–1 split gets <code>refer to officer</code>.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>def format_votes(votes):
+    return "\n".join(f"- {v['examiner']}: {v['stance']} — {v['reason']}" for v in votes)
+
+majority_prompt = ChatPromptTemplate.from_messages([
+    ("system", """You are the chair of the trade desk. The majority stance is already decided in code.
+Write a note of 4 to 6 sentences: record the majority stance, summarize the winning reasons,
+and write one paragraph on the examiner who disagreed and why their concern is or is not enough.
+Do not change the majority stance. Do not add facts outside the packet and the votes."""),
+    ("human", "MAJORITY STANCE: {winner}\n\nVOTES:\n{votes}\n\nPACKET:\n{packet}"),
+])
+
+split_prompt = ChatPromptTemplate.from_messages([
+    ("system", """You are the chair of the trade desk. The three examiners gave three different stances.
+Do NOT pick a winner. Write a short note for the human trade officer:
+what each examiner believes, which words in the papers they disagree about,
+and the one question the officer must answer to decide. Start with: REFER TO OFFICER."""),
+    ("human", "VOTES:\n{votes}\n\nPACKET:\n{packet}"),
+])
+
+majority_chain = majority_prompt | llm
+split_chain = split_prompt | llm
+
+def chair(state):
+    votes = state["votes"]
+    counts = Counter(v["stance"] for v in votes)
+    print("\n[chair] votes received:", len(votes))
+    print("[chair] counts:", dict(counts))
+    winner, top = counts.most_common(1)[0]
+    payload = {"votes": format_votes(votes), "packet": state["packet"]}
+    if top &gt;= 2:
+        print(f"[chair] majority: {winner} ({top} of {len(votes)})")
+        note = majority_chain.invoke({**payload, "winner": winner}).content
+        note = f"RECORDED: {winner} ({top} of {len(votes)})\n\n{note}"
+    else:
+        print("[chair] three-way split: refer to officer")
+        note = split_chain.invoke(payload).content
+    return {"decision_note": note}
+
+print("Chair ready.")</code></pre>
+
+  <div class="note">
+    <strong>Why the chair checks <code>len(votes)</code>.</strong>
+    The chair runs once, after all three examiners. If you see <code>votes received: 1</code>, a fan-in edge is missing, or the reducer is missing and only one write survived.
+  </div>
+
+  <h2>11. Wire the graph</h2>
+  <p>Six <code>add_edge</code> calls and one to the end. There is no <code>add_conditional_edges</code> in this lab.</p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>g = StateGraph(State)
+g.add_node("strict_examiner", strict_examiner)
+g.add_node("commercial_examiner", commercial_examiner)
+g.add_node("applicant_examiner", applicant_examiner)
+g.add_node("chair", chair)
+
+g.add_edge(START, "strict_examiner")
+g.add_edge(START, "commercial_examiner")
+g.add_edge(START, "applicant_examiner")
+g.add_edge("strict_examiner", "chair")
+g.add_edge("commercial_examiner", "chair")
+g.add_edge("applicant_examiner", "chair")
+g.add_edge("chair", END)
+
+graph = g.compile()
+print("Graph compiled.")</code></pre>
+
+  <h2>12. Draw the graph</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. You should see three solid arrows out of the start, three solid arrows into <code>chair</code>, and no dotted arrows.</p>
+  </div>
+  <pre><code>from IPython.display import Image
+Image(graph.get_graph().draw_mermaid_png())</code></pre>
+
+  <h2>13. Run the examination</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. Note the order the three examiners print in. Run the cell twice. The order may change. The chair still sees three votes.</p>
+  </div>
+  <pre><code>def examine():
+    result = graph.invoke(
+        {"packet": PACKET, "votes": [], "decision_note": ""},
+        config={"recursion_limit": 10},
+    )
+    print("\n" + "=" * 70)
+    print("VOTES:")
+    for v in result["votes"]:
+        print(f"  {v['examiner']:22} {v['stance']}")
+    print("\nDECISION NOTE:\n")
+    print(result["decision_note"])
+    return result
+
+result = examine()</code></pre>
+
+  <h3>What you should see</h3>
+  <table>
+    <thead><tr><th>Examiner</th><th>Expected stance</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>strict_examiner</td><td><code>discrepant</code></td><td>“carded” is on the invoice and not in the LC, and the port name is shortened.</td></tr>
+      <tr><td>commercial_examiner</td><td><code>complying</code></td><td>Carded cotton yarn is still cotton yarn. JNPT is the usual name for that port.</td></tr>
+      <tr><td>applicant_examiner</td><td><code>waive</code></td><td>There is a wording difference, but the buyer gets what it ordered.</td></tr>
+    </tbody>
+  </table>
+  <p>
+    With those three labels the chair prints <code>three-way split: refer to officer</code>, and the note starts with <strong>REFER TO OFFICER</strong>. It should name the disputed words, usually “carded,” and ask the officer one question.
+  </p>
+  <p>
+    If two examiners agree, you will see <code>RECORDED: ...</code> and a paragraph on the third. That is also a correct run of the pattern. The chair counted in Python, and the model wrote the note for that count.
+  </p>
+
+  <h3>If the run looks wrong</h3>
+  <ul>
+    <li><strong><code>InvalidUpdateError</code>.</strong> <code>votes</code> is a plain <code>list</code> in <code>State</code>. Add <code>Annotated[list, operator.add]</code>.</li>
+    <li><strong><code>votes received: 1</code> or <code>2</code>.</strong> A fan-in edge to <code>chair</code> is missing. All three examiners need an edge to the chair.</li>
+    <li><strong>The chair says “REFER TO OFFICER” on a 2–1 vote.</strong> The <code>top &gt;= 2</code> test is wrong, or <code>counts</code> was built from <code>reason</code> instead of <code>stance</code>.</li>
+    <li><strong>An examiner’s reason mentions another examiner.</strong> The prompt leaked the other answers, or you ran them in sequence. In this graph they cannot see each other.</li>
+  </ul>
+
+  <h2>14. When the number of examiners can change</h2>
+  <p>
+    Three fixed nodes are fine when the panel is always the same three roles. If the panel size changes from case to case, replace the three nodes with one <code>examiner</code> node and <code>Send</code> (the tool from the parallel labs that starts one copy of a node per item). Pass each examiner’s role in that copy. The chair stays the node that waits for all of them, and <code>votes</code> keeps the same reducer.
+  </p>
+  <pre><code># Sketch only, not needed for this lab
+from langgraph.types import Send
+
+ROLES = {"strict_examiner": STRICT, "commercial_examiner": COMMERCIAL, "applicant_examiner": APPLICANT}
+
+def fan_out(state):
+    return [Send("examiner", {"packet": state["packet"], "role": r}) for r in ROLES]
+
+# g.add_conditional_edges(START, fan_out, ["examiner"])
+# g.add_edge("examiner", "chair")</code></pre>
+
+  <h2>15. Key takeaways</h2>
+  <ul>
+    <li><strong>No node chooses a route.</strong> The graph is fixed. The variation is in the three votes.</li>
+    <li><strong>Independence comes from parallel start.</strong> All three examiners start from the same state, before any vote is written.</li>
+    <li><strong>The reducer is required.</strong> Three writes to <code>votes</code> in one step need <code>operator.add</code>.</li>
+    <li><strong>Count in code, explain with the model.</strong> <code>Counter</code> decides majority or split. The model writes what a person can read.</li>
+    <li><strong>A three-way split is a result.</strong> The chair hands the disagreement to a human. It does not force a winner.</li>
+  </ul>
+
+  <div class="instructor">
+    <div class="instructor-title">Try this on your own</div>
+    <ol>
+      <li>Change the invoice goods line to <code>100% cotton yarn</code> (remove “s, carded”). Run again. Predict whether the strict examiner changes, and whether the chair now records a majority.</li>
+      <li>Remove <code>operator.add</code> from <code>votes</code> and run. Read the error message. Put the reducer back.</li>
+      <li>Add a fourth examiner, <code>sanctions_examiner</code>, that only checks whether a party or port appears on a sanctions list. With four voters, a 2–2 split is possible. Change the chair so 2–2 is also <code>REFER TO OFFICER</code>.</li>
+    </ol>
+  </div>
+</main>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: "base",
+    securityLevel: "loose",
+    flowchart: { curve: "linear", htmlLabels: true, padding: 14, nodeSpacing: 40, rankSpacing: 45 },
+    themeVariables: {
+      fontFamily: "system-ui, Segoe UI, sans-serif",
+      fontSize: "15px",
+      primaryColor: "#f2f0ff",
+      primaryTextColor: "#111827",
+      primaryBorderColor: "#a78bfa",
+      lineColor: "#64748b",
+    },
+  });
+</script>
+</body>
+</html>

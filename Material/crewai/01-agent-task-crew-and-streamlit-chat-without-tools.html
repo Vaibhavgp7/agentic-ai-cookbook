@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your First Coverage Officer Agent</title>
+  <style>
+    :root {
+      --bg-gradient-start: #eef2ff;
+      --bg-gradient-mid: #f9fafb;
+      --bg-gradient-end: #fdf2ff;
+      --text-primary: #111827;
+      --text-heading: #0f172a;
+      --accent-blue: #2563eb;
+      --accent-green: #16a34a;
+      --accent-amber: #d97706;
+      --accent-red: #dc2626;
+      --card-bg: #ffffff;
+      --border-subtle: rgba(148, 163, 184, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, var(--bg-gradient-start) 0, var(--bg-gradient-mid) 40%, var(--bg-gradient-end) 100%);
+      color: var(--text-primary);
+    }
+
+    main {
+      max-width: 980px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08), 0 0 0 1px var(--border-subtle);
+    }
+
+    h1 {
+      font-size: 2.05rem;
+      margin: 0 0 1rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: var(--text-heading);
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12), 0 0 0 1px var(--border-subtle);
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: var(--text-heading);
+    }
+
+    h3 { font-size: 1.18rem; margin-top: 1.75rem; color: var(--text-heading); }
+
+    p { margin: 0.5rem 0 0.75rem; }
+
+    a { color: var(--accent-blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.93em;
+      color: #1d4ed8;
+    }
+
+    pre {
+      background: linear-gradient(145deg, #020617, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.86rem;
+      line-height: 1.5;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+
+    pre code { background: none; padding: 0; color: inherit; }
+
+    .note, .exercise, .warning, .tip, .student-edit {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+
+    .note {
+      border-left: 4px solid var(--accent-blue);
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+    }
+
+    .exercise {
+      border-left: 4px solid var(--accent-green);
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+
+    .warning {
+      border-left: 4px solid var(--accent-red);
+      background: linear-gradient(135deg, #fef2f2, #fee2e2);
+      border-color: rgba(220, 38, 38, 0.4);
+    }
+
+    .tip {
+      border-left: 4px solid var(--accent-amber);
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: rgba(217, 119, 6, 0.4);
+    }
+
+    .student-edit {
+      border-left: 4px solid var(--accent-green);
+      background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+      border-color: rgba(22, 163, 74, 0.45);
+    }
+
+    .exercise-title, .label {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.78rem;
+    }
+
+    .exercise-title { color: #166534; }
+    .label-amber { color: #92400e; }
+    .label-green { color: #166534; }
+
+    ol, ul { padding-left: 1.4rem; }
+    li { margin: 0.3rem 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.93rem;
+    }
+
+    table th {
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      color: var(--text-heading);
+      font-weight: 600;
+      padding: 0.7rem 0.9rem;
+      text-align: left;
+      border-bottom: 2px solid var(--accent-blue);
+    }
+
+    table td {
+      padding: 0.7rem 0.9rem;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+
+    table tr:hover { background-color: #f8fafc; }
+
+    .subtitle {
+      text-align: center;
+      color: #64748b;
+      margin-bottom: 1.5rem;
+      font-size: 1.05rem;
+    }
+
+    .file-tree {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      margin: 0.75rem 0 1.5rem;
+      font-family: "Fira Code", Menlo, Monaco, Consolas, monospace;
+      font-size: 0.86rem;
+      white-space: pre;
+      overflow-x: auto;
+      line-height: 1.55;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Your First Coverage Officer Agent</h1>
+  <p class="subtitle">A small chat for a made-up insurance company. You pick one car-accident file and ask a question. One AI worker reads that file and writes a note. The note does not pay anyone.</p>
+
+  <div class="note">
+    <strong>How to follow this page.</strong>
+    Do Step 1 through Step 10 in that order. Copy every code block exactly as it is shown. The code has already been tested for this exercise, so do not rewrite it. After a step, check the sentence that says what you should see. If you do not see that, use the table at the end of the page before you continue. You do not need insurance experience, and you do not need to have used CrewAI before. The first time a special word appears, its meaning is in parentheses beside it.
+  </div>
+
+  <h2>The story, in plain words</h2>
+  <p><strong>Suraksha General Insurance</strong> is a made-up company. It sells car insurance (a contract that says when the company will pay for damage to a car). A customer has an accident and asks the company to pay the garage. That request is a <strong>claim</strong> (one file: what happened, which contract the customer bought, and the garage bill).</p>
+  <p>You are the <strong>claims officer</strong> (the human at the keyboard). You prepare the file. You do not send the money. A <strong>senior examiner</strong> (a more senior human who is not in this chat) is the only person who can say "pay this" or "do not pay this".</p>
+  <p>The note you need is a <strong>coverage opinion</strong> (a first reading of "does this contract seem to cover this accident?"). The opinion is <strong>preliminary</strong> (a first draft, not the last word) and <strong>non-binding</strong> (nobody has to pay because of it).</p>
+  <p>We will build the note-writer as one <strong>agent</strong> (an AI worker with a job title, a goal, and rules for how it behaves). CrewAI is the toolkit that runs that worker. This agent's job title is coverage officer, so I will call it the <strong>coverage officer agent</strong>. You will talk to it in a chat (a web page where you type a question and read the reply). You pick a claim, you ask a question, and you read the opinion.</p>
+  <p>You and the agent are two different roles. You ask. The agent answers. On this page the agent cannot look anything up. It has no database (a stored table of records) and no search. Everything it is allowed to know is written into the <strong>task</strong> (the one job we give it, including the accident story and your question). If a fact is not in that text, the agent must say the fact is missing. It must not guess.</p>
+
+  <div class="note">
+    <strong>Why one file is harder than the others.</strong>
+    Look at claim CLM-20481, which we will use in a moment. A claim id (the short code, such as CLM-20481) is only a label for the file. The <strong>policy</strong> (the insurance contract) says the company does not pay when the driver has no valid <strong>licence</strong> (legal permission to drive). An internal note, circular CL-17 (a short office rule that tells staff how to apply the contract), says something softer: if the licence expired within the last 30 days, send the file to a senior examiner. Do not reject it on the spot. In this accident the licence expired 12 days earlier, and the police report does not match what the customer said. A careful reader can hold those sentences together. That reading is the task we will give this agent. We are not asking it to release any money.
+  </div>
+
+  <div class="warning">
+    <strong>These claims are made up.</strong> The policy numbers, places, and amounts are for class. Amounts are in Indian rupees (₹, also written INR in the files). The agent's reply is an opinion for a human to read. It must not say the claim has been paid or rejected.
+  </div>
+
+  <h2>The three claims</h2>
+  <p>The chat will offer these three files. Read them once now, so the answers later make sense. <strong>Own damage</strong> means damage to the customer's own car, such as a bumper that needs a repaint. An <strong>estimate</strong> is the garage's bill for the repair. <strong>Papers</strong> are the documents in the file, such as the customer's report, photos, or a police report.</p>
+  <table>
+    <thead>
+      <tr><th>Claim</th><th>What happened</th><th>What a careful reader should say</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>CLM-10021</td><td>The customer reversed into a pillar in a parking bay. The papers are all there. The garage bill is ₹18,000. Nobody was hurt.</td><td>A simple checklist could have finished this small file. On this page the agent still writes an opinion, and it must not say the money has been paid.</td></tr>
+      <tr><td>CLM-10044</td><td>A similar small accident. The customer says another car hit them and drove away. The police report is missing.</td><td>Say the police report is not in the file. Do not invent one.</td></tr>
+      <tr><td>CLM-20481</td><td>The customer and the police disagree about the crash. The licence expired 12 days earlier. A hospital bill is attached, and it may not fit the crash.</td><td>Use Exclusion 4 (the contract sentence about a driver with no valid licence) and circular CL-17. Send the file toward a senior examiner. Do not pay it and do not reject it.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Before you start</h2>
+  <table>
+    <thead><tr><th>You need</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Python</td><td>Version 3.10 or newer, and older than 3.14. Python 3.11 or 3.12 is a good choice.</td></tr>
+      <tr><td>uv</td><td>A small installer we use to set up Python projects. We install it in Step 1.</td></tr>
+      <tr><td>An OpenAI key</td><td>You will paste it into a file named <code>.env</code>. Do not put the key in the chat or in the claim text.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Step 1: Install the CrewAI command</h2>
+  <p>In this step you install CrewAI (the toolkit that will run the agent). Open a terminal (the window where you type commands). On Windows, use PowerShell. Check Python first:</p>
+  <pre><code>python --version</code></pre>
+  <p>Install uv. On Windows, in PowerShell:</p>
+  <pre><code>powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"</code></pre>
+  <p>On macOS or Linux:</p>
+  <pre><code>curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
+  <p>Then install CrewAI and confirm the command works:</p>
+  <pre><code>uv --version
+uv tool install crewai
+uv tool update-shell
+crewai version</code></pre>
+  <p>When this step works, <code>crewai version</code> prints a version number. If the terminal says <code>crewai</code> is not found, close it, open a new one, and try <code>crewai version</code> again. If you already installed CrewAI earlier and it is old, run <code>uv tool install crewai --upgrade</code>.</p>
+
+  <h2>Step 2: Create the project</h2>
+  <p>In this step you create the project folder. CrewAI will make a starter folder and skip the questions it usually asks. You will put the API key (the secret password that lets the program call OpenAI) in yourself. Stay in this same terminal for the later steps.</p>
+  <p>PowerShell. The first line lets Windows print CrewAI's checkmarks. Set it once in this terminal and leave the terminal open for the later commands. If you open a new terminal, set it again before <code>crewai run</code>.</p>
+  <pre><code>$env:PYTHONUTF8="1"
+mkdir crewai-labs
+cd crewai-labs
+$env:CREWAI_DMN="true"
+crewai create crew suraksha_claims_desk --skip-provider
+cd suraksha_claims_desk
+mkdir output
+crewai install</code></pre>
+  <p>Command Prompt, if you are not using PowerShell:</p>
+  <pre><code>mkdir crewai-labs
+cd crewai-labs
+set CREWAI_DMN=true
+crewai create crew suraksha_claims_desk --skip-provider
+cd suraksha_claims_desk
+mkdir output
+crewai install</code></pre>
+
+  <div class="note">
+    <strong>What those two settings do.</strong> <code>CREWAI_DMN=true</code> skips the menu that would invent a sample researcher for you to click through. <code>--skip-provider</code> skips the menu that asks which AI company you use. The new folder holds the agent in <code>agents/</code> and the crew, including its task, in <code>crew.jsonc</code>. A <strong>crew</strong> (the agent and its task, run together as one team) lives in that file. When this step works, you are inside the folder <code>suraksha_claims_desk</code>, and <code>crewai install</code> has finished without an error. Stay inside that folder for the rest of this page.
+  </div>
+
+  <p>Open <code>.env</code> in that folder and set your key:</p>
+  <pre><code>OPENAI_API_KEY=sk-your-key-here
+MODEL=openai/gpt-4o-mini</code></pre>
+  <p><code>gpt-4o-mini</code> is enough for this exercise and keeps the cost down. Save the file.</p>
+
+  <h2>Step 3: The files you will have</h2>
+  <p>In this step you only look at the folder, then delete one sample file. The starter project includes <code>agents/researcher.jsonc</code>. Delete that file. We are writing our own agent. You will create or replace the other files in the later steps. You should already be in the folder that contains <code>crew.jsonc</code>.</p>
+  <div class="file-tree">suraksha_claims_desk/
+├── .env                          ← your key, already edited
+├── agents/
+│   └── coverage_officer.jsonc    ← the coverage officer agent
+├── crew.jsonc                    ← the crew, with one task
+├── sample_claims.py              ← the three claims, copy as given
+├── desk.py                       ← you will fill in one function
+├── app.py                        ← the chat window, copy as given
+├── output/                       ← written opinions land here
+└── pyproject.toml</div>
+
+  <h2>Step 4: Describe the coverage officer agent</h2>
+  <p>In this step you write the agent's job description. Create the file <code>agents/coverage_officer.jsonc</code> and paste the block below exactly. The name of the file, without <code>.jsonc</code>, is the agent's id (the short name other files use to point at this agent). I have left out <code>tools</code> (lookups the agent could call) on purpose. With no tools, the agent can only read the text we hand it in the task. When this step works, that file exists and there is no <code>researcher.jsonc</code> left in <code>agents/</code>.</p>
+  <pre><code>{
+  "role": "Coverage Officer for claim {claim_id}",
+  "goal": "Give a preliminary coverage opinion for {claim_id} using only the narrative, policy excerpt, and known facts supplied in the task.",
+  "backstory": "You are a coverage officer at Suraksha General Insurance in India. You interpret policy wording and short internal circulars. You do not look up other systems. You do not invent policy numbers, dates, amounts, or documents that are absent from the task. You never mark a claim paid or declined. A senior examiner binds every payment and every denial.",
+  "llm": "openai/gpt-4o-mini",
+  "settings": {
+    "verbose": true,
+    "allow_delegation": false,
+    "max_iter": 8
+  }
+}</code></pre>
+
+  <div class="tip">
+    <div class="label label-amber">How to read this file</div>
+    <p><code>role</code> is the job title the agent works under. <code>goal</code> is what "finished" looks like. <code>backstory</code> is the manner I want: quote the policy lines you were given, admit when something is missing, and stop before deciding the money. Words in curly braces, such as <code>{claim_id}</code>, are blanks. They are filled in from the claim when the task starts. <code>llm</code> is the model (the AI that writes the sentences). <code>allow_delegation</code> set to false means this worker cannot hand the job to another worker. There is no other worker yet. <code>max_iter</code> is how many tries the agent gets before it must answer. <code>verbose</code> prints the agent's steps in the terminal, so you can see that it is only reading.</p>
+  </div>
+
+  <h2>Step 5: Give the agent one task</h2>
+  <p>In this step you tell the crew what work to do. Open <code>crew.jsonc</code> and replace the whole file with the text below. This file names the agent and the one task. The sample text at the bottom is for claim CLM-20481, so the first run from the terminal uses that harder file. When you later pick another claim in the chat, that sample text is replaced by the claim you picked. Save the file before you go on.</p>
+  <pre><code>{
+  "name": "Suraksha Coverage Desk",
+  "agents": ["coverage_officer"],
+  "tasks": [
+    {
+      "name": "coverage_opinion",
+      "description": "A claims officer asked: {officer_question}\n\nClaim id: {claim_id}\n\nNarrative:\n{narrative}\n\nPolicy excerpt:\n{policy_excerpt}\n\nKnown facts already on the file:\n{known_facts}\n\nWrite a preliminary coverage opinion.\n1. Restate what the file actually says.\n2. Name the clause or circular sentence that matters, using only the excerpt above.\n3. Say whether cover looks available, partly unclear, or should be referred. Explain why in plain language.\n4. List facts the claims officer asked about that are not in the file. Say they are not on file. Do not guess them.\n5. If the known facts describe a simple complete claim under the straight-through threshold, say a rules check could settle it without an investigation. Still give your reading. Do not mark it paid.\n\nCONSTRAINTS:\n- Use only the text in this task.\n- Amounts in INR.\n- Do not say the claim is paid, approved, or declined.\n- Label the opinion PRELIMINARY and NON-BINDING.",
+      "expected_output": "Markdown, no code fences, with these sections:\n- File as stated\n- Clause that matters\n- Preliminary opinion\n- Not on file\n- What a human examiner should check next\nMax 450 words. First line must be: PRELIMINARY COVERAGE OPINION — NON-BINDING.",
+      "agent": "coverage_officer",
+      "markdown": true,
+      "output_file": "output/coverage_{claim_id}.md"
+    }
+  ],
+  "process": "sequential",
+  "verbose": true,
+  "inputs": {
+    "claim_id": "CLM-20481",
+    "officer_question": "Is this loss covered?",
+    "narrative": "Date of loss: 12 March 2026. Place: Outer Ring Road, Hyderabad. The customer's report: the insured says a truck swerved and struck the rear of the private car. Police report: the insured struck a divider. Garage estimate from Highway Motors: INR 185000 for side and rear panels. A typical surveyor figure for this description is about INR 75000. Driving licence expired on 28 February 2026, which is 12 days before the accident. A third-party whiplash bill of INR 42000 is attached. Highway Motors appears on two earlier claims. This policyholder had a bumper claim five months ago.",
+    "policy_excerpt": "Private Car Package Policy, Section I Own Damage. The company indemnifies the insured against accidental loss or damage to the vehicle, subject to the deductions in the schedule. Exclusion 4: the company is not liable while the vehicle is driven by a person who does not hold an effective driving licence. Internal circular CL-17: a licence that expired within the previous 30 days is referred to a senior examiner. It is not an automatic decline. Record the lapse in days and cite Exclusion 4.",
+    "known_facts": "Policy number PSC-44821, fictional. Policy status on the date of loss: ACTIVE. Sum insured: INR 850000. Injury bill present: yes. A simple rules check has marked this file REVIEW. That mark is not a fraud finding. Documents on file: customer report, police report, garage estimate. Photographs are mentioned but the pictures themselves are not in this text. A simple pay is allowed only under INR 25000, and only when there is no injury, no REVIEW mark, and every document is present."
+  }
+}</code></pre>
+
+  <div class="note">
+    <strong>How the names connect.</strong> <code>"agents": ["coverage_officer"]</code> tells the crew to load the coverage officer agent from <code>agents/coverage_officer.jsonc</code>. On the task, <code>"agent": "coverage_officer"</code> assigns that task to this agent. The line “A claims officer asked” is you, the human. It is not the agent talking to itself. Each <code>{narrative}</code> style word is replaced by the matching line under <code>inputs</code>. <code>output_file</code> also saves the opinion into the <code>output</code> folder, so you can read it after the run.
+  </div>
+
+  <h2>Step 6: Run it once in the terminal</h2>
+  <p>In this step you run the crew once, before you build the chat. You are still inside <code>suraksha_claims_desk</code>. This uses the CLM-20481 story stored in <code>crew.jsonc</code>. It can take a minute. When it finishes, open <code>output/coverage_CLM-20481.md</code>.</p>
+  <pre><code>crewai run</code></pre>
+  <p>A good opinion mentions Exclusion 4, the 12-day gap, and circular CL-17, and it leaves the money decision to a senior person. The first line should be <code>PRELIMINARY COVERAGE OPINION — NON-BINDING</code>. The terminal shows the agent working through the task. You should see reading and writing. You should not see a tool being called, because this agent has none. If the run stops with an error about a missing key, go back to the <code>.env</code> file in Step 2 and save the key again.</p>
+
+  <h2>Step 7: Put the three claims in a Python file</h2>
+  <p>In this step you save the three accident stories in one file the chat can read. Create <code>sample_claims.py</code> in the same folder as <code>crew.jsonc</code> and paste the block below exactly. These are the only facts the chat will pass into the task. The CLM-20481 text matches what you just ran. Do not add policy sentences of your own. When this step works, the file exists and it ends with the line <code>CLAIM_ORDER = ["CLM-10021", "CLM-10044", "CLM-20481"]</code>.</p>
+  <pre><code>CLAIMS = {
+    "CLM-10021": {
+        "claim_id": "CLM-10021",
+        "title": "Simple bumper scrape",
+        "narrative": (
+            "Date of loss: 2 March 2026. Place: Banjara Hills, Hyderabad. "
+            "The insured reversed into a pillar in a marked parking bay. "
+            "Own damage only. No third party. No injury. "
+            "Garage estimate: INR 18000 for a rear bumper repaint."
+        ),
+        "policy_excerpt": (
+            "Private Car Package Policy, Section I Own Damage. "
+            "Accidental loss to the insured vehicle is covered, subject to the compulsory deductible. "
+            "Exclusion 4 applies only when the driver has no effective licence. "
+            "The licence on this file is effective."
+        ),
+        "known_facts": (
+            "Policy number PSC-10021, fictional. Policy status: ACTIVE. "
+            "Sum insured: INR 650000. Injury: none. Fraud flag: none. "
+            "Documents on file: customer report, photos, estimate. "
+            "A police report is not required for this parking loss. "
+            "Estimate: INR 18000. Simple-pay limit: INR 25000."
+        ),
+    },
+    "CLM-10044": {
+        "claim_id": "CLM-10044",
+        "title": "Bumper scrape, police report missing",
+        "narrative": (
+            "Date of loss: 4 March 2026. Place: Necklace Road, Hyderabad. "
+            "The insured reports a low-speed rear tap by an unknown car that left the scene. "
+            "Estimate: INR 22000. No injury mentioned."
+        ),
+        "policy_excerpt": (
+            "Private Car Package Policy, Section I Own Damage. "
+            "A police report is required when the insured says an unknown vehicle left the scene."
+        ),
+        "known_facts": (
+            "Policy number PSC-10044, fictional. Policy status: ACTIVE. "
+            "Injury: none. Fraud flag: none. "
+            "Documents on file: customer report and estimate. Police report: NOT ON FILE. "
+            "Estimate: INR 22000. Simple-pay limit: INR 25000."
+        ),
+    },
+    "CLM-20481": {
+        "claim_id": "CLM-20481",
+        "title": "Conflicting crash, licence lapse",
+        "narrative": (
+            "Date of loss: 12 March 2026. Place: Outer Ring Road, Hyderabad. "
+            "The customer's report: the insured says a truck swerved and struck the rear of the private car. "
+            "Police report: the insured struck a divider. "
+            "Garage estimate from Highway Motors: INR 185000 for side and rear panels. "
+            "A typical surveyor figure for this description is about INR 75000. "
+            "Driving licence expired on 28 February 2026, which is 12 days before the accident. "
+            "A third-party whiplash bill of INR 42000 is attached. "
+            "Highway Motors appears on two earlier claims. "
+            "This policyholder had a bumper claim five months ago."
+        ),
+        "policy_excerpt": (
+            "Private Car Package Policy, Section I Own Damage. "
+            "The company indemnifies the insured against accidental loss or damage to the vehicle, "
+            "subject to the deductions in the schedule. "
+            "Exclusion 4: the company is not liable while the vehicle is driven by a person "
+            "who does not hold an effective driving licence. "
+            "Internal circular CL-17: a licence that expired within the previous 30 days "
+            "is referred to a senior examiner. It is not an automatic decline. "
+            "Record the lapse in days and cite Exclusion 4."
+        ),
+        "known_facts": (
+            "Policy number PSC-44821, fictional. Policy status on the date of loss: ACTIVE. "
+            "Sum insured: INR 850000. Injury bill present: yes. "
+            "A simple rules check has marked this file REVIEW. That mark is not a fraud finding. "
+            "Documents on file: customer report, police report, garage estimate. "
+            "Photographs are mentioned but the pictures themselves are not in this text. "
+            "A simple pay is allowed only under INR 25000, and only when there is no injury, "
+            "no REVIEW mark, and every document is present."
+        ),
+    },
+}
+
+CLAIM_ORDER = ["CLM-10021", "CLM-10044", "CLM-20481"]</code></pre>
+
+  <h2>Step 8: Connect the chat to the agent</h2>
+  <p>In this step you connect the question you type to the crew. Create <code>desk.py</code> in the same folder as <code>crew.jsonc</code>. First paste the whole file below. The chat will call <code>respond()</code> (the function that receives your question and returns the opinion). I have left that function as a short placeholder (a stand-in message), so if you run the chat too early you will see a clear sentence instead of a confusing error. After the file is saved, replace only the marked function, as the green box tells you.</p>
+  <pre><code>from pathlib import Path
+
+from dotenv import load_dotenv
+from crewai.project import load_crew
+
+load_dotenv()
+
+_crew = None
+_defaults = None
+
+
+def _get_crew():
+    global _crew, _defaults
+    if _crew is None:
+        _crew, _defaults = load_crew(Path(__file__).parent / "crew.jsonc")
+    return _crew, _defaults
+
+
+def claim_to_inputs(claim: dict, officer_question: str) -&gt; dict:
+    return {
+        "claim_id": claim["claim_id"],
+        "narrative": claim["narrative"],
+        "policy_excerpt": claim["policy_excerpt"],
+        "known_facts": claim["known_facts"],
+        "officer_question": officer_question,
+    }
+
+
+# ===== CHANGE THIS FUNCTION =====
+def respond(user_message: str, claim: dict) -&gt; str:
+    """Answer the question using only the selected claim."""
+    return (
+        "The coverage officer is not connected yet. "
+        "Replace respond() in desk.py, save, and ask again."
+    )
+# ===== END OF THE CHANGE =====</code></pre>
+
+  <div class="student-edit">
+    <div class="label label-green">The only function I want you to replace</div>
+    <p>Leave <code>_get_crew</code> and <code>claim_to_inputs</code> as they are. Replace <code>respond</code> with this:</p>
+  </div>
+  <pre><code># ===== CHANGE THIS FUNCTION =====
+def respond(user_message: str, claim: dict) -&gt; str:
+    """Answer the question using only the selected claim."""
+    crew, defaults = _get_crew()
+    inputs = {**defaults, **claim_to_inputs(claim, user_message)}
+    result = crew.kickoff(inputs=inputs)
+    return result.raw
+# ===== END OF THE CHANGE =====</code></pre>
+  <p>Here is what that function does, in order. <code>load_crew</code> reads <code>crew.jsonc</code> and builds the crew: the coverage officer agent and its task. We put the claim you selected, and the question you typed, on top of the sample inputs. <code>kickoff</code> (the command that starts the crew) runs the task. <code>result.raw</code> is the opinion text, which we hand back to the chat. The first question takes longer, because the crew is loaded on that first call and then kept for the next questions. When this step works, <code>desk.py</code> no longer contains the sentence "The coverage officer is not connected yet."</p>
+
+  <h2>Step 9: The chat window</h2>
+  <p>In this step you open the page you will actually use. Create <code>app.py</code> and paste it exactly as given. This file only draws the page and calls <code>respond</code>. You do not need to change the layout to finish the exercise. Streamlit (the library that turns this Python file into a web page) is added by the first command below.</p>
+  <pre><code>import streamlit as st
+
+from desk import respond
+from sample_claims import CLAIM_ORDER, CLAIMS
+
+st.set_page_config(page_title="Suraksha Claims Desk", layout="centered")
+st.title("Suraksha Claims Desk")
+st.caption("One coverage officer agent. It can use only the text in the selected claim.")
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+if "active_claim" not in st.session_state:
+    st.session_state.active_claim = CLAIM_ORDER[0]
+if "pending_prompt" not in st.session_state:
+    st.session_state.pending_prompt = None
+
+with st.sidebar:
+    st.header("Claim file")
+    claim_id = st.radio(
+        "Select a claim",
+        CLAIM_ORDER,
+        format_func=lambda cid: f"{cid} — {CLAIMS[cid]['title']}",
+    )
+    st.markdown(CLAIMS[claim_id]["narrative"])
+    st.divider()
+    st.subheader("Try these")
+    for prompt in (
+        "Is this loss covered?",
+        "What is the chassis number?",
+        "Should we pay this claim now?",
+    ):
+        if st.button(prompt, use_container_width=True):
+            st.session_state.pending_prompt = prompt
+
+if st.session_state.active_claim != claim_id:
+    st.session_state.messages = []
+    st.session_state.active_claim = claim_id
+
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+typed = st.chat_input("Ask the coverage officer agent about the selected claim")
+user_text = st.session_state.pending_prompt or typed
+if st.session_state.pending_prompt:
+    st.session_state.pending_prompt = None
+
+if user_text:
+    st.session_state.messages.append({"role": "user", "content": user_text})
+    with st.chat_message("user"):
+        st.markdown(user_text)
+    with st.chat_message("assistant"):
+        with st.spinner("The coverage officer agent is reading the file..."):
+            try:
+                answer = respond(user_text, CLAIMS[claim_id])
+            except Exception as exc:
+                answer = f"The desk could not complete the opinion.\n\n{exc}"
+        st.markdown(answer)
+    st.session_state.messages.append({"role": "assistant", "content": answer})</code></pre>
+
+  <p>Add the chat library and start the page. Stay in <code>suraksha_claims_desk</code>:</p>
+  <pre><code>uv add streamlit
+uv run streamlit run app.py</code></pre>
+  <p><code>uv run</code> uses the Python setup created by <code>crewai install</code>. When this step works, the browser opens a page titled Suraksha Claims Desk, with three claims in the sidebar (the panel on the left). If the browser does not open, copy the local address printed in the terminal, usually <code>http://localhost:8501</code>, and open it yourself. Leave this terminal running. The next step happens in the browser.</p>
+
+  <h2>Step 10: Ask the three questions that matter</h2>
+  <p>In this step you check that the agent is reading the file you selected, and only that file. Changing the claim in the sidebar starts a fresh chat, which is what we want. Each claim should be judged on its own text. Wait until the spinner (the "reading the file" message) finishes before you judge the answer. A chassis number (the factory identity number stamped on a car) is not in any of these files, so the agent must say it is not on file.</p>
+  <table>
+    <thead>
+      <tr><th>What to click</th><th>A good answer</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Select <strong>CLM-20481</strong>. Click <strong>Is this loss covered?</strong></td><td>The first line is <code>PRELIMINARY COVERAGE OPINION — NON-BINDING</code>. It mentions Exclusion 4, circular CL-17, and the 12-day lapse, and it treats that lapse as a referral to a senior person.</td></tr>
+      <tr><td>Same claim. Click <strong>What is the chassis number?</strong></td><td>The "Not on file" section says the chassis number was not given. The agent does not make one up.</td></tr>
+      <tr><td>Select <strong>CLM-10021</strong>. Click <strong>Should we pay this claim now?</strong></td><td>The agent notices that a simple check could settle this file, and still does not mark it paid.</td></tr>
+      <tr><td>Select <strong>CLM-10044</strong>. Click <strong>Is this loss covered?</strong></td><td>The answer says the police report is not on file, and it does not describe a report we never supplied.</td></tr>
+    </tbody>
+  </table>
+  <p>Each answer is also saved, for example as <code>output/coverage_CLM-10021.md</code>.</p>
+
+  <div class="warning">
+    <strong>If the agent invents a chassis number, describes a photo, or pays the claim.</strong> The task text in <code>crew.jsonc</code> was changed, or the model answered from general knowledge. Put the constraints back, save, and ask again. If you changed <code>crew.jsonc</code> while the chat was already open, stop the terminal with Ctrl+C and start <code>uv run streamlit run app.py</code> again.
+  </div>
+
+  <h2>What just happened</h2>
+  <div class="file-tree">You pick a claim and ask a question
+        │
+        ▼
+The chat calls respond() in desk.py
+        │
+        ▼
+That function reads crew.jsonc and the agent file
+        │
+        ▼
+The curly-brace words are filled with this claim's text
+        │
+        ▼
+The opinion comes back into the chat
+and is saved under output/</div>
+  <ul>
+    <li>An agent is a worker with a role (a job title), a goal (what finished looks like), and a way of behaving. The coverage officer agent has no tools, so the claim text in the task is the whole world it can see.</li>
+    <li>A task is one piece of work assigned to an agent. This crew has one task: write the coverage opinion.</li>
+    <li>A crew runs the agent and the task together. Ours has one agent and one task.</li>
+    <li>The chat is only the front window. The opinion is produced in <code>desk.py</code>.</li>
+    <li>The opinion is for a person to read. This chat has no button that pays or rejects a claim.</li>
+  </ul>
+
+  <h2>If something goes wrong</h2>
+  <table>
+    <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td><code>crewai</code> is not recognized</td><td>Run <code>uv tool update-shell</code>, open a new terminal, then <code>crewai version</code>.</td></tr>
+      <tr><td>A menu still asks you to pick a provider</td><td>Use <code>--skip-provider</code> with a hyphen, and set <code>CREWAI_DMN=true</code> in that same terminal before creating the project.</td></tr>
+      <tr><td>Missing API key</td><td>Put <code>OPENAI_API_KEY</code> in <code>suraksha_claims_desk/.env</code>. The chat loads that file when it starts.</td></tr>
+      <tr><td>The agent file cannot be found</td><td>The file must be named <code>agents/coverage_officer.jsonc</code>, and <code>crew.jsonc</code> must list <code>coverage_officer</code>. Delete <code>agents/researcher.jsonc</code> if it is still there.</td></tr>
+      <tr><td><code>streamlit</code> is not found</td><td>From the project folder run <code>uv add streamlit</code>, then <code>uv run streamlit run app.py</code>.</td></tr>
+      <tr><td>The chat says the coverage officer is not connected</td><td><code>respond()</code> is still the placeholder. Replace it, save <code>desk.py</code>, and ask again.</td></tr>
+      <tr><td>An error about a tool or about Serper</td><td>A <code>tools</code> line is still on the agent, or the sample researcher is still listed in <code>crew.jsonc</code>. Remove both.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="exercise">
+    <div class="exercise-title">Try these on your own</div>
+    <ol>
+      <li>On CLM-20481, ask “What is the insured’s phone number?” The reply should say it is not on file.</li>
+      <li>In <code>sample_claims.py</code>, change only the CLM-20481 story so the licence expired 400 days before the accident. Ask the coverage question again. Circular CL-17 is about a lapse within 30 days, so the agent should stop treating this as that kind of referral. Put the original story back when you are done.</li>
+      <li>Select CLM-10044 and ask which circular applies. That claim’s policy lines do not mention CL-17. The agent should not borrow the circular from the other claim.</li>
+    </ol>
+  </div>
+</main>
+</body>
+</html>

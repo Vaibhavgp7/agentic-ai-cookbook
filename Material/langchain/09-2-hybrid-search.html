@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hybrid Search (BM25 + Similarity) with LangChain – Hands-on Lab</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.0rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+      color: #0f172a;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .note, .exercise, .warning {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .warning {
+      border-left: 4px solid #dc2626;
+      background: linear-gradient(135deg, #fef2f2, #fff1f2);
+      border-color: rgba(220, 38, 38, 0.35);
+    }
+    .exercise-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #166534;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+    .diagram {
+      margin: 1rem 0 1.5rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      text-align: center;
+    }
+    .diagram svg {
+      max-width: 100%;
+      height: auto;
+    }
+    .diagram-caption {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin: 0.5rem 0 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 0.55rem 0.7rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Hybrid Search (BM25 + Similarity) – Hands-on Lab</h1>
+
+  <div class="note">
+    <strong>How to use this lab</strong>
+    <ol>
+      <li>Open your editor and create a notebook named <code>09-hybrid-search.ipynb</code> next to the <code>hybrid-search-docs/</code> folder.</li>
+      <li>Place this HTML guide side‑by‑side with your notebook.</li>
+      <li>For every section labeled <strong>Your Task</strong>, create a <strong>new cell</strong>, paste the code, and run it.</li>
+      <li>Goal: show two queries where <strong>similarity</strong> and <strong>BM25</strong> each miss the right document, then recover both with <strong>hybrid search</strong>.</li>
+    </ol>
+  </div>
+
+  <h2>1. Why Hybrid Search?</h2>
+  <p>
+    In the RAG lab you used <strong>similarity search</strong> (dense embeddings). It follows meaning, so a paraphrase can
+    still hit the right page. It can miss a page whose only distinctive clue is a <strong>rare exact token</strong>
+    such as a SKU, error code, or part number.
+  </p>
+  <p>
+    <strong>BM25</strong> does the opposite. It scores overlapping words. It finds <code>SKU-ZX9001</code> even when the
+    page never says “warranty”, and it misses a page that answers the question with different words
+    (“annual leave” instead of “vacation”).
+  </p>
+  <p>
+    <strong>Hybrid search</strong> runs both and fuses the ranked lists. This lab uses two queries so you can see each method fail on its own:
+  </p>
+  <ul>
+    <li><strong>Exact-token query</strong> – BM25 returns the SKU ledger. Similarity returns the generic 12‑month coverage page.</li>
+    <li><strong>Paraphrase query</strong> – similarity returns the annual‑leave chapter. BM25 returns a party note that merely contains the words “vacation”, “employee”, and “holiday”.</li>
+  </ul>
+
+  <div class="diagram">
+    <svg viewBox="0 0 760 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hybrid search overview">
+      <rect x="20" y="80" width="140" height="50" rx="8" fill="#dbeafe" stroke="#2563eb"/>
+      <text x="90" y="110" text-anchor="middle" font-size="14" fill="#1e3a8a">User query</text>
+
+      <path d="M160 105 H210" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#64748b"/>
+        </marker>
+      </defs>
+
+      <rect x="220" y="30" width="170" height="50" rx="8" fill="#bbf7d0" stroke="#16a34a"/>
+      <text x="305" y="60" text-anchor="middle" font-size="13" fill="#14532d">BM25 (keywords)</text>
+
+      <rect x="220" y="130" width="170" height="50" rx="8" fill="#fde68a" stroke="#d97706"/>
+      <text x="305" y="160" text-anchor="middle" font-size="13" fill="#92400e">Similarity (vectors)</text>
+
+      <path d="M390 55 H450 V105 H490" stroke="#64748b" stroke-width="2" fill="none"/>
+      <path d="M390 155 H450 V105 H490" stroke="#64748b" stroke-width="2" fill="none"/>
+
+      <rect x="500" y="80" width="220" height="50" rx="8" fill="#e9d5ff" stroke="#7c3aed"/>
+      <text x="610" y="110" text-anchor="middle" font-size="13" fill="#5b21b6">Ensemble / fuse ranks</text>
+    </svg>
+    <p class="diagram-caption">Hybrid = keyword recall + semantic ranking, fused by an ensemble retriever.</p>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Retriever</th>
+        <th>Strengths</th>
+        <th>Weaknesses</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Similarity (dense)</td>
+        <td>Meaning, synonyms, paraphrases</td>
+        <td>Can bury rare IDs behind topical distractors</td>
+      </tr>
+      <tr>
+        <td>BM25 (sparse)</td>
+        <td>Exact keywords, SKUs, error codes</td>
+        <td>Misses paraphrases / synonyms</td>
+      </tr>
+      <tr>
+        <td>Hybrid (both)</td>
+        <td>Best of both for production RAG</td>
+        <td>Slightly more setup; need to tune weights</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>2. Demo Corpus</h2>
+  <p>
+    Use the prepared folder <code>hybrid-search-docs/</code> (next to this HTML). The wording is deliberate:
+    the right page for each demo query does <em>not</em> reuse the query’s distinctive words, and a distractor does.
+  </p>
+  <ul>
+    <li><code>sku_zx9001_warranty.txt</code> – catalog token <code>SKU-ZX9001</code> has a <strong>36‑month</strong> replacement window. This page never says “warranty period”.</li>
+    <li><code>general_warranty_policy.txt</code> – ordinary products have a <strong>12‑month</strong> coverage length. This page never contains <code>SKU-ZX9001</code>.</li>
+    <li><code>aurora_pro_warranty.txt</code> – Aurora Pro has a 24‑month plan (another coverage page).</li>
+    <li><code>annual_leave_policy.txt</code> – staff accrue <strong>15 days</strong> of annual leave. This page never says “vacation”, “employee”, or “holiday”.</li>
+    <li><code>holiday_party.txt</code> – a facilities note. It does say “employees”, “vacation”, and “holiday”, but only about a party. It states no leave allowance.</li>
+    <li><code>wellness_room.txt</code> – nap room and yoga. Related to rest, not an allowance.</li>
+    <li><code>returns_and_exchanges.txt</code> – refunds, not coverage or leave.</li>
+    <li><code>error_code_7742.txt</code> – an incident code. It is not an answer to either demo query.</li>
+  </ul>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Query</th>
+        <th>Right document</th>
+        <th>Similarity top‑1</th>
+        <th>BM25 top‑1</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>What is the warranty period for SKU-ZX9001?</code></td>
+        <td><code>sku_zx9001_warranty.txt</code> (36 months)</td>
+        <td>Wrong: 12‑month coverage page</td>
+        <td>Right: the SKU ledger</td>
+      </tr>
+      <tr>
+        <td><code>How many vacation days can an employee take for a holiday?</code></td>
+        <td><code>annual_leave_policy.txt</code> (15 days)</td>
+        <td>Right: annual leave</td>
+        <td>Wrong: the party note</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="warning">
+    <strong>Why hybrid is required</strong><br/>
+    Neither retriever is top‑1 on both queries. A RAG app that trusts similarity alone answers
+    <strong>12 months</strong> for SKU‑ZX9001. A RAG app that trusts keywords alone describes a
+    <strong>holiday party</strong> instead of the 15‑day annual‑leave allowance.
+    Hybrid search returns the right document for both.
+  </div>
+
+  <h2>3. Installation &amp; Setup</h2>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>In your <strong>terminal</strong>, install the packages needed for this lab.</p>
+  </div>
+
+  <pre><code>pip install "langchain&gt;=1.0" langchain-openai langchain-community langchain-text-splitters chromadb rank-bm25 python-dotenv</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new notebook cell</strong>, paste this code, and run it to load your <code>OPENAI_API_KEY</code>.</p>
+  </div>
+
+  <pre><code>from pathlib import Path
+from dotenv import load_dotenv
+
+env_path = Path(r"C:\2027\agenticai\02-langchain\.env")
+load_dotenv(env_path)
+print("Loaded", env_path)</code></pre>
+
+  <h2>4. Step 1 – Load the Text Documents</h2>
+  <p>
+    Load every <code>.txt</code> file in <code>hybrid-search-docs/</code> into LangChain <code>Document</code> objects.
+    For this small lab we keep each file as one document (no chunking), so identifiers stay intact.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste and run:</p>
+  </div>
+
+  <pre><code>from pathlib import Path
+from langchain_community.document_loaders import DirectoryLoader, TextLoader
+
+docs = DirectoryLoader(
+    "hybrid-search-docs",
+    glob="*.txt",
+    loader_cls=TextLoader,
+    loader_kwargs={"encoding": "utf-8"},
+).load()
+
+print(f"Loaded {len(docs)} documents")
+for d in docs:
+    print("-", Path(d.metadata["source"]).name)</code></pre>
+
+  <h2>5. Step 2 – Build a Similarity (Dense) Retriever</h2>
+  <p>
+    Embed the documents with OpenAI and store them in Chroma. This is the same style of retriever
+    you used in the RAG lab.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste and run:</p>
+  </div>
+
+  <pre><code>from langchain_openai import OpenAIEmbeddings
+from langchain_community.vectorstores import Chroma
+
+vector_store = Chroma.from_documents(
+    documents=docs,
+    embedding=OpenAIEmbeddings(model="text-embedding-3-small"),
+    collection_name="hybrid_lab",
+)
+
+# k=3, not 1. Hybrid fusion needs a short list from each retriever.
+# With k=1 the two lists often hold different documents and the ranks tie.
+similarity_retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+print("✅ Similarity retriever ready (k=3)")</code></pre>
+
+  <h2>6. Step 3 – Similarity Misses the SKU, Finds the Paraphrase</h2>
+  <p>
+    Run both demo queries. Similarity search should <strong>miss</strong> the SKU ledger
+    (it follows “coverage length” and returns the 12‑month page) and <strong>hit</strong> the
+    annual‑leave chapter (it understands “vacation” ≈ “annual leave”).
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste and run.</p>
+  </div>
+
+  <pre><code>from pathlib import Path
+
+SKU_QUERY = "What is the warranty period for SKU-ZX9001?"
+SKU_GOLD = "sku_zx9001_warranty.txt"
+
+LEAVE_QUERY = "How many vacation days can an employee take for a holiday?"
+LEAVE_GOLD = "annual_leave_policy.txt"
+
+def source_name(doc):
+    return Path(doc.metadata["source"]).name
+
+def show(title, query, hits):
+    print("\n" + title)
+    print("Query:", query)
+    for i, doc in enumerate(hits, 1):
+        print(f"  {i}. {source_name(doc)}")
+
+show("SIMILARITY — exact token", SKU_QUERY, similarity_retriever.invoke(SKU_QUERY))
+sku_top = source_name(similarity_retriever.invoke(SKU_QUERY)[0])
+if sku_top != SKU_GOLD:
+    print("❌ Similarity did not return the SKU ledger. Top-1 is the 12-month coverage page.")
+else:
+    print("⚠️ Unexpected — similarity ranked the SKU ledger first.")
+
+show("SIMILARITY — paraphrase", LEAVE_QUERY, similarity_retriever.invoke(LEAVE_QUERY))
+leave_top = source_name(similarity_retriever.invoke(LEAVE_QUERY)[0])
+if leave_top == LEAVE_GOLD:
+    print("✅ Similarity found annual leave from the words vacation / employee / holiday.")
+else:
+    print("❌ Unexpected top-1:", leave_top)</code></pre>
+
+  <div class="note">
+    <strong>What you should observe</strong>
+    <ul>
+      <li>SKU query top‑1: <code>general_warranty_policy.txt</code> (12 months), not the 36‑month ledger.</li>
+      <li>Leave query top‑1: <code>annual_leave_policy.txt</code> (15 days of annual leave).</li>
+    </ul>
+  </div>
+
+  <h2>7. Step 4 – BM25 Finds the SKU, Misses the Paraphrase</h2>
+  <p>
+    <strong>BM25</strong> scores overlapping terms. The tokenizer keeps <code>sku-zx9001</code> as one token.
+    On the leave question, the party note wins because it literally contains “employee”, “vacation”, and “holiday”,
+    while the leave chapter uses “staff”, “annual leave”, and “absence”.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste and run.</p>
+  </div>
+
+  <pre><code>import re
+from langchain_community.retrievers import BM25Retriever
+
+def tokenize(text: str) -&gt; list[str]:
+    """Keep hyphenated IDs like sku-zx9001 intact."""
+    return re.findall(r"[a-z0-9]+(?:-[a-z0-9]+)*", text.lower())
+
+bm25_retriever = BM25Retriever.from_documents(docs, preprocess_func=tokenize)
+bm25_retriever.k = 3
+
+show("BM25 — exact token", SKU_QUERY, bm25_retriever.invoke(SKU_QUERY))
+if source_name(bm25_retriever.invoke(SKU_QUERY)[0]) == SKU_GOLD:
+    print("✅ BM25 returned the SKU ledger. Keyword search finds SKU-ZX9001.")
+else:
+    print("❌ Unexpected — check hybrid-search-docs/.")
+
+show("BM25 — paraphrase", LEAVE_QUERY, bm25_retriever.invoke(LEAVE_QUERY))
+bm25_leave_top = source_name(bm25_retriever.invoke(LEAVE_QUERY)[0])
+if bm25_leave_top != LEAVE_GOLD:
+    print("❌ BM25 did not return the leave policy. Top-1 is the holiday party note.")
+else:
+    print("⚠️ Unexpected — BM25 ranked annual leave first.")</code></pre>
+
+  <h2>8. Step 5 – Hybrid Search Recovers Both</h2>
+  <p>
+    LangChain’s <code>EnsembleRetriever</code> fuses the two lists with
+    <strong>reciprocal rank fusion</strong>. A document that is rank 1 in one list and
+    still present in the other list rises above a document that only won the weak retriever.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste and run.</p>
+  </div>
+
+  <pre><code>from langchain_classic.retrievers import EnsembleRetriever
+
+hybrid_retriever = EnsembleRetriever(
+    retrievers=[bm25_retriever, similarity_retriever],
+    weights=[0.5, 0.5],
+)
+
+show("HYBRID — exact token", SKU_QUERY, hybrid_retriever.invoke(SKU_QUERY))
+show("HYBRID — paraphrase", LEAVE_QUERY, hybrid_retriever.invoke(LEAVE_QUERY))
+
+sku_ok = source_name(hybrid_retriever.invoke(SKU_QUERY)[0]) == SKU_GOLD
+leave_ok = source_name(hybrid_retriever.invoke(LEAVE_QUERY)[0]) == LEAVE_GOLD
+print("✅ Hybrid recovered both gold documents." if sku_ok and leave_ok else "❌ Hybrid missed a gold document.")</code></pre>
+
+  <div class="note">
+    <strong>Expected comparison</strong>
+    <ul>
+      <li><strong>SKU query:</strong> similarity → 12‑month page; BM25 → 36‑month ledger; hybrid → 36‑month ledger.</li>
+      <li><strong>Leave query:</strong> similarity → 15‑day annual leave; BM25 → holiday party; hybrid → 15‑day annual leave.</li>
+    </ul>
+  </div>
+
+  <h2>9. Step 6 – Side‑by‑Side Summary Cell</h2>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> that prints top‑1 for both queries. This is the cell to screenshot for the lab.</p>
+  </div>
+
+  <pre><code>cases = [
+    (SKU_QUERY, SKU_GOLD),
+    (LEAVE_QUERY, LEAVE_GOLD),
+]
+
+for query, gold in cases:
+    print("=" * 72)
+    print("Query:", query)
+    print("Gold: ", gold)
+    for label, retriever in [
+        ("Similarity", similarity_retriever),
+        ("BM25      ", bm25_retriever),
+        ("Hybrid    ", hybrid_retriever),
+    ]:
+        top = source_name(retriever.invoke(query)[0])
+        mark = "OK" if top == gold else "MISS"
+        print(f"  {label} top-1: {top}  [{mark}]")</code></pre>
+
+  <h2>10. What You Learned</h2>
+  <ul>
+    <li>Similarity search answers the paraphrase (“vacation” → annual leave) and misses the rare token <code>SKU-ZX9001</code>.</li>
+    <li>BM25 returns a result only when the query words actually occur. It finds the SKU and misses the leave policy.</li>
+    <li>Hybrid search is required when a corpus has both kinds of questions. <code>EnsembleRetriever</code> fuses the two ranked lists.</li>
+    <li>Keep <code>k</code> at 3 (or more) so each list contains more than a single hit. With <code>k=1</code> the ranks often tie and the keyword miss can survive fusion.</li>
+  </ul>
+
+  <div class="exercise">
+    <div class="exercise-title">Challenge</div>
+    <ul>
+      <li>Set both retrievers to <code>k = 1</code> and rerun the leave query. Watch whether hybrid still returns the annual‑leave chapter.</li>
+      <li>Change ensemble weights to <code>[0.7, 0.3]</code> and <code>[0.3, 0.7]</code>. Which query breaks first?</li>
+      <li>Add the words “vacation” and “employee” to <code>annual_leave_policy.txt</code> and rerun BM25. The keyword miss should disappear — and so should the reason to demo hybrid on that query.</li>
+    </ul>
+  </div>
+
+</main>
+</body>
+</html>

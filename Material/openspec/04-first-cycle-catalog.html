@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>04 · First Cycle: Product Catalog – OpenSpec ShopLite</title>
+  <style>
+:root {
+  --ink: #0f172a;
+  --muted: #475569;
+  --accent: #1d4ed8;
+  --line: rgba(37, 99, 235, 0.18);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.65;
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+  color: #111827;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(15, 23, 42, 0.94);
+  color: #e5e7eb;
+  backdrop-filter: blur(8px);
+}
+
+.topbar-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0.7rem 1.25rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.topbar a {
+  color: #bfdbfe;
+  text-decoration: none;
+  font-size: 0.88rem;
+}
+
+.topbar a:hover { color: #fff; text-decoration: underline; }
+
+.brand {
+  font-weight: 700;
+  color: #fff !important;
+  letter-spacing: -0.02em;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+main {
+  max-width: 960px;
+  margin: 1.5rem auto 3rem;
+  padding: 2.25rem 2rem 3rem;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(148, 163, 184, 0.12);
+}
+
+h1 {
+  font-size: 2.05rem;
+  margin: 0 0 1.1rem;
+  letter-spacing: -0.03em;
+  text-align: center;
+  color: #0f172a;
+  padding: 1rem 1.4rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+  box-shadow:
+    0 10px 25px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(148, 163, 184, 0.35);
+}
+
+h2 {
+  font-size: 1.55rem;
+  margin-top: 2.15rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 0.35rem;
+  color: #0f172a;
+}
+
+h3 {
+  font-size: 1.2rem;
+  margin-top: 1.6rem;
+  color: #0f172a;
+}
+
+p { margin: 0.5rem 0 0.75rem; }
+
+code {
+  font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+  background-color: #f3f4ff;
+  padding: 0.12rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.95em;
+  color: #1d4ed8;
+}
+
+pre {
+  background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+  color: #e5e7eb;
+  padding: 2.25rem 4.75rem 1rem 1.1rem;
+  border-radius: 10px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+  margin: 0.75rem 0 1.5rem;
+  border: 1px solid rgba(15, 23, 42, 0.6);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.note, .exercise, .warn, .concept, .checkpoint, .behind, .think {
+  padding: 0.9rem 1.1rem;
+  margin: 1rem 0 1.5rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+}
+
+.note {
+  border-left: 4px solid #2563eb;
+  background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+  border-color: rgba(37, 99, 235, 0.4);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(191, 219, 254, 0.9);
+}
+
+.exercise {
+  border-left: 4px solid #16a34a;
+  background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+  border-color: rgba(22, 163, 74, 0.4);
+}
+
+.warn {
+  border-left: 4px solid #d97706;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: rgba(217, 119, 6, 0.4);
+}
+
+.concept {
+  border-left: 4px solid #7c3aed;
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+  border-color: rgba(124, 58, 237, 0.35);
+}
+
+.checkpoint {
+  border-left: 4px solid #0f766e;
+  background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+  border-color: rgba(15, 118, 110, 0.35);
+}
+
+.behind {
+  border-left: 4px solid #0e7490;
+  background: linear-gradient(135deg, #ecfeff, #cffafe);
+  border-color: rgba(14, 116, 144, 0.35);
+}
+
+.think {
+  border-left: 4px solid #c2410c;
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border-color: rgba(194, 65, 12, 0.35);
+}
+
+.exercise-title, .warn-title, .concept-title, .checkpoint-title, .behind-title, .think-title {
+  font-weight: 650;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+}
+
+.exercise-title { color: #166534; }
+.warn-title { color: #92400e; }
+.concept-title { color: #5b21b6; }
+.checkpoint-title { color: #115e59; }
+.behind-title { color: #155e75; }
+.think-title { color: #9a3412; }
+
+.thought-check {
+  margin: -0.65rem 0 1.5rem;
+  padding: 0.75rem 1.1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 118, 110, 0.35);
+  border-left: 4px solid #0f766e;
+  background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+  font-size: 0.95rem;
+}
+
+.thought-check summary {
+  cursor: pointer;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+  color: #115e59;
+  user-select: none;
+}
+
+.thought-check summary:hover { text-decoration: underline; }
+
+.thought-check[open] summary { margin-bottom: 0.45rem; }
+
+.thought-check p:last-child { margin-bottom: 0; }
+
+.step-answer {
+  margin: 0.35rem 0 1.5rem;
+  padding: 0.75rem 1.1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(22, 163, 74, 0.35);
+  border-left: 4px solid #16a34a;
+  background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+  font-size: 0.95rem;
+}
+
+.step-answer summary {
+  cursor: pointer;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+  color: #166534;
+  user-select: none;
+}
+
+.step-answer summary:hover { text-decoration: underline; }
+
+.step-answer[open] summary { margin-bottom: 0.45rem; }
+
+.step-answer p:last-child,
+.step-answer ul:last-child,
+.step-answer ol:last-child { margin-bottom: 0; }
+
+ol, ul { padding-left: 1.4rem; }
+li { margin: 0.25rem 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.95rem;
+}
+
+th, td {
+  border: 1px solid #e2e8f0;
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #eff6ff;
+  color: #0f172a;
+}
+
+tr:nth-child(even) td { background: #f8fafc; }
+
+.meta {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0 0 1.25rem;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.kicker {
+  text-align: center;
+  color: var(--muted);
+  margin-top: -0.35rem;
+  margin-bottom: 1.1rem;
+}
+
+.toc a { color: #1d4ed8; }
+
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.lesson-nav a {
+  color: #1d4ed8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.lesson-nav a:hover { text-decoration: underline; }
+
+.sample-output-title {
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+  color: #0f172a;
+}
+
+.code-wrapper { position: relative; }
+
+.copy-btn {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.5rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.55rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  color: #9ca3af;
+  font-family: system-ui, sans-serif;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  user-select: none;
+}
+
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #f9fafb;
+}
+
+.copy-btn.copied {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.45);
+}
+
+.progress {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.progress span {
+  display: block;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  background: #f1f5f9;
+  font-size: 0.82rem;
+  color: #334155;
+  text-align: center;
+}
+
+.progress span.done {
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 600;
+}
+
+.progress span.now {
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 700;
+}
+
+footer.site {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-bottom: 2rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.85rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.95rem 1rem;
+  background: #f8fafc;
+}
+
+.card h3 { margin-top: 0; font-size: 1.05rem; }
+.card a { color: #1d4ed8; font-weight: 650; text-decoration: none; }
+.card a:hover { text-decoration: underline; }
+.card p { margin: 0.35rem 0 0; font-size: 0.92rem; color: #475569; }
+
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="00-index.html">OpenSpec · ShopLite</a>
+    <nav>
+      <a href="00-index.html">Home</a>
+      <a href="01-why-spec-driven-development.html">01</a>
+      <a href="02-install-and-initialize.html">02</a>
+      <a href="03-core-concepts.html">03</a>
+      <a href="04-first-cycle-catalog.html">04</a>
+      <a href="05-explore-and-specify-search.html">05</a>
+      <a href="06-review-artifacts-cart.html">06</a>
+      <a href="07-apply-debug-checkout.html">07</a>
+      <a href="08-expanded-workflow-orders.html">08</a>
+      <a href="09-spec-evolution-inventory.html">09</a>
+      <a href="10-spec-management-and-beyond.html">10</a>
+    </nav>
+  </div>
+</div>
+
+<main>
+  <h1>04 · First Cycle: Product Catalog</h1>
+  <p class="kicker">Plan, read the plan, build, then file it. ShopLite gets a home page of products. Each scenario in the spec gets a test.</p>
+  <div class="meta">
+    <span class="pill">Lesson 04 of 10</span>
+    <span class="pill">~70 minutes</span>
+    <span class="pill">First working app</span>
+  </div>
+
+  <div class="progress">
+    <span class="now">Catalog</span><span>Search</span><span>Cart</span>
+    <span>Checkout</span><span>Orders</span><span>Inventory</span>
+  </div>
+
+  <div class="note">
+    <strong>What you will do</strong>
+    <ul>
+      <li>Run your first <code>propose → apply → archive</code> cycle.</li>
+      <li>Read the generated files. Do not accept them just because they look like Markdown.</li>
+      <li>Run ShopLite and see a home page of products.</li>
+      <li>Check that each scenario has a passing test.</li>
+      <li>Start a new chat before apply.</li>
+    </ul>
+  </div>
+
+  <div class="behind">
+    <div class="behind-title">The three commands, in plain words</div>
+    <p>These are the same three jobs you did by hand in lesson 01.</p>
+    <table>
+      <thead>
+        <tr><th>You type</th><th>What happens</th><th>What you did by hand</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>/opsx:propose</code></td>
+          <td>
+            The instruction file tells the assistant: make a change folder, write the proposal, the spec difference, the design, and the tasks, then stop.
+            The spec must say that each scenario gets a test. The tasks must list those tests. The assistant writes no shop code yet.
+          </td>
+          <td>Your propose file, plus creating the folder</td>
+        </tr>
+        <tr>
+          <td><code>/opsx:apply</code></td>
+          <td>
+            The assistant reads the tasks, the spec, and the design. It does the checkboxes in order, including the tests, and ticks them as it goes.
+            It should not add features you left out.
+          </td>
+          <td>Your apply file</td>
+        </tr>
+        <tr>
+          <td><code>/opsx:archive</code></td>
+          <td>
+            The new rules are copied into <code>openspec/specs/</code>, including the test requirement. The change folder moves to
+            <code>changes/archive/YYYY-MM-DD-name/</code>. A changed rule is found by its heading, so the title must match.
+          </td>
+          <td>Your archive file, plus a careful copy</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      You still have to read the plan between propose and apply. The tool will not do that reading for you.
+    </p>
+  </div>
+  <div class="think">
+    <div class="think-title">Think</div>
+    <p>
+      After propose, the code still should not exist. If the agent starts writing FastAPI during propose, it violated
+      the skill. Stop it. The split exists to protect you from exactly that.
+    </p>
+  </div>
+  <details class="thought-check">
+    <summary>Check your thought</summary>
+    <p>
+      Propose is planning only. A finished run leaves
+      <code>openspec/changes/add-product-catalog/</code> with Markdown — proposal, delta specs, design, tasks —
+      and <em>no</em> FastAPI files. If <code>app/main.py</code> appears, the skill was ignored and the review
+      gate never happened. Stop the agent, delete the premature code, keep the artifacts. You apply later, in a
+      new chat, after you have agreed the plan. That split is what stops rejected ideas from becoming the storefront.
+    </p>
+  </details>
+
+  <h2>1. The feature (intentionally small)</h2>
+  <p>
+    Amazon’s home experience is a wall of products. ShopLite’s first slice is smaller: a home page that lists
+    products with name and price, plus a simple detail page. No search box yet. No cart. Scope stays small so you
+    can feel the whole loop in about ten minutes of agent time — then we slow down for review.
+  </p>
+  <div class="concept">
+    <div class="concept-title">Why we skip the thinking step this time</div>
+    <p>
+      Lesson 05 is where we practice thinking out loud before we write a spec. Here I am handing you the feature, the way a clear ticket sometimes does.
+      When you can already say the change in one sentence, going straight to propose is the right move.
+    </p>
+  </div>
+
+  <h2>2. Start a clean chat</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Open the <code>shoplite</code> folder as the workspace. Start a <strong>new</strong> agent chat. Do not reuse a
+      long setup conversation from lesson 02.
+    </p>
+  </div>
+
+  <h2>3. Propose the catalog</h2>
+  <p>In Cursor:</p>
+  <pre><code>/opsx-propose add-product-catalog
+
+Build ShopLite's first slice: a mini-Amazon product catalog.
+
+In scope:
+- A home page that lists seed products (at least 6 everyday items: e.g. headphones, kettle, notebook, coffee beans, USB-C cable, desk lamp).
+- Each product shows name, price, and a short description.
+- Clicking a product opens a detail page with the same fields.
+- Empty-catalog message if the product list is empty.
+- FastAPI + vanilla HTML/CSS/JS. Seed data in JSON or a Python module.
+- Run with uvicorn on port 8000.
+
+Out of scope:
+- Search, cart, checkout, accounts, recommendations, real payments, inventory rules.
+
+Keep the change named add-product-catalog. Specs describe shopper-visible behavior only.
+Every scenario needs one automated test. The test name includes the scenario title.
+tasks.md must list those tests. Do not write application code or tests during propose.</code></pre>
+  <p>Claude Code equivalent: start with <code>/opsx:propose add-product-catalog</code> and paste the same body.</p>
+  <p>Wait until the agent reports that it created a change folder with proposal, specs, design, and tasks. <strong>Do not apply yet.</strong></p>
+
+  <h2>4. Look at what was created</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>In the terminal, from <code>shoplite</code>:</p>
+  </div>
+  <pre><code>openspec list
+openspec show add-product-catalog
+openspec validate add-product-catalog</code></pre>
+  <p>Then open these files in the editor:</p>
+  <ul>
+    <li><code>openspec/changes/add-product-catalog/proposal.md</code></li>
+    <li><code>openspec/changes/add-product-catalog/specs/</code> (likely <code>catalog/spec.md</code>)</li>
+    <li><code>openspec/changes/add-product-catalog/design.md</code></li>
+    <li><code>openspec/changes/add-product-catalog/tasks.md</code></li>
+  </ul>
+
+  <h3>4.1 Two-minute review (do this every time)</h3>
+  <p>Read the plan the way you would read a colleague’s PR description. Ask:</p>
+  <table>
+    <thead>
+      <tr><th>Artifact</th><th>Questions</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Proposal</td>
+        <td>Is the intent one sentence? Is search/cart listed as out of scope? Did the AI sneak in extra features?</td>
+      </tr>
+      <tr>
+        <td>Specs</td>
+        <td>Can a shopper see the behavior? Does the empty catalog have its own scenario? Does any SHALL name FastAPI or CSS? Does the spec say each scenario needs a test, and do the tasks list those tests?</td>
+      </tr>
+      <tr>
+        <td>Design</td>
+        <td>Is the stack what we asked for? Is persistence simple? Any over-engineering (auth, Docker, React)?</td>
+      </tr>
+      <tr>
+        <td>Tasks</td>
+        <td>Could you implement from the checkboxes alone? Are they small enough to verify one at a time?</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="warn">
+    <div class="warn-title">Do not accept the draft because it “looks like Markdown”</div>
+    <p>
+      Students fail this step by trusting the AI’s first draft. Would you merge a teammate’s spec unread? If the
+      proposal includes search, a cart, or “users must sign in,” edit it now. You can edit the files by hand or ask
+      in the same chat: <em>“Remove search and accounts from the proposal and specs. Catalog only.”</em>
+    </p>
+  </div>
+
+  <p>If you want the agent to keep artifacts consistent after a manual edit:</p>
+  <pre><code>/opsx-update
+
+I edited the proposal to exclude search and cart. Align specs, design, and tasks. Do not write application code.</code></pre>
+  <details class="step-answer">
+    <summary>Explanation — what “healthy” looks like</summary>
+    <p>Walk the table. A pass looks like this:</p>
+    <ul>
+      <li><strong>Proposal</strong> — one sentence of intent (“shoppers browse a seed catalog”). Search, cart, checkout, accounts are named out of scope. No extra features.</li>
+      <li><strong>Specs</strong> — what the shopper can see. The home page lists name and price (and a description if you asked). The empty catalog and an unknown product each have a scenario. No SHALL that names FastAPI or CSS. The spec includes “Test for each scenario.”</li>
+      <li><strong>Design</strong> — FastAPI + vanilla HTML/CSS/JS, seed in JSON or a Python module, uvicorn on 8000. Persistence is a file, not Postgres. No auth, Docker, or React.</li>
+      <li><strong>Tasks</strong> — small checkboxes you could tick one at a time (scaffold, seed, home grid, detail, empty/not-found). If you cannot implement from the list alone, the tasks are too vague.</li>
+    </ul>
+    <p>
+      If the draft includes search or accounts, edit now — by hand or with the <code>/opsx-update</code> prompt above.
+      Do not apply a plan you would not merge.
+    </p>
+  </details>
+
+  <h3>4.2 What a healthy catalog spec looks like</h3>
+  <p>Yours will not match word-for-word. The shape should:</p>
+  <pre><code>## Purpose
+Shoppers can browse Nile Retail products and open a product detail page.
+
+## ADDED Requirements
+
+### Requirement: Home catalog
+The system SHALL list each available product with name and price.
+
+#### Scenario: Seeded store
+- GIVEN the store has multiple available products
+- WHEN the shopper opens the home page
+- THEN each product is listed with name and price
+
+#### Scenario: No products
+- GIVEN the catalog has no products
+- WHEN the shopper opens the home page
+- THEN the page states that no products are available
+
+### Requirement: Product detail
+The system SHALL show name, price, and description for a selected product.
+
+#### Scenario: Open from the grid
+- GIVEN a listed product
+- WHEN the shopper selects it
+- THEN the detail view shows that product’s name, price, and description
+
+#### Scenario: Unknown product
+- GIVEN a product id that does not exist
+- WHEN the shopper opens its detail URL
+- THEN the system shows a not-found message rather than an empty broken page
+
+### Requirement: Test for each scenario
+The project SHALL include one automated test for each scenario in this spec.
+The test name SHALL include the scenario title.
+The test SHALL fail when that scenario's THEN is not met.</code></pre>
+
+  <h2>5. Apply — in a fresh chat</h2>
+  <p>
+    Planning and implementation compete for the same context window. A long propose conversation is full of rejected
+    ideas. Start implementation clean.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Open a <strong>new</strong> chat. Then apply.</p>
+  </div>
+  <pre><code>/opsx-apply add-product-catalog</code></pre>
+  <p>
+    The agent reads <code>tasks.md</code>, the delta specs, and <code>design.md</code>. It should work through checkboxes
+    and mark them done. If it asks to confirm the change name, say yes.
+  </p>
+  <p class="sample-output-title">You should see something like</p>
+  <pre><code>Implementing add-product-catalog...
+✓ 1.1 Create FastAPI app scaffold
+✓ 1.2 Add seed products
+✓ 2.1 Home page product grid
+✓ 2.2 Product detail page
+✓ 3.1 Empty and not-found states
+All tasks complete.</code></pre>
+
+  <h2>6. Run ShopLite</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a virtual environment, install dependencies the agent added (often <code>requirements.txt</code> or <code>pyproject.toml</code>), and start the server.</p>
+  </div>
+  <pre><code>python -m venv .venv
+# Windows PowerShell
+.\.venv\Scripts\Activate.ps1
+# macOS / Linux
+# source .venv/bin/activate
+
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000</code></pre>
+  <p>
+    Paths may differ (<code>main.py</code> at repo root, or <code>app/main.py</code>). Use whatever <code>design.md</code>
+    and the generated README say. If the agent used a different runner, follow that.
+  </p>
+  <p>Open <a href="http://127.0.0.1:8000" target="_blank" rel="noopener">http://127.0.0.1:8000</a>. You should see a grid of products. Click one. You should see details.</p>
+
+  <div class="checkpoint">
+    <div class="checkpoint-title">Manual acceptance</div>
+    <ul>
+      <li>At least six products, each with name and price.</li>
+      <li>A detail page for a product.</li>
+      <li>A sensible not-found page if you invent a bad URL (try <code>/products/does-not-exist</code> or similar).</li>
+      <li>No search box, no cart icon that works, no login wall. Extra decorations are okay if they do not invent behavior.</li>
+      <li>The tests pass, and you can point at one test whose name includes a scenario title from the spec.</li>
+    </ul>
+  </div>
+
+  <h2>7. If the app is wrong</h2>
+  <p>Do not immediately paste a new vibe prompt. Trace it:</p>
+  <ol>
+    <li>Is the behavior specified? If no, the spec is incomplete — edit specs, then apply again.</li>
+    <li>Is the behavior specified but the code ignores it? That is an implementation miss — apply again calling out the task.</li>
+    <li>Did the agent build search “to be helpful”? That is scope creep — delete it or park it for lesson 05. Update the proposal if needed.</li>
+  </ol>
+  <p>To resume a partial apply in a new chat:</p>
+  <pre><code>/opsx-apply add-product-catalog
+
+Continue remaining tasks. Do not expand scope.</code></pre>
+
+  <h2>8. Archive</h2>
+  <p>Only archive when you would be willing to treat the catalog behavior as “how ShopLite works today.”</p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New chat (or the apply chat if it is still focused). Archive and allow spec sync when asked.</p>
+  </div>
+  <pre><code>/opsx-archive add-product-catalog</code></pre>
+  <p>Terminal equivalent if you prefer (skips some chat confirmation):</p>
+  <pre><code>openspec archive add-product-catalog --yes</code></pre>
+  <p>Check:</p>
+  <pre><code>openspec list
+dir openspec\specs
+dir openspec\changes\archive</code></pre>
+  <p>
+    <code>list</code> should show no active change (or not show <code>add-product-catalog</code>).
+    You should have something like <code>openspec/specs/catalog/spec.md</code> and an archive folder dated today.
+  </p>
+
+  <h2>9. Why this mattered</h2>
+  <p>You now have two products, not one:</p>
+  <ul>
+    <li>A running storefront grid.</li>
+    <li>A spec suite that says what that grid must do.</li>
+  </ul>
+  <p>
+    Tomorrow’s agent can read the spec and will not “forget” that products have detail pages. That is the whole point
+    of the cycle, even when the feature felt small.
+  </p>
+
+  <h2>10. Challenge (optional)</h2>
+  <div class="exercise">
+    <div class="exercise-title">Challenge</div>
+    <p>
+      Without starting a new OpenSpec change, read <code>openspec/specs/catalog/spec.md</code> and add one scenario
+      the AI missed (for example: prices show two decimal places). Then decide: is this a spec fix you should have
+      made <em>before</em> archive? If yes, you can still edit the main spec by hand — and you should, because the
+      spec is now the truth. We will do a proper MODIFIED delta in lesson 09.
+    </p>
+    <p>
+      That hand-edit does <strong>not</strong> change the running app, and the next
+      <code>/opsx-apply</code> will not implement it. Apply reads an <em>active</em> change’s
+      <code>tasks.md</code>, delta specs, and <code>design.md</code>. After archive,
+      <code>add-product-catalog</code> is gone — there is nothing left to apply. The main spec is
+      documented truth for the next agent (lesson 05 will <em>read</em> it). If the page already
+      matches, you only fixed the spec. If it does not, you have <strong>drift</strong>: either
+      patch the template yourself, or open a new change later (lesson 09) and apply <em>that</em>.
+    </p>
+  </div>
+  <details class="step-answer">
+    <summary>Solution</summary>
+    <p>
+      Yes — a missing scenario is a spec gap you should have caught in the two-minute review, before archive.
+      After archive the main spec is the truth, so edit <code>openspec/specs/catalog/spec.md</code> by hand.
+      Do not open a new change for a one-line clarification; lesson 09 is the proper MODIFIED delta.
+    </p>
+    <p>Example scenario you can add under product listing or a new “Price display” requirement:</p>
+    <pre><code>### Requirement: Price display
+The system SHALL show each product price with a currency symbol and exactly two decimal places.
+
+#### Scenario: Seeded prices
+- GIVEN a product priced 29.5
+- WHEN the shopper views the listing or the detail page
+- THEN the price is shown as $29.50</code></pre>
+    <p>
+      Then glance at the running app. If it already prints <code>$29.50</code>, spec and code still
+      agree. If it prints <code>29.5</code>, only the Markdown changed — OpenSpec will not notice
+      until you either edit the HTML yourself or create a new change with tasks and apply that one.
+    </p>
+  </details>
+
+  <h2>11. Common issues</h2>
+  <table>
+    <thead>
+      <tr><th>Symptom</th><th>Fix</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Slash command not found</td><td>Reload window; <code>openspec update</code>; workspace root is <code>shoplite</code>.</td></tr>
+      <tr><td>Port 8000 in use</td><td>Stop the other process or use <code>--port 8001</code>.</td></tr>
+      <tr><td>Agent used React / Next.js</td><td>Out of stack. Update design.md and apply again, or revert and re-propose with a firmer constraint.</td></tr>
+      <tr><td>PowerShell activate fails</td><td>Execution policy: <code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</code> then activate.</td></tr>
+      <tr><td>Propose created a vague name like <code>add-feature</code></td><td>Rename is painful; archive/cancel if unused and propose again with the kebab-case name first.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>12. Reflection</h2>
+  <ol>
+    <li>Which artifact did you actually edit, if any? What would have gone wrong if you had not?</li>
+    <li>Why apply in a new chat?</li>
+    <li>After archive, where does “products have a detail page” live?</li>
+  </ol>
+  <details class="step-answer">
+    <summary>Check your answers</summary>
+    <ol>
+      <li>
+        Honest answer for many first runs: none — and that is the failure mode. If you <em>did</em> edit, it was
+        probably the proposal (strip search/cart/accounts) or the spec (add empty catalog / unknown product).
+        Skipping that edit means apply builds the sneaked feature, or ships a grid with no empty-state.
+      </li>
+      <li>
+        Planning and implementation share one context window. A long propose thread still contains rejected ideas.
+        A fresh chat makes the agent a constrained reader of <code>tasks.md</code>, the delta spec, and
+        <code>design.md</code> — not a continuation of the Amazon brainstorm.
+      </li>
+      <li>
+        In the main spec: <code>openspec/specs/catalog/spec.md</code>, under the product-detail requirement.
+        That is today’s truth. The archived folder is decision history. The page at <code>/products/{id}</code>
+        is the implementation, not a replacement for the spec.
+      </li>
+    </ol>
+  </details>
+
+  <div class="checkpoint">
+    <div class="checkpoint-title">Lesson 04 complete</div>
+    <p>You have a mini-Amazon grid and a living spec. Next: search — and this time you will explore before you propose.</p>
+  </div>
+
+  <div class="lesson-nav">
+    <a href="03-core-concepts.html">← 03 Concepts</a>
+    <a href="05-explore-and-specify-search.html">Next: 05 Search (explore + specs) →</a>
+  </div>
+</main>
+<script>
+(function () {
+  const COPY_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  const CHECK_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  function copyText(text, onDone) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(onDone).catch(fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      onDone();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("pre").forEach((pre) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "code-wrapper";
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "copy-btn";
+      btn.innerHTML = COPY_ICON + " Copy";
+      wrapper.appendChild(btn);
+
+      btn.addEventListener("click", () => {
+        const code = pre.querySelector("code");
+        const text = (code ? code.innerText : pre.innerText).trimEnd();
+        copyText(text, () => {
+          btn.innerHTML = CHECK_ICON + " Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.innerHTML = COPY_ICON + " Copy";
+            btn.classList.remove("copied");
+          }, 2000);
+        });
+      });
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

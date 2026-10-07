@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>01 · Build a tiny OpenSpec yourself – ShopLite</title>
+  <style>
+:root {
+  --ink: #0f172a;
+  --muted: #475569;
+  --accent: #1d4ed8;
+  --line: rgba(37, 99, 235, 0.18);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.65;
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+  color: #111827;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(15, 23, 42, 0.94);
+  color: #e5e7eb;
+  backdrop-filter: blur(8px);
+}
+
+.topbar-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0.7rem 1.25rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.topbar a {
+  color: #bfdbfe;
+  text-decoration: none;
+  font-size: 0.88rem;
+}
+
+.topbar a:hover { color: #fff; text-decoration: underline; }
+
+.brand {
+  font-weight: 700;
+  color: #fff !important;
+  letter-spacing: -0.02em;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+main {
+  max-width: 960px;
+  margin: 1.5rem auto 3rem;
+  padding: 2.25rem 2rem 3rem;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(148, 163, 184, 0.12);
+}
+
+h1 {
+  font-size: 2.05rem;
+  margin: 0 0 1.1rem;
+  letter-spacing: -0.03em;
+  text-align: center;
+  color: #0f172a;
+  padding: 1rem 1.4rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+  box-shadow:
+    0 10px 25px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(148, 163, 184, 0.35);
+}
+
+h2 {
+  font-size: 1.55rem;
+  margin-top: 2.15rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 0.35rem;
+  color: #0f172a;
+}
+
+h3 {
+  font-size: 1.2rem;
+  margin-top: 1.6rem;
+  color: #0f172a;
+}
+
+p { margin: 0.5rem 0 0.75rem; }
+
+code {
+  font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+  background-color: #f3f4ff;
+  padding: 0.12rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.95em;
+  color: #1d4ed8;
+}
+
+pre {
+  background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+  color: #e5e7eb;
+  padding: 2.25rem 4.75rem 1rem 1.1rem;
+  border-radius: 10px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+  margin: 0.75rem 0 1.5rem;
+  border: 1px solid rgba(15, 23, 42, 0.6);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.note, .exercise, .warn, .concept, .checkpoint, .behind, .think {
+  padding: 0.9rem 1.1rem;
+  margin: 1rem 0 1.5rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+}
+
+.note {
+  border-left: 4px solid #2563eb;
+  background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+  border-color: rgba(37, 99, 235, 0.4);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(191, 219, 254, 0.9);
+}
+
+.exercise {
+  border-left: 4px solid #16a34a;
+  background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+  border-color: rgba(22, 163, 74, 0.4);
+}
+
+.warn {
+  border-left: 4px solid #d97706;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: rgba(217, 119, 6, 0.4);
+}
+
+.concept {
+  border-left: 4px solid #7c3aed;
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+  border-color: rgba(124, 58, 237, 0.35);
+}
+
+.checkpoint {
+  border-left: 4px solid #0f766e;
+  background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+  border-color: rgba(15, 118, 110, 0.35);
+}
+
+.behind {
+  border-left: 4px solid #0e7490;
+  background: linear-gradient(135deg, #ecfeff, #cffafe);
+  border-color: rgba(14, 116, 144, 0.35);
+}
+
+.think {
+  border-left: 4px solid #c2410c;
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border-color: rgba(194, 65, 12, 0.35);
+}
+
+.exercise-title, .warn-title, .concept-title, .checkpoint-title, .behind-title, .think-title {
+  font-weight: 650;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+}
+
+.exercise-title { color: #166534; }
+.warn-title { color: #92400e; }
+.concept-title { color: #5b21b6; }
+.checkpoint-title { color: #115e59; }
+.behind-title { color: #155e75; }
+.think-title { color: #9a3412; }
+
+ol, ul { padding-left: 1.4rem; }
+li { margin: 0.25rem 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.95rem;
+}
+
+th, td {
+  border: 1px solid #e2e8f0;
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #eff6ff;
+  color: #0f172a;
+}
+
+tr:nth-child(even) td { background: #f8fafc; }
+
+.meta {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0 0 1.25rem;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.kicker {
+  text-align: center;
+  color: var(--muted);
+  margin-top: -0.35rem;
+  margin-bottom: 1.1rem;
+}
+
+.toc a { color: #1d4ed8; }
+
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.lesson-nav a {
+  color: #1d4ed8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.lesson-nav a:hover { text-decoration: underline; }
+
+.sample-output-title {
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+  color: #0f172a;
+}
+
+.code-wrapper { position: relative; }
+
+.copy-btn {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.5rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.55rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  color: #9ca3af;
+  font-family: system-ui, sans-serif;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  user-select: none;
+}
+
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #f9fafb;
+}
+
+.copy-btn.copied {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.45);
+}
+
+.progress {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.progress span {
+  display: block;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  background: #f1f5f9;
+  font-size: 0.82rem;
+  color: #334155;
+  text-align: center;
+}
+
+.progress span.done {
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 600;
+}
+
+.progress span.now {
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 700;
+}
+
+footer.site {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-bottom: 2rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.85rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.95rem 1rem;
+  background: #f8fafc;
+}
+
+.card h3 { margin-top: 0; font-size: 1.05rem; }
+.card a { color: #1d4ed8; font-weight: 650; text-decoration: none; }
+.card a:hover { text-decoration: underline; }
+.card p { margin: 0.35rem 0 0; font-size: 0.92rem; color: #475569; }
+
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="00-index.html">OpenSpec · ShopLite</a>
+    <nav>
+      <a href="00-index.html">Home</a>
+      <a href="01-why-spec-driven-development.html">01</a>
+      <a href="02-install-and-initialize.html">02</a>
+      <a href="03-core-concepts.html">03</a>
+      <a href="04-first-cycle-catalog.html">04</a>
+      <a href="05-explore-and-specify-search.html">05</a>
+      <a href="06-review-artifacts-cart.html">06</a>
+      <a href="07-apply-debug-checkout.html">07</a>
+      <a href="08-expanded-workflow-orders.html">08</a>
+      <a href="09-spec-evolution-inventory.html">09</a>
+      <a href="10-spec-management-and-beyond.html">10</a>
+    </nav>
+  </div>
+</div>
+
+<main>
+  <h1>01 · Build a tiny OpenSpec yourself</h1>
+  <p class="kicker">No npm package yet. You write the Markdown folders and the slash-command files. Then you use them to ship a tiny catalog page — the same loop OpenSpec will run later.</p>
+  <p class="kicker">Prefer skills instead of slash commands? Use <a href="01-why-spec-driven-development-skills.html">the skills version</a> of this lesson.</p>
+  <div class="meta">
+    <span class="pill">Lesson 01 of 10</span>
+    <span class="pill">~90 minutes</span>
+    <span class="pill">Hands-on homemade protocol</span>
+  </div>
+
+  <div class="note">
+    <strong>How this lesson works</strong>
+    <ol>
+      <li>Feel why chat-only coding fails.</li>
+      <li>Create a <code>shoplite</code> folder with <code>protocol/specs</code> and <code>protocol/changes</code> — the same two-folder idea OpenSpec uses.</li>
+      <li>Copy-paste three command (or skill) files so your AI assistant learns propose / apply / archive.</li>
+      <li>Run that loop to build a one-page Nile Retail catalog. No FastAPI yet. No OpenSpec CLI yet.</li>
+      <li>Only then we name OpenSpec: it is this ritual, generated and merged more carefully.</li>
+    </ol>
+  </div>
+
+  <h2>1. Why we bother</h2>
+  <p>
+    Nile Retail asks you to add checkout. You type into the agent:
+  </p>
+  <pre><code>Add checkout like Amazon. Collect shipping and show a total.</code></pre>
+  <p>Code appears. Then tax is 8% because the model guessed. On Monday a teammate adds promo codes in a new chat and guesses a different tax rule. The rule lived only in the old chat. That is fast for a quick try, and useless as an agreement the next person can trust.</p>
+
+  <div class="think">
+    <div class="think-title">Think</div>
+    <p>Before creating any files, answer in one line each:</p>
+    <ol>
+      <li>Where should a business rule live so a new chat can find it?</li>
+      <li>How do you stop the agent from writing code until you agreed on the rule?</li>
+      <li>How do you teach the agent this ritual once, instead of pasting a paragraph every time?</li>
+    </ol>
+    <p>This lesson’s answers: a <code>specs/</code> folder, a change folder you review first, and a slash-command Markdown file in <code>.cursor/commands/</code> (or <code>.claude/commands/</code>).</p>
+  </div>
+
+  <h2>2. The homemade protocol (HomeSpec)</h2>
+  <p>We will not install OpenSpec. We will fake it with folders plus three prompts saved as commands. Names:</p>
+  <table>
+    <thead>
+      <tr><th>Your job</th><th>HomeSpec command</th><th>OpenSpec later</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Draft the plan, write no app code</td><td><code>/homespec-propose</code></td><td><code>/opsx-propose</code></td></tr>
+      <tr><td>Build only what the plan lists</td><td><code>/homespec-apply</code></td><td><code>/opsx-apply</code></td></tr>
+      <tr><td>Merge the spec delta into the source of truth, file the change away</td><td><code>/homespec-archive</code></td><td><code>/opsx-archive</code></td></tr>
+    </tbody>
+  </table>
+  <p>Folders (these are <code>protocol/</code>, not <code>openspec/</code>, so lesson 02 can add the real tool beside them):</p>
+  <pre><code>shoplite/
+├── protocol/
+│   ├── specs/                 # truth: how the app behaves TODAY
+│   └── changes/               # one folder per in-flight change
+│       └── archive/           # finished changes
+├── .cursor/commands/          # Cursor slash commands (if you use Cursor)
+│   ├── homespec-propose.md
+│   ├── homespec-apply.md
+│   └── homespec-archive.md
+└── (later) index.html         # the tiny store we will build</code></pre>
+  <div class="concept">
+    <div class="concept-title">What you are building</div>
+    <p>A <strong>spec</strong> is the written agreement about how the shop works today. A <strong>change</strong> is one piece of work that is not finished yet. A <strong>command</strong> is the instruction file the assistant reads so you do not paste that agreement process every time. OpenSpec later creates the folders and copies the rules for you. The ideas stay the same. Each scenario in a spec also asks for a test.</p>
+  </div>
+
+  <h2>3. Create the project</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>In a terminal, create the folder tree. Lesson 02 will keep using this same <code>shoplite</code> directory.</p>
+  </div>
+  <pre><code>mkdir shoplite
+cd shoplite
+mkdir protocol
+mkdir protocol\specs
+mkdir protocol\changes
+mkdir protocol\changes\archive
+mkdir .cursor
+mkdir .cursor\commands</code></pre>
+  <p>macOS / Linux: use <code>mkdir -p protocol/specs protocol/changes/archive .cursor/commands</code>.</p>
+  <p>Open the <code>shoplite</code> folder as the Cursor (or Claude Code) workspace. Slash commands only appear for the workspace root.</p>
+
+  <h2>4. Install the three commands by copy-paste</h2>
+  <p>
+    A slash command is a Markdown file. The filename becomes the command. Cursor looks in
+    <code>.cursor/commands/</code>. Claude Code looks in <code>.claude/commands/</code>. You are doing by hand what
+    <code>openspec init</code> will generate later.
+  </p>
+
+  <h3>4.1 Cursor (primary for this course)</h3>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create <code>.cursor/commands/homespec-propose.md</code> with exactly this content:</p>
+  </div>
+  <pre><code>---
+description: Draft a HomeSpec change. Write planning Markdown only. Do not implement.
+---
+
+You are running HomeSpec propose. Create the files yourself, in the order below.
+Planning only: do not create or edit implementation files (source, markup, styles, scripts, tests, or config).
+
+1. Understand the request.
+   - If the user gave a kebab-case change name, use it. Otherwise derive one: lowercase words joined by hyphens.
+     Example: "add user authentication" becomes add-user-auth.
+   - If you cannot tell what observable behavior should change, ask one question and wait.
+   - If a detail is small, choose a reasonable assumption and record it under Impact in the proposal.
+   - If protocol/changes/&lt;name&gt;/ already exists, ask whether to continue it or pick a new name. Do not overwrite it.
+
+2. Create protocol/changes/&lt;name&gt;/ and write four artifacts, in this order.
+   Later files depend on earlier ones, so finish and re-read each file before starting the next.
+   Write them in this order: proposal, then specs, then design, then tasks.
+
+3. proposal.md — why this change exists, and what is in or out.
+   Use this shape:
+
+   A capability is one area of behavior, named in kebab-case.
+   Write "None." when a Capabilities subsection has no entries.
+
+   # Proposal: &lt;name&gt;
+
+   ## Why
+   &lt;one or two sentences: the problem, and the outcome when this change is done&gt;
+
+   ## What Changes
+   - &lt;behavior this change adds, changes, or removes&gt;
+
+   ## Capabilities
+
+   ### New Capabilities
+   - `&lt;capability&gt;`: &lt;one line&gt;
+
+   ### Modified Capabilities
+   - `&lt;capability&gt;`: &lt;one line&gt;
+
+   ## Impact
+   - &lt;what parts of the system this touches&gt;
+   - &lt;assumptions you made&gt;
+   - Out of scope: &lt;behavior you will not add in this change&gt;
+
+4. specs/&lt;capability&gt;/spec.md — the delta. One file per capability.
+   A delta is the diff for this change, not a rewrite of all current behavior.
+   If protocol/specs/&lt;capability&gt;/spec.md already exists, read it first.
+   Reuse that capability name. Do not invent a second name for the same behavior.
+   Use ADDED only for new rules, MODIFIED only when replacing an existing requirement
+   with the same title, and REMOVED only when a requirement should disappear.
+   Describe what a person can observe. Do not name languages, frameworks, libraries, or file paths.
+   Include one unhappy path (empty, missing, or rejected input) when the request has one.
+   Every scenario needs a test. End the delta with this requirement:
+
+   ### Requirement: Test for each scenario
+   The project SHALL include one automated test for each scenario in this spec.
+   The test name SHALL include the scenario title.
+   The test SHALL fail when that scenario's THEN is not met.
+
+   Use only the sections you need:
+
+   # Delta for &lt;capability&gt;
+
+   ## Purpose
+   &lt;one sentence; include this section only when the capability is new&gt;
+
+   ## ADDED Requirements
+
+   ### Requirement: &lt;short title&gt;
+   The system SHALL &lt;observable behavior&gt;.
+
+   #### Scenario: &lt;short case name&gt;
+   - GIVEN &lt;starting state&gt;
+   - WHEN &lt;action&gt;
+   - THEN &lt;observable result&gt;
+
+   ## MODIFIED Requirements
+
+   ### Requirement: &lt;same title as the living spec&gt;
+   The system SHALL &lt;full replacement text, including its scenarios&gt;.
+
+   ## REMOVED Requirements
+
+   ### Requirement: &lt;title that should disappear&gt;
+   &lt;one line on why it goes away&gt;
+
+5. design.md — how to build what the spec describes. Read the proposal and the delta first.
+
+   # Design: &lt;name&gt;
+
+   ## Context
+   &lt;what exists today that this change must fit; say so if nothing exists yet&gt;
+
+   ## Goals / Non-Goals
+
+   **Goals:**
+   - &lt;outcome this change must achieve&gt;
+
+   **Non-Goals:**
+   - &lt;same items as Out of scope in the proposal&gt;
+
+   ## Decisions
+
+   ### 1. &lt;decision title&gt;
+   &lt;what you will do, in concrete terms&gt;
+
+   - Why: &lt;one sentence&gt;
+   - Alternative not chosen: &lt;one sentence&gt;
+
+   Add more numbered decisions only when a real choice exists. Do not start building.
+
+6. tasks.md — small steps the implementer will tick. Read the design and the delta first.
+   Every in-scope requirement needs at least one task. Out-of-scope items get no task.
+   Every scenario needs its own task: write the automated test for that scenario and make it pass.
+   Each checkbox is one checkable step, not "build the feature."
+
+   # Tasks: &lt;name&gt;
+
+   ## 1. &lt;group name&gt;
+
+   - [ ] 1.1 &lt;one small step, including how to tell it is done&gt;
+   - [ ] 1.2 &lt;the next step&gt;
+
+7. Stop. List each file you created with a one-line summary.
+   Tell the user to review them, then run /homespec-apply &lt;name&gt;.
+   Do not implement in this turn, even if the user asked you to build it.</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create <code>.cursor/commands/homespec-apply.md</code>:</p>
+  </div>
+  <pre><code>---
+description: Implement one HomeSpec change from its tasks, specs, and design.
+---
+
+You are running HomeSpec apply. The plan already exists; implement that plan.
+
+1. Choose the change.
+   - If the user named one, use protocol/changes/&lt;name&gt;/.
+   - If not, and exactly one folder sits directly under protocol/changes/ (ignore archive/), use it and say which one.
+   - If several are open, list them and ask. Do not guess.
+
+2. Read these files from disk, in this order, before you change anything:
+   proposal.md, every file under specs/, design.md, tasks.md.
+   Implement from those files. Do not rebuild the plan from an earlier chat.
+
+3. Work unchecked tasks from top to bottom.
+   - Make the smallest change that finishes that one task.
+   - When the spec behavior for that task is actually done, change `- [ ]` to `- [x]` in tasks.md.
+   - Leave the box unchecked if the task is only partly done.
+   - Say which task you are on (for example, "2/5") before you start it.
+
+4. Stay inside the proposal.
+   Do not add behavior listed as out of scope.
+   Do not invent requirements that are not in the delta spec.
+   For each scenario, write the automated test named in the spec and make it pass.
+   A scenario with no passing test is not done.
+
+5. Stop and ask when:
+   - a task is unclear
+   - building it would need behavior the spec does not describe
+   - the design conflicts with the spec
+   Do not silently shrink, skip, or rewrite a requirement to make the task easier.
+
+6. Do not edit anything under protocol/specs/.
+   Do not move the change folder into archive/.
+   Merging and filing happen only in /homespec-archive.
+
+7. When every task is checked, list what you completed and tell the user they can run /homespec-archive &lt;name&gt;.
+   If you paused, say why and wait.</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create <code>.cursor/commands/homespec-archive.md</code>:</p>
+  </div>
+  <pre><code>---
+description: Merge HomeSpec delta specs into protocol/specs and archive the change folder.
+---
+
+You are running HomeSpec archive. You merge Markdown. You do not change implementation code.
+
+1. Choose the change the same way apply does.
+   Use the name the user gave, or the only open folder under protocol/changes/ (not inside archive/).
+   If several are open, list them and ask.
+   Say which change you are archiving.
+
+2. Read tasks.md.
+   A task is complete only when its box contains x or X, as in `- [x]`.
+   If any task is still open, say how many and ask whether to continue.
+   Continue only if the user says yes. If there is no tasks.md, continue and mention that.
+
+3. Merge each delta into the living spec.
+   For every file protocol/changes/&lt;name&gt;/specs/&lt;capability&gt;/spec.md,
+   the living spec is protocol/specs/&lt;capability&gt;/spec.md.
+   A requirement's identity is its heading: ### Requirement: &lt;title&gt;. Match on that exact title.
+
+   - If the living spec does not exist:
+     Create it from the delta's ADDED requirements only.
+     Keep ## Purpose when the delta has one.
+     Drop the word "Delta" so the file reads as current truth, under a heading ## Requirements.
+     If the delta has MODIFIED or REMOVED but no ADDED, stop. There is no living spec to change.
+   - If the living spec exists:
+     ADDED: append each new requirement. If that title is already there, do not add a second copy; say so.
+     MODIFIED: replace the whole requirement with that title, including its scenarios.
+     If the title is missing, stop and name the title you could not find.
+     REMOVED: delete the requirement with that title. If the title is missing, say so and continue.
+   - Leave every other requirement in the living spec unchanged.
+
+4. Move the change folder only after the merge is done.
+   From: protocol/changes/&lt;name&gt;/
+   To:   protocol/changes/archive/YYYY-MM-DD-&lt;name&gt;/
+   Use today's date. If that archive folder already exists, stop and ask. Do not overwrite it.
+   If the change name already starts with YYYY-MM-DD-, do not add a second date.
+
+5. Do not edit implementation code.
+   Report the change name, the archive path, and for each capability which requirement
+   titles were added, replaced, or removed.</code></pre>
+
+  <h3>4.2 Claude Code (if that is your agent)</h3>
+  <p>Same three files, different folder. Create <code>.claude/commands/homespec-propose.md</code> (and apply, archive) with the <strong>same bodies</strong>. Invoke as <code>/homespec-propose</code>.</p>
+
+  <h3>4.3 Skills-only tools</h3>
+  <p>
+    If your tool has no slash commands, create
+    <code>.cursor/skills/homespec-propose/SKILL.md</code> (or <code>.agents/skills/...</code>) with a YAML header
+    plus the same instructions:
+  </p>
+  <pre><code>---
+name: homespec-propose
+description: Draft a HomeSpec change folder. Use when the user wants to plan a feature before code.
+---
+
+(paste the same steps as homespec-propose.md above)</code></pre>
+
+  <h3>4.4 Reload and confirm</h3>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Reload the editor window (Cursor Command Palette → “Developer: Reload Window”). In a new chat type:</p>
+  </div>
+  <pre><code>/homespec</code></pre>
+  <p>You should see autocomplete for propose, apply, and archive. If not: confirm the workspace root is <code>shoplite</code>, not its parent; confirm the filenames; reload again.</p>
+  <div class="warn">
+    <div class="warn-title">If slash commands still do not appear</div>
+    <p>
+      You can still run the protocol: open a new chat and paste the contents of <code>homespec-propose.md</code> as the
+      first message, then your feature request. The file is the ritual. Autocomplete is convenience. OpenSpec later
+      is the same idea with more tools pre-wired.
+    </p>
+  </div>
+
+  <div class="behind">
+    <div class="behind-title">What those files actually are</div>
+    <p>
+      Those three Markdown files are the whole method. The model does not already know “HomeSpec.” It reads the command file and follows it.
+      Later, <code>openspec init</code> writes longer versions of the same instructions, and a terminal command that creates folders and copies rules more carefully.
+      You now know why init exists.
+    </p>
+  </div>
+
+  <h2>5. Propose a tiny catalog — Markdown only</h2>
+  <p>
+    Amazon’s home page is a wall of products. We want the smallest possible slice: a single HTML page with three
+    items and prices. No search, no cart. Keep the change small so you can watch every file.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New chat. Run propose. Then <strong>do not apply</strong> until you have opened the generated Markdown.</p>
+  </div>
+  <pre><code>/homespec-propose add-hello-catalog
+
+Build ShopLite's first slice for Nile Retail: a single index.html catalog page.
+
+In scope:
+- A heading "ShopLite"
+- At least three products, each with a name and a price
+- A short note that this is a teaching store, not amazon.com
+
+Out of scope:
+- Search, cart, checkout, accounts, FastAPI, databases
+
+Use capability name catalog. Change name add-hello-catalog.
+Stop after the Markdown artifacts. No application code yet.</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task — review like a teammate</div>
+    <p>Open the folder the agent created. You should see something like:</p>
+  </div>
+  <pre><code>protocol/changes/add-hello-catalog/
+  proposal.md
+  design.md
+  tasks.md
+  specs/catalog/spec.md</code></pre>
+  <p>Check:</p>
+  <ul>
+    <li>Proposal lists search/cart as out of scope.</li>
+    <li>Spec describes shopper-visible behavior (names and prices), not “use flexbox.”</li>
+    <li>Spec has at least one Given / When / Then scenario.</li>
+    <li>The spec includes “Test for each scenario”: one automated test per scenario, and the test name includes the scenario title.</li>
+    <li>Tasks include a checkbox to write that test. Propose still does not write the test. Apply does.</li>
+    <li>Tasks are small checkboxes, not one line “build the site.”</li>
+    <li>There is still <strong>no</strong> <code>index.html</code>. If the agent wrote the page already, it ignored the command. Delete the HTML and remind it: propose writes Markdown only.</li>
+  </ul>
+  <div class="think">
+    <div class="think-title">Think</div>
+    <p>
+      Would you merge a colleague’s design unread because it “looks like Markdown”? The review step is the whole
+      protocol. OpenSpec will not do this for you either.
+    </p>
+  </div>
+  <p>If the spec is vague, edit the file by hand or tell the same chat: “Add a scenario for an empty product list. Do not write HTML.”</p>
+  <p>A healthy spec delta looks like this (yours need not match word for word):</p>
+  <pre><code># Delta for catalog
+
+## ADDED Requirements
+
+### Requirement: Product listing
+The home page SHALL list at least three products, each with a name and a price.
+
+#### Scenario: Shopper opens the page
+- GIVEN the catalog has seed products
+- WHEN the shopper opens index.html
+- THEN at least three products are visible
+- AND each shows a name and a price
+
+### Requirement: Test for each scenario
+The project SHALL include one automated test for each scenario in this spec.
+The test name SHALL include the scenario title.
+The test SHALL fail when that scenario's THEN is not met.</code></pre>
+
+  <h2>6. Apply — now the agent may write code</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New chat (clean context). Apply the change you just reviewed.</p>
+  </div>
+  <pre><code>/homespec-apply add-hello-catalog</code></pre>
+  <p>When it finishes, open <code>index.html</code> in a browser (double-click, or Live Preview). You should see ShopLite and three products.</p>
+  <div class="checkpoint">
+    <div class="checkpoint-title">Manual check</div>
+    <ul>
+      <li>Heading ShopLite (or Nile Retail) is visible.</li>
+      <li>Three products with prices.</li>
+      <li>A test exists for the catalog scenario, the test name includes that scenario’s title, and the test passes.</li>
+      <li><code>tasks.md</code> checkboxes are mostly ticked.</li>
+      <li>No search box that works. No cart. The command said out of scope.</li>
+    </ul>
+  </div>
+  <div class="behind">
+    <div class="behind-title">What apply just did</div>
+    <p>
+      Apply did not go back to your first sentence, “like Amazon.” It read <code>tasks.md</code>, the spec, and the design.
+      That is why we split propose and apply. A vague spec produces a confident wrong page. A clear spec produces a plain correct page, plus a test for each scenario.
+      OpenSpec’s apply command is the same idea, with a bit more bookkeeping around the files.
+    </p>
+  </div>
+
+  <h2>7. Archive — fold the change into truth</h2>
+  <p>
+    Right now the catalog rules live only in the change folder. A new chat would not know ShopLite already lists
+    products. Archive copies the delta into <code>protocol/specs/</code> and moves the change into <code>archive/</code>.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New chat, or the apply chat if it is still focused:</p>
+  </div>
+  <pre><code>/homespec-archive add-hello-catalog</code></pre>
+  <p>Then confirm:</p>
+  <pre><code>dir protocol\specs
+dir protocol\changes\archive</code></pre>
+  <p>You want <code>protocol/specs/catalog/spec.md</code> (living truth) and a dated folder under <code>archive/</code>. The open change folder should be gone.</p>
+  <div class="behind">
+    <div class="behind-title">What archive just did</div>
+    <p>
+      You asked the model to copy the new rules into the main spec. That works until two rules share a vague title.
+      OpenSpec’s archive command does that copy with a program, so ADDED, MODIFIED, and REMOVED are followed exactly.
+      You would not want a tax rule copied “creatively.”
+    </p>
+  </div>
+
+  <h2>8. Prove the spec is memory</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Brand-new chat. Do not mention what you built. Ask:</p>
+  </div>
+  <pre><code>Using only files under protocol/specs/, what can a ShopLite shopper do today?
+Do not invent features that are not in those files.</code></pre>
+  <p>
+    If the answer is “see a list of products with prices,” the protocol worked. If the agent invents checkout, it
+    did not stay inside <code>protocol/specs/</code> — that is what OpenSpec’s spec suite is for, at larger scale.
+  </p>
+
+  <h2>9. Optional second change (same commands)</h2>
+  <p>
+    You already have a living spec under <code>protocol/specs/catalog/</code>. This second loop is tiny on purpose:
+    a footer line “Nile Retail · teaching store.” You will reuse the same three commands. The only new idea is
+    archive <em>appending</em> an ADDED requirement onto an existing spec, instead of creating the file from scratch.
+  </p>
+  <div class="think">
+    <div class="think-title">Think first — skip the protocol?</div>
+    <p>
+      A footer that is only copy, with no shopper behavior, is a fair “just edit <code>index.html</code>” call.
+      Making that call is part of the skill. If you skip, add the line by hand, say why, and jump to section 10.
+      If you want muscle memory on propose → review → apply → archive, follow the commands below in a
+      <strong>new chat</strong> each time (clean context, same as sections 5–7).
+    </p>
+  </div>
+
+  <h3>9.1 Propose — Markdown only</h3>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New chat. Run propose. Then <strong>do not apply</strong> until you have opened the generated Markdown.</p>
+  </div>
+  <pre><code>/homespec-propose add-store-footer
+
+Add a footer to ShopLite's existing index.html.
+
+In scope:
+- A footer line that reads exactly: Nile Retail · teaching store
+- Visible on the same catalog page the shopper already opens
+
+Out of scope:
+- New pages, links, copyright years, social icons
+- Search, cart, checkout, accounts, FastAPI, databases
+- Changing product names or prices
+
+Use capability name catalog (this is more catalog page behavior, not a new capability).
+Change name add-store-footer.
+Stop after the Markdown artifacts. No application code yet. Do not edit index.html.</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task — review like a teammate</div>
+    <p>Open the folder the agent created. You should see:</p>
+  </div>
+  <pre><code>protocol/changes/add-store-footer/
+  proposal.md
+  design.md
+  tasks.md
+  specs/catalog/spec.md</code></pre>
+  <p>Check:</p>
+  <ul>
+    <li>Proposal lists search/cart/new pages as out of scope.</li>
+    <li>The delta is <code>## ADDED Requirements</code> (a new footer rule). It must not rewrite or delete the product-listing requirement you already archived.</li>
+    <li>Spec describes shopper-visible text, not “use a <code>&lt;footer&gt;</code> tag” as the requirement.</li>
+    <li>Spec has at least one Given / When / Then scenario.</li>
+    <li>The spec includes “Test for each scenario”: one automated test per scenario, and the test name includes the scenario title.</li>
+    <li>Tasks include a checkbox to write that test. Propose still does not write the test. Apply does.</li>
+    <li>Tasks are small checkboxes (add footer, keep the three products, do not add search).</li>
+    <li><code>index.html</code> is still unchanged. If the agent edited it, undo that and remind it: propose writes Markdown only.</li>
+  </ul>
+  <p>A healthy spec delta looks like this (yours need not match word for word):</p>
+  <pre><code># Delta for catalog
+
+## ADDED Requirements
+
+### Requirement: Store footer
+The home page SHALL show a footer line that reads "Nile Retail · teaching store".
+
+#### Scenario: Shopper reaches the bottom of the page
+- GIVEN the shopper opens index.html
+- WHEN the page has loaded
+- THEN the line "Nile Retail · teaching store" is visible
+- AND the existing products and ShopLite heading are still present
+
+### Requirement: Test for each scenario
+The project SHALL include one automated test for each scenario in this spec.
+The test name SHALL include the scenario title.
+The test SHALL fail when that scenario's THEN is not met.</code></pre>
+
+  <h3>9.2 Apply — now the agent may edit the page</h3>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New chat (clean context). Apply only this change.</p>
+  </div>
+  <pre><code>/homespec-apply add-store-footer</code></pre>
+  <p>When it finishes, refresh <code>index.html</code> in the browser. You should still see ShopLite and the three products, plus the new footer.</p>
+  <div class="checkpoint">
+    <div class="checkpoint-title">Manual check</div>
+    <ul>
+      <li>Footer text is exactly <code>Nile Retail · teaching store</code> (or the wording you approved in the spec).</li>
+      <li>The three products and prices did not change.</li>
+      <li><code>tasks.md</code> checkboxes are mostly ticked.</li>
+      <li>Still no search box, cart, or extra pages.</li>
+      <li><code>protocol/specs/catalog/spec.md</code> is still the <em>old</em> truth — apply does not merge. Archive does.</li>
+    </ul>
+  </div>
+
+  <h3>9.3 Archive — append the footer rule onto living truth</h3>
+  <p>
+    After the first change, “the home page lists products” already lives in <code>protocol/specs/catalog/spec.md</code>.
+    Archive should <strong>keep those requirements</strong> and append the footer requirement. If the agent replaces
+    the whole file and drops product listing, the protocol failed — put the old requirements back.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New chat, or the apply chat if it is still focused:</p>
+  </div>
+  <pre><code>/homespec-archive add-store-footer</code></pre>
+  <p>Then confirm:</p>
+  <pre><code>dir protocol\specs\catalog
+dir protocol\changes
+dir protocol\changes\archive</code></pre>
+  <p>
+    You want <code>protocol/specs/catalog/spec.md</code> to mention both products <em>and</em> the footer,
+    a new dated folder <code>protocol/changes/archive/YYYY-MM-DD-add-store-footer/</code>,
+    and no open <code>protocol/changes/add-store-footer/</code> folder.
+  </p>
+  <p>Open the living spec and check it now contains (order can vary):</p>
+  <ul>
+    <li>Product listing (from the first archive)</li>
+    <li>Store identity / teaching-store note (from the first archive)</li>
+    <li>Store footer (just merged)</li>
+  </ul>
+  <div class="behind">
+    <div class="behind-title">The second archive should add, not replace</div>
+    <p>
+      The first archive created <code>protocol/specs/catalog/spec.md</code>. This one should add the footer rule onto that file.
+      The old product-listing rule stays. If the model rewrote the file and dropped a requirement, you just saw why a careful copy matters.
+      A vague title can overwrite the wrong rule, including a tax rule later.
+    </p>
+  </div>
+
+  <h3>9.4 Prove the spec grew</h3>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Brand-new chat. Do not mention the footer. Ask:</p>
+  </div>
+  <pre><code>Using only files under protocol/specs/, what can a ShopLite shopper do today?
+Do not invent features that are not in those files.</code></pre>
+  <p>
+    You now want two answers, not one: see products with prices, <em>and</em> see the Nile Retail teaching-store
+    footer. If the agent only remembers the first change, archive did not merge. If it invents checkout, it left
+    <code>protocol/specs/</code>.
+  </p>
+
+  <h2>10. What still hurts (why OpenSpec exists)</h2>
+  <p>You already have a working spec-driven store. A weekend protocol. Pain you will not want to maintain:</p>
+  <ul>
+    <li>Every AI tool wants commands in a different directory.</li>
+    <li>Teammates will “improve” the three Markdown files until propose starts writing code again.</li>
+    <li>Archive merge is only as careful as today’s model.</li>
+    <li>No <code>list</code> / <code>validate</code> / dashboard of open changes.</li>
+    <li>No explore command, no review gates for huge features, no shared dialect across 30 tools.</li>
+  </ul>
+  <p>The painful part is keeping those files tidy across tools. You already understand the idea, because you just ran it.</p>
+
+  <h2>11. Introducing OpenSpec</h2>
+  <p>
+    <a href="https://github.com/Fission-AI/OpenSpec" target="_blank" rel="noopener">OpenSpec</a> is HomeSpec with a
+    CLI and generated skills. You will keep <code>protocol/</code> as a souvenir. Lesson 02 adds
+    <code>openspec/</code> beside it.
+  </p>
+  <div class="behind">
+    <div class="behind-title">You already know every moving part</div>
+    <table>
+      <thead>
+        <tr><th>What you just built</th><th>OpenSpec’s name</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>protocol/specs/</code></td><td><code>openspec/specs/&lt;capability&gt;/spec.md</code></td></tr>
+        <tr><td><code>protocol/changes/add-hello-catalog/</code></td><td><code>openspec/changes/&lt;name&gt;/</code></td></tr>
+        <tr><td><code>proposal.md</code></td><td><code>proposal.md</code></td></tr>
+        <tr><td><code>specs/catalog/spec.md</code> inside the change</td><td>delta specs (ADDED / MODIFIED / REMOVED)</td></tr>
+        <tr><td><code>design.md</code> + <code>tasks.md</code></td><td>the same filenames</td></tr>
+        <tr><td><code>/homespec-propose</code></td><td><code>/opsx-propose</code> (Cursor) / <code>/opsx:propose</code> (Claude Code)</td></tr>
+        <tr><td><code>/homespec-apply</code></td><td><code>/opsx-apply</code></td></tr>
+        <tr><td><code>/homespec-archive</code></td><td><code>/opsx-archive</code> (plus a real merge CLI)</td></tr>
+        <tr><td>Files you pasted into <code>.cursor/commands/</code></td><td>Files <code>openspec init</code> generates for 30+ tools</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>These are the habits I want you to keep:</p>
+  <pre><code>You can go back and edit.
+You can change the plan when you learn something.
+Keep each change small.
+The same folders work on a new shop and on a shop that already exists.
+The same idea works for one person and for a team.</code></pre>
+  <p>
+    OpenSpec drafts the Markdown. It does not replace your reading. If you accept a bad plan, apply builds a bad page, and the tests only prove that bad plan.
+  </p>
+
+  <div class="think">
+    <div class="think-title">Think</div>
+    <p>
+      If the OpenSpec website disappeared tomorrow, could you keep shipping with HomeSpec? You just did. Later lessons
+      show what the package adds (validation, explore, continue/ff, portable skills). You will never need to treat
+      slash commands as magic: you have written them.
+    </p>
+  </div>
+
+  <h2>12. How the rest of the course uses this</h2>
+  <table>
+    <thead>
+      <tr><th>Lesson</th><th>What you already felt in HomeSpec</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>02 Init</td><td>Someone else writes the command files and adds a CLI</td></tr>
+      <tr><td>03 Concepts</td><td>Names for specs, deltas, archive</td></tr>
+      <tr><td>04 Catalog</td><td>The same cycle, on a richer FastAPI catalog</td></tr>
+      <tr><td>05–10</td><td>Explore, review, spec bugs, expanded gates, MODIFIED/REMOVED — extra moves on the same board</td></tr>
+    </tbody>
+  </table>
+
+  <h2>13. Reflection</h2>
+  <div class="exercise">
+    <div class="exercise-title">Check your understanding</div>
+    <ol>
+      <li>What two folders did you create under <code>protocol/</code>, and what is each for?</li>
+      <li>Why did propose refuse to write <code>index.html</code>?</li>
+      <li>After archive, where does “the home page lists products” live?</li>
+      <li>What is a slash-command file, in one sentence?</li>
+      <li>Name one thing OpenSpec will do that your three Markdown commands did not.</li>
+    </ol>
+    <p>Suggested answers:</p>
+    <ol>
+      <li><code>specs/</code> = current truth; <code>changes/</code> = in-flight work (plus <code>archive/</code>).</li>
+      <li>The command said stop after artifacts. Code during propose mixes guessing with the contract.</li>
+      <li><code>protocol/specs/catalog/spec.md</code> (and the running <code>index.html</code>).</li>
+      <li>A Markdown job description the editor loads when you type <code>/homespec-propose</code>.</li>
+      <li>Deterministic merge/validate, generated skills for many tools, explore/continue/verify, a shared dialect.</li>
+    </ol>
+  </div>
+
+  <div class="checkpoint">
+    <div class="checkpoint-title">Lesson 01 complete</div>
+    <p>
+      You implemented spec-driven development with three pasted commands and a handful of Markdown files, and you
+      shipped a tiny Amazon-like grid. Next: install OpenSpec in this same <code>shoplite</code> folder and see
+      <code>init</code> write the grown-up version of what you pasted today.
+    </p>
+  </div>
+
+  <div class="lesson-nav">
+    <a href="00-index.html">← Course home</a>
+    <a href="02-install-and-initialize.html">Next: 02 Install &amp; init →</a>
+  </div>
+</main>
+<script>
+(function () {
+  const COPY_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  const CHECK_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  function copyText(text, onDone) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(onDone).catch(fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      onDone();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("pre").forEach((pre) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "code-wrapper";
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "copy-btn";
+      btn.innerHTML = COPY_ICON + " Copy";
+      wrapper.appendChild(btn);
+
+      btn.addEventListener("click", () => {
+        const code = pre.querySelector("code");
+        const text = (code ? code.innerText : pre.innerText).trimEnd();
+        copyText(text, () => {
+          btn.innerHTML = CHECK_ICON + " Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.innerHTML = COPY_ICON + " Copy";
+            btn.classList.remove("copied");
+          }, 2000);
+        });
+      });
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

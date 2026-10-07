@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Why the Desk Needs a Flow</title>
+  <style>
+    :root {
+      --bg-gradient-start: #eef2ff;
+      --bg-gradient-mid: #f9fafb;
+      --bg-gradient-end: #fdf2ff;
+      --text-primary: #111827;
+      --text-heading: #0f172a;
+      --accent-blue: #2563eb;
+      --accent-green: #16a34a;
+      --accent-amber: #d97706;
+      --accent-red: #dc2626;
+      --card-bg: #ffffff;
+      --border-subtle: rgba(148, 163, 184, 0.35);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65; margin: 0; padding: 0;
+      background: radial-gradient(circle at top left, var(--bg-gradient-start) 0, var(--bg-gradient-mid) 40%, var(--bg-gradient-end) 100%);
+      color: var(--text-primary);
+    }
+    main {
+      max-width: 980px; margin: 2rem auto 3rem; padding: 2.5rem 2rem 3rem;
+      background-color: var(--card-bg); border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08), 0 0 0 1px var(--border-subtle);
+    }
+    h1 {
+      font-size: 2.05rem; margin: 0 0 1rem; letter-spacing: -0.03em; text-align: center; color: var(--text-heading);
+      padding: 1rem 1.5rem; border-radius: 999px; background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12), 0 0 0 1px var(--border-subtle);
+    }
+    h2 { font-size: 1.5rem; margin-top: 2.25rem; margin-bottom: 0.5rem; border-bottom: 2px solid rgba(37, 99, 235, 0.18); padding-bottom: 0.35rem; color: var(--text-heading); }
+    h3 { font-size: 1.18rem; margin-top: 1.75rem; color: var(--text-heading); }
+    p { margin: 0.5rem 0 0.75rem; }
+    code { font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace; background-color: #f3f4ff; padding: 0.12rem 0.3rem; border-radius: 4px; font-size: 0.93em; color: #1d4ed8; }
+    pre { background: linear-gradient(145deg, #020617, #0b1120); color: #e5e7eb; padding: 1rem 1.1rem; border-radius: 10px; overflow-x: auto; font-size: 0.86rem; line-height: 1.5; margin: 0.75rem 0 1.5rem; border: 1px solid rgba(15, 23, 42, 0.6); }
+    pre code { background: none; padding: 0; color: inherit; }
+    .note, .exercise, .warning, .tip, .student-edit { padding: 0.9rem 1.1rem; margin: 1rem 0 1.5rem; border-radius: 10px; font-size: 0.95rem; border: 1px solid transparent; }
+    .note { border-left: 4px solid var(--accent-blue); background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%); border-color: rgba(37, 99, 235, 0.4); }
+    .exercise { border-left: 4px solid var(--accent-green); background: linear-gradient(135deg, #ecfdf3, #f0fdf4); border-color: rgba(22, 163, 74, 0.4); }
+    .warning { border-left: 4px solid var(--accent-red); background: linear-gradient(135deg, #fef2f2, #fee2e2); border-color: rgba(220, 38, 38, 0.4); }
+    .tip { border-left: 4px solid var(--accent-amber); background: linear-gradient(135deg, #fffbeb, #fef3c7); border-color: rgba(217, 119, 6, 0.4); }
+    .student-edit { border-left: 4px solid var(--accent-green); background: linear-gradient(135deg, #f0fdf4, #ecfdf5); border-color: rgba(22, 163, 74, 0.45); }
+    .exercise-title, .label { font-weight: 650; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.78rem; }
+    .exercise-title { color: #166534; }
+    .label-green { color: #166534; }
+    ol, ul { padding-left: 1.4rem; }
+    li { margin: 0.3rem 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.93rem; }
+    table th { background: linear-gradient(135deg, #dbeafe, #e0f2fe); color: var(--text-heading); font-weight: 600; padding: 0.7rem 0.9rem; text-align: left; border-bottom: 2px solid var(--accent-blue); }
+    table td { padding: 0.7rem 0.9rem; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+    table tr:hover { background-color: #f8fafc; }
+    .subtitle { text-align: center; color: #64748b; margin-bottom: 1.5rem; font-size: 1.05rem; }
+    .file-tree { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem 1.1rem; margin: 0.75rem 0 1.5rem; font-family: "Fira Code", Menlo, Monaco, Consolas, monospace; font-size: 0.86rem; white-space: pre; overflow-x: auto; line-height: 1.55; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Why the Desk Needs a Flow</h1>
+  <p class="subtitle">The team can write an opinion. It cannot decide that this file should never have been given to the team.</p>
+
+  <div class="note">
+    <strong>How to follow this page.</strong>
+    You already have a chat that sends every claim to the crew. On this page you only add one new Python file and run it. Do not change the chat. Copy <code>claim_route.py</code> exactly. When the script prints the three labels below, the step has worked. New words are explained in parentheses the first time they appear.
+  </div>
+
+  <h2>The story, in plain words</h2>
+  <p>You are still the <strong>claims officer</strong> (the human at the keyboard) at Suraksha, the made-up car insurer. A <strong>claim</strong> is one accident file. The <strong>crew</strong> (the AI team: the coverage officer who writes the first reading, and the brief writer who turns that reading into a short note) already runs for every question. A <strong>senior examiner</strong> (a person outside the chat) is still the only one who can pay or refuse.</p>
+  <p>That was the right shape while you were teaching the crew to read. It is the wrong shape for a claims desk. Open CLM-10021 and ask whether the loss is covered. You will wait while two agents discuss a parking scrape of ₹18,000 whose papers are already complete. Open CLM-10044 and they will write an opinion while the police report is still missing. A person at the desk would not do either of those things. A small complete file can be described by a checklist. A file with a missing paper should wait. Only a hard file should wake the crew.</p>
+
+  <h2>What a crew can and cannot do</h2>
+  <p>A <strong>crew</strong> is a team with a list of tasks. You choose how the team works.</p>
+  <p>In a <strong>sequential</strong> crew (tasks run in the order they are written) the agent named on a task does that task. The second task can read the first because its <code>context</code> (the list of earlier answers it may read) lists the first task's name.</p>
+  <p>In a <strong>hierarchical</strong> crew (a manager hands each task to a specialist), CrewAI adds a Crew Manager. The tasks are still the tasks you wrote. The manager does not look at the file and say "do not start."</p>
+  <p>Either way, <code>kickoff</code> (the command that starts the crew) means: do this work. There is no setting on the crew that means "if the police report is missing, do nothing." You can tell an agent, inside a task, to mention a missing paper. The agent still ran. The model was still called. The brief was still written. The desk has already spent the time.</p>
+
+  <div class="note">
+    <strong>A flow is the procedure around the team.</strong>
+    A flow is ordinary Python that runs before any agent. It reads the file and chooses a door. One door can call the crew. The other doors return a sentence and stop. The crew stays what it is. The flow decides whether the crew is needed.
+  </div>
+
+  <h2>The three doors</h2>
+  <p>The choice is not a judgement the model should invent. It is already written in <code>suraksha_claims.db</code>, in the <code>policies</code> table. A <strong>policy row</strong> is the one database line for that claim. <code>setup_claims_db.py</code> put these columns there: <code>papers_on_file</code> (which documents are present), <code>rules_mark</code> (a review flag; <code>REVIEW</code> means a person should read the file), <code>injury</code> (whether anyone was hurt), <code>estimate_inr</code> (the garage bill in rupees), and <code>simple_pay_limit_inr</code> (the largest bill a checklist may pass; on every row here that limit is 25000, which is ₹25,000).</p>
+  <p>Read the row in this order. The order is the rule. A later line must not override an earlier one.</p>
+  <ol>
+    <li><strong>Wait for papers</strong>, label <code>wait_for_papers</code>. If <code>papers_on_file</code> contains the words <code>NOT ON FILE</code>, stop. CLM-10044 says the police report is not on file. The estimate is ₹22,000, which is under the limit, and that does not matter. A missing paper wins.</li>
+    <li><strong>Ask the crew</strong>, label <code>ask_the_crew</code>. If <code>rules_mark</code> contains <code>REVIEW</code>, or if <code>estimate_inr</code> is greater than <code>simple_pay_limit_inr</code>, the file is not a rules file. CLM-20481 is marked REVIEW and the estimate is ₹1,85,000. Exclusion 4 (the contract sentence about a driver with no valid licence), circular CL-17 (the office rule: a licence that expired within 30 days is sent to a senior examiner, not rejected on the spot), the disagreeing reports, and the Highway Motors notes are why a coverage officer has to read it. The door only decides to call them. It does not write the opinion.</li>
+    <li><strong>Settle by rule</strong>, label <code>settle_by_rule</code>. If the injury is <code>none</code> and the estimate is within the limit, a rules check (a fixed checklist, with no AI opinion) can describe the file. CLM-10021 is that file: complete papers, no injury, ₹18,000, licence effective (the driver was allowed to drive), <code>rules_mark</code> none. The message may say a rules settlement can be prepared (the file is eligible for the company's ordinary small-claim process). It must not say the money has moved.</li>
+    <li>Anything that matches none of those, including a claim id with no row, uses <code>ask_the_crew</code>. When you are unsure, a person and the crew should see the file. A silent rules payment should not.</li>
+  </ol>
+
+  <div class="warning">
+    <strong>Do not ask an agent which door to open.</strong>
+    An agent is for wording that has to be interpreted: Exclusion 4 beside CL-17, a customer report beside a police report. "Does this text contain NOT ON FILE?" is a question Python answers exactly. If you spend a model call on it, the agent can misread the row, and you have lost the reason for having a rule.
+  </div>
+
+  <h2>Where a flow will sit</h2>
+  <p>You are not building the flow on this page. You are proving the three labels, because a flow is only as good as the choice it makes.</p>
+  <p>When you do build it, the shape is a Python class (a blueprint with methods). One method is the start: it reads the claim and stores the label. A router method (the method that returns one short label) returns that label and nothing else. Three listener methods (methods that run only when their label comes back) wait, each for one label. Kickoff runs the start, then the router, then only the listener whose label came back. The other two listeners do not run. The value kickoff returns is whatever that one listener returns.</p>
+  <p>Two details matter so the class does not surprise you later.</p>
+  <ul>
+    <li>The listener's Python name must not be the same as the label it waits for. If a method is named <code>ask_the_crew</code> and it also listens for <code>ask_the_crew</code>, finishing the method emits that name again, and the method starts itself. CrewAI stops that loop after a fixed number of calls. Name the method for the work, such as <code>handle_complex_claim</code>, and keep the label as <code>ask_the_crew</code>.</li>
+    <li>The chat must keep calling <code>respond</code>. Later, <code>respond</code> will call the flow, and only the complex door will call the crew. If the flow calls <code>respond</code>, and <code>respond</code> calls the flow, they call each other forever. The crew runner and the desk procedure have to be two functions.</li>
+  </ul>
+  <p>None of that is wired today. The chat still calls the crew for every claim. You should see that contrast with your own run.</p>
+
+  <h2>Where you are working</h2>
+  <p>Stay inside <code>suraksha_claims_desk</code>. If the chat is running, stop it with Ctrl+C. On Windows PowerShell, set this once in that terminal:</p>
+  <pre><code>$env:PYTHONUTF8="1"</code></pre>
+  <p>Leave <code>crew.jsonc</code>, the agent files, <code>desk.py</code>, and <code>app.py</code> as they are. If the database is missing, create it first:</p>
+  <pre><code>uv run python setup_claims_db.py</code></pre>
+
+  <h2>Step 1: Read the row and name the door</h2>
+  <p>In this step you write a small Python function that reads one policy row and prints one label. It does not call the AI. Create <code>claim_route.py</code> next to <code>desk.py</code> and paste the block below exactly. A <strong>flow</strong> (a later procedure that can refuse to start the crew) is not built on this page. This file is the decision that procedure will trust.</p>
+  <div class="student-edit">
+    <div class="label label-green">Create claim_route.py</div>
+    <p>Save this file in the project folder, next to <code>desk.py</code>. It only reads SQLite. It does not import CrewAI and it does not call a model.</p>
+  </div>
+  <pre><code>import sqlite3
+from pathlib import Path
+
+DB_PATH = Path(__file__).resolve().parent / "suraksha_claims.db"
+
+
+def policy_row(claim_id: str) -> sqlite3.Row | None:
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        return conn.execute(
+            "SELECT * FROM policies WHERE claim_id = ?",
+            (claim_id.strip().upper(),),
+        ).fetchone()
+
+
+def route_claim(claim_id: str) -&gt; str:
+    """Choose a door from the policy row. Do not call a model."""
+    row = policy_row(claim_id)
+    if row is None:
+        return "ask_the_crew"
+
+    papers = (row["papers_on_file"] or "").upper()
+    mark = (row["rules_mark"] or "").upper()
+    injury = (row["injury"] or "").strip().lower()
+    estimate = int(row["estimate_inr"])
+    limit = int(row["simple_pay_limit_inr"])
+
+    if "NOT ON FILE" in papers:
+        return "wait_for_papers"
+    if "REVIEW" in mark or estimate &gt; limit:
+        return "ask_the_crew"
+    if injury == "none" and estimate &lt;= limit:
+        return "settle_by_rule"
+    return "ask_the_crew"
+
+
+if __name__ == "__main__":
+    for claim_id in ("CLM-10021", "CLM-10044", "CLM-20481"):
+        row = policy_row(claim_id)
+        print(claim_id, route_claim(claim_id))
+        print("  papers:", row["papers_on_file"])
+        print("  rules_mark:", row["rules_mark"])
+        print("  estimate:", row["estimate_inr"], "limit:", row["simple_pay_limit_inr"])
+        print()</code></pre>
+  <h2>Step 2: Run the three files</h2>
+  <p>In this step you check the three labels. Stay inside <code>suraksha_claims_desk</code>. You should see exactly the three labels in the list under the command. If a label is different, stop and use the table at the end. Do not continue to the chat until these three match.</p>
+  <pre><code>uv run python claim_route.py</code></pre>
+  <p>You should see exactly these labels:</p>
+  <ul>
+    <li>CLM-10021 <code>settle_by_rule</code></li>
+    <li>CLM-10044 <code>wait_for_papers</code></li>
+    <li>CLM-20481 <code>ask_the_crew</code></li>
+  </ul>
+  <p>Under each label, the printout shows the paper sentence, the rules mark, and the two amounts. Check them against the order above. CLM-10044 is under the money limit and still waits, because the paper line is first. CLM-10021 does not contain <code>NOT ON FILE</code>. Its paper sentence says a police report is not required. Those are different facts.</p>
+
+  <h2>Step 3: See that the chat has not learned this yet</h2>
+  <p>In this step you confirm that the chat still calls the crew for the simple file. That is expected. The new file is not connected yet. Start the chat, ask about CLM-10021, see the crew start, then stop the chat. Do not edit <code>desk.py</code> on this page.</p>
+  <pre><code>uv run streamlit run app.py</code></pre>
+  <p>Select CLM-10021 and ask whether the loss is covered. The terminal still shows the crew starting. You still get a coverage opinion and an examiner brief. Records opened can still name Policy Record. The route function is sitting in a file the chat does not call. That gap is the point. A correct label does not change the desk until <code>respond</code> uses it.</p>
+  <p>Stop the chat with Ctrl+C when you have seen the crew start for the simple file.</p>
+
+  <h2>What just happened</h2>
+  <div class="file-tree">Policy row in suraksha_claims.db
+        │
+        ▼
+route_claim reads papers, then the review mark and the amounts
+        │
+        ├── wait_for_papers     CLM-10044
+        ├── ask_the_crew        CLM-20481
+        └── settle_by_rule      CLM-10021
+
+The chat still ignores this function and always runs the crew.</div>
+  <ul>
+    <li>A crew executes the tasks it was given. Sequential order and a manager both assume the tasks should run.</li>
+    <li>A flow is the procedure that can refuse to start the crew. You have not built that class yet. You have built the decision it will trust.</li>
+    <li>The decision is a fixed order over columns you can see. Missing papers win over a small estimate. REVIEW, or an estimate over ₹25,000, means the crew. A complete small file with no injury can be described by a rules check.</li>
+    <li><code>claim_route.py</code> does not pay anyone. <code>settle_by_rule</code> means "this file is eligible for a rules settlement," not "the money has moved."</li>
+  </ul>
+
+  <h2>If something goes wrong</h2>
+  <table>
+    <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td>No such table, or the database file is missing</td><td>From <code>suraksha_claims_desk</code>, run <code>uv run python setup_claims_db.py</code>. The file <code>suraksha_claims.db</code> must sit next to <code>claim_route.py</code>.</td></tr>
+      <tr><td>CLM-10044 prints <code>settle_by_rule</code></td><td>The <code>NOT ON FILE</code> test is below the estimate test, or the paper text was changed. Missing papers have to be the first check. The words are uppercase in the comparison, so the row may use any case.</td></tr>
+      <tr><td>CLM-10021 prints <code>wait_for_papers</code></td><td>The test is too wide. "A police report is not required" must not count as <code>NOT ON FILE</code>. Search for that exact phrase.</td></tr>
+      <tr><td>CLM-20481 prints <code>settle_by_rule</code></td><td>The REVIEW check or the amount check is missing. 185000 is greater than 25000, and <code>rules_mark</code> begins with REVIEW.</td></tr>
+      <tr><td>The chat already skips the crew</td><td>It should not. This page does not change <code>desk.py</code>. If the chat skips the crew, <code>respond</code> was edited. Put the crew call back until you are ready to wrap it in a flow.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="exercise">
+    <div class="exercise-title">Try this on your own</div>
+    <ol>
+      <li>In a Python prompt, or by adding one print, call <code>route_claim("clm-10044")</code> in lower case. The function strips and uppercases the id, so the label should still be <code>wait_for_papers</code>.</li>
+      <li>Call <code>route_claim("CLM-99999")</code>. There is no row. The label should be <code>ask_the_crew</code>, not a rules settlement.</li>
+      <li>Read the paper sentence for CLM-10021 out loud and say why it is not the same test as CLM-10044. Then leave the chat able to call the crew, because the route file is not connected yet.</li>
+    </ol>
+  </div>
+</main>
+</body>
+</html>

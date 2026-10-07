@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Using OpenAI Chatbot – Hands-on Guide (Classroom)</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2, h3 {
+      color: #0f172a;
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .note, .exercise {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .exercise-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #166534;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+  </style>
+</head>
+<body>
+<main>
+
+  <h1>Using OpenAI Chatbot – Hands-on Guide (Classroom)</h1>
+  <p>
+    This guide walks you step by step through using the OpenAI Python client to send prompts,
+    maintain conversation history, and finally build a simple chatbot UI with Gradio.
+    You should actively type or copy each code block into your own Jupyter notebook and execute it.
+  </p>
+
+  <div class="note">
+    <strong>How to use this guide</strong>
+    <ol>
+      <li>Open Jupyter (Jupyter Notebook or JupyterLab) on your machine.</li>
+      <li>Create a new notebook, for example: <code>01-using-openai-chatbot.ipynb</code>.</li>
+      <li>Place this HTML guide side-by-side with your notebook (split screen or a second monitor).</li>
+      <li>Whenever you see a section that says “In your Jupyter notebook, create a new code cell…”, add a <strong>new code cell</strong>, then <strong>copy or type the code</strong> and run it.</li>
+      <li>Carefully read the explanation around each code block and observe the outputs in your notebook as you go.</li>
+    </ol>
+  </div>
+
+  <h2>1. Install and Configure the OpenAI Client</h2>
+
+  <p>
+    We will start by installing the OpenAI client library and related tools.
+    These packages allow your Python code to talk to the OpenAI API.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      In your Jupyter notebook, create a <strong>new code cell</strong>, copy or type the following command,
+      and then execute the cell to install the required packages.
+    </p>
+  </div>
+
+  <pre><code>pip install openai python-dotenv</code></pre>
+
+  <h3>1.1 Your API key (provided by your instructor)</h3>
+
+  <p>
+    Your instructor will give you an API key for this course so you can call the OpenAI API from your code.
+    Treat this key like a password: do not share it with classmates or anyone else, post it online, or commit it to public repositories.
+  </p>
+
+  <ul>
+    <li>
+      Put the key in a <code>.env</code> file in your project folder (next to your notebook), on a line like
+      <code>OPENAI_API_KEY=your_api_key_here</code>, using the exact value your instructor gave you.
+    </li>
+    <li>If you are working on Google Colab, create a Secret named <code>OPENAI_API_KEY</code> and paste your key as the value.</li>
+  </ul>
+
+  <h3>1.2 Load Your API Key from Environment Variables</h3>
+
+  <p>
+    A common pattern is to store the API key in an environment variable (for example in a <code>.env</code> file)
+    and load it into your Python process. We will use <code>python-dotenv</code> to do this.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      In your Jupyter notebook, create a <strong>new code cell</strong>, copy or type the following code,
+      and then execute the cell.
+    </p>
+  </div>
+
+  <pre><code>from dotenv import load_dotenv
+
+load_dotenv()</code></pre>
+
+  <p>
+    Make sure your <code>.env</code> file (if you use one) contains a line like
+    <code>OPENAI_API_KEY=your_api_key_here</code>. After running <code>load_dotenv()</code>,
+    the key will be available as an environment variable.
+  </p>
+
+  <h2>2. Calling the Chat Completions API</h2>
+
+  <p>
+    Next, we will send a minimal request from Python: a system message (optional behavior instructions) and
+    a single user message. Running this shows how the <code>messages</code> list is structured and what the API returns.
+    Later you will extend this to full back-and-forth conversations.
+  </p>
+
+  <h3>2.1 Call the Chat Completions API from Python</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      In your Jupyter notebook, create a <strong>new code cell</strong>, copy or type the following code,
+      and then execute the cell. Make sure you have already run the environment setup cells above.
+    </p>
+  </div>
+
+  <pre><code>from openai import OpenAI
+client = OpenAI()
+
+response = client.chat.completions.create(
+  model="gpt-4.1-mini",
+  messages=[
+    {
+      "role": "system",
+      "content": "Give your responses in a funny way . Limit your responses to atmost 3 sentences"
+    },
+    {
+      "role": "user",
+      "content": "Who is elon musk?"
+    }
+  ],
+)
+response</code></pre>
+
+  <p>
+    When you run this cell, you should see a full response object.
+    Next, we will extract the text of the assistant's reply.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      In your Jupyter notebook, create a <strong>new code cell</strong>, copy or type the following line,
+      and then execute the cell to print the assistant's message.
+    </p>
+  </div>
+
+  <pre><code>response.choices[0].message.content</code></pre>
+
+  <h2>3. Helper Function for Chat Completions</h2>
+
+  <p>
+    It is convenient to wrap the chat completions call in a helper function that takes a list of messages
+    and returns the assistant's reply text. We will define such a function next.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      In your Jupyter notebook, create a <strong>new code cell</strong>, copy or type the following function definition,
+      and then execute the cell.
+    </p>
+  </div>
+
+  <pre><code>def get_completion_from_messages(messages, model="gpt-4.1-mini", temperature=0):
+    response = client.chat.completions.create(
+        model=model,
+        messages=messages,
+        temperature=temperature, # this is the degree of randomness of the model's output
+    )
+    # print(str(response.choices[0].message))
+    return response.choices[0].message.content</code></pre>
+
+  <h2>4. Maintaining Conversation State with a Message List</h2>
+
+  <p>
+    You can keep track of a conversation by maintaining a Python list of messages and passing it
+    to the helper function. Each new user message is appended to the list before calling the model.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      In your Jupyter notebook, create a <strong>new code cell</strong>, copy or type the following code,
+      and then execute the cell. Observe how the model remembers your name.
+    </p>
+  </div>
+
+  <pre><code>messages =[]
+
+messages.append({'role':'user', 'content': "My Name is SivaPrasad"})
+
+get_completion_from_messages(messages)
+
+messages.append({'role':'user', 'content': "What is my name"})
+
+get_completion_from_messages(messages)</code></pre>
+
+  <p>
+    You should see that the second response correctly remembers the name from the first message,
+    demonstrating how conversation history works.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Now try using a system message to control the behavior of the assistant.
+      In your Jupyter notebook, create a <strong>new code cell</strong>, copy or type the following code,
+      and then execute the cell.
+    </p>
+  </div>
+
+  <pre><code>messages=[
+    {
+      "role": "system",
+      "content": "You are a funny ai . Give funny response"
+    },
+    {
+      "role": "user",
+      "content": "What is 2+5"
+    }
+  ]
+
+get_completion_from_messages(messages=messages)</code></pre>
+
+  <p>
+    Notice how the tone of the answer changes based on the system message.
+  </p>
+
+  <h2>5. Building a Simple Chatbot UI with Gradio</h2>
+
+  <p>
+    Finally, we will wrap our model calls inside a simple web-based chat interface using
+    the <code>gradio</code> library. This allows you (and your users) to chat with the model
+    through a browser.
+  </p>
+
+  <h3>5.1 Install Gradio</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      In your Jupyter notebook, create a <strong>new code cell</strong>, copy or type the following command,
+      and then execute the cell to install Gradio.
+    </p>
+  </div>
+
+  <pre><code>pip install gradio</code></pre>
+
+  <h3>5.2 Create the Gradio Chat Interface</h3>
+
+  <p>
+    We will define a <code>predict</code> function that converts the Gradio chat history into the
+    message format expected by our <code>get_completion_from_messages</code> helper, and then
+    use <code>gr.ChatInterface</code> to launch the UI.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      In your Jupyter notebook, create a <strong>new code cell</strong>, copy or type the following code,
+      and then execute the cell. This will launch a Gradio chatbot in a new tab or inline (depending on your environment).
+    </p>
+  </div>
+
+  <pre><code>import gradio as gr
+
+def predict(message,history):
+
+    print("Message:", message)
+    print("History:", history)
+
+    messages = []
+
+    for history_item in history:
+        messages.append(history_item)
+
+    messages.append({ "role": "user", "content": message   })
+
+
+
+    return get_completion_from_messages(messages)
+
+
+gr.ChatInterface(predict).launch(debug=True)</code></pre>
+
+  <p>
+    Once the interface is running, type a few prompts and observe how the chatbot responds.
+    When you are done, stop the Gradio server (for example, by interrupting the kernel in Jupyter).
+  </p>
+
+</main>
+</body>
+</html>
+

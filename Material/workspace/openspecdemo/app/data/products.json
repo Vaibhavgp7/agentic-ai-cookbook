@@ -1,0 +1,38 @@
+[
+  {
+    "id": "headphones",
+    "name": "Headphones",
+    "price_paise": 149900,
+    "description": "Over-ear headphones for everyday listening."
+  },
+  {
+    "id": "kettle",
+    "name": "Kettle",
+    "price_paise": 89900,
+    "description": "Compact electric kettle for boiling water."
+  },
+  {
+    "id": "notebook",
+    "name": "Notebook",
+    "price_paise": 24900,
+    "description": "Lined notebook for notes and lists."
+  },
+  {
+    "id": "coffee-beans",
+    "name": "Coffee Beans",
+    "price_paise": 59900,
+    "description": "Medium-roast coffee beans for home brewing."
+  },
+  {
+    "id": "usb-c-cable",
+    "name": "USB-C Cable",
+    "price_paise": 19900,
+    "description": "One-meter USB-C charging cable."
+  },
+  {
+    "id": "desk-lamp",
+    "name": "Desk Lamp",
+    "price_paise": 129900,
+    "description": "Adjustable LED lamp for a desk."
+  }
+]

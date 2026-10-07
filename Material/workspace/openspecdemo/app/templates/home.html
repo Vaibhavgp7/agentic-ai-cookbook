@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ShopLite</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <p class="brand">ShopLite</p>
+    <h1>Everyday essentials</h1>
+  </header>
+  <main>
+    {% if products %}
+    <ul class="catalog">
+      {% for product in products %}
+      <li class="product">
+        <h2><a href="/products/{{ product.id }}">{{ product.name }}</a></h2>
+        <p class="price">{{ product.price }}</p>
+        <p class="description">{{ product.description }}</p>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty">The catalog is empty.</p>
+    {% endif %}
+  </main>
+</body>
+</html>

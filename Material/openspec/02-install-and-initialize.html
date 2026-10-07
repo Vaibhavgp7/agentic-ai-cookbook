@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>02 · Install and Initialize – OpenSpec ShopLite</title>
+  <style>
+:root {
+  --ink: #0f172a;
+  --muted: #475569;
+  --accent: #1d4ed8;
+  --line: rgba(37, 99, 235, 0.18);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.65;
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+  color: #111827;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(15, 23, 42, 0.94);
+  color: #e5e7eb;
+  backdrop-filter: blur(8px);
+}
+
+.topbar-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0.7rem 1.25rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.topbar a {
+  color: #bfdbfe;
+  text-decoration: none;
+  font-size: 0.88rem;
+}
+
+.topbar a:hover { color: #fff; text-decoration: underline; }
+
+.brand {
+  font-weight: 700;
+  color: #fff !important;
+  letter-spacing: -0.02em;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+main {
+  max-width: 960px;
+  margin: 1.5rem auto 3rem;
+  padding: 2.25rem 2rem 3rem;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(148, 163, 184, 0.12);
+}
+
+h1 {
+  font-size: 2.05rem;
+  margin: 0 0 1.1rem;
+  letter-spacing: -0.03em;
+  text-align: center;
+  color: #0f172a;
+  padding: 1rem 1.4rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+  box-shadow:
+    0 10px 25px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(148, 163, 184, 0.35);
+}
+
+h2 {
+  font-size: 1.55rem;
+  margin-top: 2.15rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 0.35rem;
+  color: #0f172a;
+}
+
+h3 {
+  font-size: 1.2rem;
+  margin-top: 1.6rem;
+  color: #0f172a;
+}
+
+p { margin: 0.5rem 0 0.75rem; }
+
+code {
+  font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+  background-color: #f3f4ff;
+  padding: 0.12rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.95em;
+  color: #1d4ed8;
+}
+
+pre {
+  background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+  color: #e5e7eb;
+  padding: 2.25rem 4.75rem 1rem 1.1rem;
+  border-radius: 10px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+  margin: 0.75rem 0 1.5rem;
+  border: 1px solid rgba(15, 23, 42, 0.6);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.note, .exercise, .warn, .concept, .checkpoint, .behind, .think {
+  padding: 0.9rem 1.1rem;
+  margin: 1rem 0 1.5rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+}
+
+.note {
+  border-left: 4px solid #2563eb;
+  background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+  border-color: rgba(37, 99, 235, 0.4);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(191, 219, 254, 0.9);
+}
+
+.exercise {
+  border-left: 4px solid #16a34a;
+  background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+  border-color: rgba(22, 163, 74, 0.4);
+}
+
+.warn {
+  border-left: 4px solid #d97706;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: rgba(217, 119, 6, 0.4);
+}
+
+.concept {
+  border-left: 4px solid #7c3aed;
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+  border-color: rgba(124, 58, 237, 0.35);
+}
+
+.checkpoint {
+  border-left: 4px solid #0f766e;
+  background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+  border-color: rgba(15, 118, 110, 0.35);
+}
+
+.behind {
+  border-left: 4px solid #0e7490;
+  background: linear-gradient(135deg, #ecfeff, #cffafe);
+  border-color: rgba(14, 116, 144, 0.35);
+}
+
+.think {
+  border-left: 4px solid #c2410c;
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border-color: rgba(194, 65, 12, 0.35);
+}
+
+.exercise-title, .warn-title, .concept-title, .checkpoint-title, .behind-title, .think-title {
+  font-weight: 650;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+}
+
+.exercise-title { color: #166534; }
+.warn-title { color: #92400e; }
+.concept-title { color: #5b21b6; }
+.checkpoint-title { color: #115e59; }
+.behind-title { color: #155e75; }
+.think-title { color: #9a3412; }
+
+ol, ul { padding-left: 1.4rem; }
+li { margin: 0.25rem 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.95rem;
+}
+
+th, td {
+  border: 1px solid #e2e8f0;
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #eff6ff;
+  color: #0f172a;
+}
+
+tr:nth-child(even) td { background: #f8fafc; }
+
+.meta {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0 0 1.25rem;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.kicker {
+  text-align: center;
+  color: var(--muted);
+  margin-top: -0.35rem;
+  margin-bottom: 1.1rem;
+}
+
+.toc a { color: #1d4ed8; }
+
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.lesson-nav a {
+  color: #1d4ed8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.lesson-nav a:hover { text-decoration: underline; }
+
+.sample-output-title {
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+  color: #0f172a;
+}
+
+.code-wrapper { position: relative; }
+
+.copy-btn {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.5rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.55rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  color: #9ca3af;
+  font-family: system-ui, sans-serif;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  user-select: none;
+}
+
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #f9fafb;
+}
+
+.copy-btn.copied {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.45);
+}
+
+.progress {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.progress span {
+  display: block;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  background: #f1f5f9;
+  font-size: 0.82rem;
+  color: #334155;
+  text-align: center;
+}
+
+.progress span.done {
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 600;
+}
+
+.progress span.now {
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 700;
+}
+
+footer.site {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-bottom: 2rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.85rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.95rem 1rem;
+  background: #f8fafc;
+}
+
+.card h3 { margin-top: 0; font-size: 1.05rem; }
+.card a { color: #1d4ed8; font-weight: 650; text-decoration: none; }
+.card a:hover { text-decoration: underline; }
+.card p { margin: 0.35rem 0 0; font-size: 0.92rem; color: #475569; }
+
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="00-index.html">OpenSpec · ShopLite</a>
+    <nav>
+      <a href="00-index.html">Home</a>
+      <a href="01-why-spec-driven-development.html">01</a>
+      <a href="02-install-and-initialize.html">02</a>
+      <a href="03-core-concepts.html">03</a>
+      <a href="04-first-cycle-catalog.html">04</a>
+      <a href="05-explore-and-specify-search.html">05</a>
+      <a href="06-review-artifacts-cart.html">06</a>
+      <a href="07-apply-debug-checkout.html">07</a>
+      <a href="08-expanded-workflow-orders.html">08</a>
+      <a href="09-spec-evolution-inventory.html">09</a>
+      <a href="10-spec-management-and-beyond.html">10</a>
+    </nav>
+  </div>
+</div>
+
+<main>
+  <h1>02 · Install and Initialize</h1>
+  <p class="kicker">OpenSpec has two places you type. The terminal runs <code>openspec</code>. The chat runs <code>/opsx</code>. Lesson 01 was the homemade version of both.</p>
+  <div class="meta">
+    <span class="pill">Lesson 02 of 10</span>
+    <span class="pill">~50 minutes</span>
+    <span class="pill">Hands-on setup</span>
+  </div>
+
+  <div class="note">
+    <strong>What you will do</strong>
+    <ul>
+      <li>Install the OpenSpec CLI and verify Node.js.</li>
+      <li>Create the <code>shoplite</code> project folder.</li>
+      <li>Run <code>openspec init</code> and inspect what it wrote.</li>
+      <li>Learn where to type <code>openspec ...</code> vs <code>/opsx:...</code>.</li>
+    </ul>
+  </div>
+
+  <div class="behind">
+    <div class="behind-title">What init is actually doing</div>
+    <p>
+      In lesson 01 you made two things by hand: folders for specs and changes, and three instruction files so you would not paste the same prompt every time.
+      <code>npm install -g @fission-ai/openspec</code> puts the <code>openspec</code> command on your machine.
+      <code>openspec init</code> then does two jobs:
+    </p>
+    <ol>
+      <li>Creates <code>openspec/specs/</code> and <code>openspec/changes/</code>. They start empty. Those folders are the system.</li>
+      <li>Writes instruction files into your AI tool’s folder (<code>.cursor/</code>, <code>.claude/</code>, and so on). Those files are the same kind of instructions you pasted in lesson 01, written in the spelling that tool understands.</li>
+    </ol>
+    <p>
+      Nothing stays running in the background. The chat commands work because the editor read those files when it started.
+      That is why you reload the window. If the commands disappear later, <code>openspec update</code> writes the instruction files again so they match the version you installed.
+    </p>
+  </div>
+  <div class="think">
+    <div class="think-title">Think</div>
+    <p>
+      If you were not allowed to install OpenSpec, where would you put the “plan this change” instructions so Cursor still picked them up?
+      A file under <code>.cursor/</code> is enough. Init writes that file for you, and the matching file for Claude if you selected both tools.
+    </p>
+  </div>
+
+  <h2>1. Two places to type</h2>
+  <p>This is the mistake I see first. The terminal and the chat are not the same place.</p>
+  <table>
+    <thead>
+      <tr><th>Where</th><th>What you type</th><th>Examples</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Terminal</strong> (PowerShell, VS Code terminal, iTerm)</td>
+        <td><code>openspec ...</code></td>
+        <td><code>openspec init</code>, <code>openspec list</code>, <code>openspec view</code></td>
+      </tr>
+      <tr>
+        <td><strong>AI chat</strong> (Cursor, Claude Code, Copilot…)</td>
+        <td><code>/opsx:...</code> (or your tool’s spelling)</td>
+        <td><code>/opsx:propose</code>, <code>/opsx:apply</code>, <code>/opsx:archive</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <pre><code>        YOUR TERMINAL                         YOUR AI ASSISTANT'S CHAT
+   ┌──────────────────────┐               ┌──────────────────────────────┐
+   │  $ openspec init     │   installs    │  /opsx:propose add-catalog    │
+   │  $ openspec list     │  ──────────►  │  /opsx:apply                  │
+   │  $ openspec view     │   commands    │  /opsx:archive                │
+   └──────────────────────┘    &amp; skills   └──────────────────────────────┘
+        run openspec here                       run /opsx:* here</code></pre>
+  <p>
+    There is no extra program you have to leave running. Open the coding assistant the way you always do, and type the slash command in chat.
+    <code>openspec init</code> is what puts those chat commands into the tool.
+  </p>
+
+  <div class="warn">
+    <div class="warn-title">How you type slash commands</div>
+    <p>Canonical name in docs: <code>/opsx:propose</code></p>
+    <ul>
+      <li><strong>Cursor / GitHub Copilot:</strong> <code>/opsx-propose</code> (hyphen)</li>
+      <li><strong>Claude Code / Gemini CLI:</strong> <code>/opsx:propose</code> (colon)</li>
+      <li><strong>Amazon Q:</strong> <code>@opsx-propose</code></li>
+      <li><strong>Codex:</strong> <code>$openspec-propose</code></li>
+    </ul>
+    <p><code>openspec init</code> prints the spelling for the tools you selected. Trust that line. When in doubt, type <code>/opsx</code> and use autocomplete.</p>
+  </div>
+
+  <h2>2. Check Node.js</h2>
+  <p>OpenSpec requires <strong>Node.js 20.19.0 or higher</strong>.</p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>In a terminal, check your Node version.</p>
+  </div>
+  <pre><code>node --version</code></pre>
+  <p>If you see <code>v20.19.0</code> or greater, continue. If not, install a current LTS from <a href="https://nodejs.org" target="_blank" rel="noopener">nodejs.org</a> or your version manager (nvm, fnm, volta), then open a new terminal.</p>
+
+  <h2>3. Install the CLI</h2>
+  <p>The CLI is installed once per machine (per Node installation). It does not live inside one project.</p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Install OpenSpec globally with npm, then check the version.</p>
+  </div>
+  <pre><code>npm install -g @fission-ai/openspec@latest
+openspec --version</code></pre>
+  <p>A version number means the terminal can find the <code>openspec</code> command. pnpm and bun can install it too. If you use Yarn, use npm, pnpm, or bun for this global install. Newer Yarn does not keep a global install command.</p>
+
+  <div class="warn">
+    <div class="warn-title">Common issue: command not found</div>
+    <p>On Windows, the folder where npm puts global commands is sometimes missing from PATH. Run <code>npm bin -g</code>, add that folder to PATH, and open a new terminal. On macOS or Linux, install npm packages for your own user. You should not need <code>sudo</code> for this.</p>
+  </div>
+
+  <p>Optional: opt out of anonymous telemetry (command names and version only; no paths or source).</p>
+  <pre><code>openspec config set telemetry.enabled false</code></pre>
+  <p>Environment alternatives: <code>OPENSPEC_TELEMETRY=0</code> or <code>DO_NOT_TRACK=1</code>.</p>
+
+  <h2>4. Continue in the ShopLite project from lesson 01</h2>
+  <p>
+    You already created <code>shoplite</code> with HomeSpec (<code>protocol/</code> and <code>/homespec-*</code> commands).
+    Stay in that folder. OpenSpec will add <code>openspec/</code> and <code>/opsx-*</code> beside what you built by hand —
+    that comparison is the point. If you skipped lesson 01, create the folder now.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>From a terminal, enter the existing project (create it only if it is missing), then initialize git if you have not.</p>
+  </div>
+  <pre><code>cd shoplite
+git init</code></pre>
+  <p>Then create <code>README.md</code> with this content (or ask the agent after init — but doing it by hand now is fine):</p>
+  <pre><code># ShopLite
+
+A teaching store for Nile Retail. Mini-Amazon: catalog, search, cart, checkout, orders, inventory.
+
+Stack: Python 3.11+, FastAPI, vanilla HTML/CSS/JS. No React required.
+
+We use OpenSpec so the AI coding assistant agrees on behavior before writing code.</code></pre>
+  <p>Create a tiny <code>.gitignore</code> now so later Python junk does not get committed:</p>
+  <pre><code>__pycache__/
+.venv/
+.env
+*.pyc
+.pytest_cache/</code></pre>
+
+  <h3>4.1 Python check (used from lesson 04)</h3>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Confirm Python is available. We will not run an app until the catalog exists.</p>
+  </div>
+  <pre><code>python --version</code></pre>
+  <p>On some Windows installs the command is <code>py --version</code> or <code>python3 --version</code>. Use whichever prints 3.11+.</p>
+
+  <h2>5. Initialize OpenSpec in the project</h2>
+  <p>
+    <code>openspec init</code> is interactive. It asks which AI tools you use, then writes skills/commands into that
+    tool’s folders, plus the <code>openspec/</code> directory.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>From inside <code>shoplite</code>, initialize OpenSpec. Pick the tool you actually use (Cursor, Claude Code, …). You can select more than one.</p>
+  </div>
+  <pre><code>cd shoplite
+openspec init</code></pre>
+  <p>Non-interactive variant if you already know the tool id (example: Cursor only):</p>
+  <pre><code>openspec init --tools cursor</code></pre>
+  <p>Useful tool ids include: <code>cursor</code>, <code>claude</code>, <code>github-copilot</code>, <code>codex</code>, <code>amazon-q</code>. <code>--tools all</code> is possible but noisy.</p>
+
+  <div class="note">
+    <strong>Want the AI to do setup?</strong>
+    <p>You can paste this into chat instead of running init yourself:</p>
+    <pre><code>Fetch https://raw.githubusercontent.com/Fission-AI/OpenSpec/main/install.md and follow it.</code></pre>
+    <p>Prefer the manual steps at least once so you see what was created.</p>
+  </div>
+
+  <h3>5.1 Restart the editor</h3>
+  <p>
+    Many tools scan skills and slash commands at startup. After init, <strong>reload the window</strong> (Cursor:
+    Command Palette → “Developer: Reload Window”) or close and reopen the project. Then type <code>/opsx</code> in chat
+    and confirm autocomplete appears.
+  </p>
+
+  <h2>6. What init created</h2>
+  <p>You should now see something like this (exact agent folders depend on the tools you picked):</p>
+  <pre><code>shoplite/
+├── README.md
+├── .gitignore
+├── openspec/
+│   ├── specs/              # empty at first — source of truth will grow here
+│   ├── changes/            # empty — one folder per in-flight change
+│   └── config.yaml         # project context for the AI (may appear after first use / edit)
+├── .cursor/                # if you selected Cursor: commands / skills
+│   └── ...
+└── .claude/                # if you selected Claude Code
+    └── ...</code></pre>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>List the project and browse with the CLI.</p>
+  </div>
+  <pre><code>openspec --version
+openspec list
+openspec view</code></pre>
+  <p>
+    <code>openspec list</code> should show no active changes. <code>openspec view</code> opens a small dashboard for
+    specs and changes. Close it when you have clicked around.
+  </p>
+  <p>Optional health check:</p>
+  <pre><code>openspec doctor</code></pre>
+
+  <h3>6.1 Skills vs commands (you do not have to memorize paths)</h3>
+  <p>
+    Init writes <strong>skills</strong> (folders like <code>openspec-propose/SKILL.md</code>) and/or <strong>command
+    files</strong> (tool-specific slash-command markdown). You never edit these by hand for this course. If slash
+    commands vanish later, the fix is:
+  </p>
+  <pre><code>openspec update</code></pre>
+  <p>
+    <code>openspec update</code> refreshes generated agent files to match the installed CLI. Run it in each project
+    after you upgrade the global package, and after you change the workflow profile (lesson 08).
+  </p>
+  <div class="behind">
+    <div class="behind-title">Behind the scenes — a skill file is just Prompt B with a filename</div>
+    <p>
+      Open one generated file if you like (example: a Cursor command markdown under <code>.cursor/</code>, or
+      <code>.claude/skills/openspec-propose/SKILL.md</code>). You will see English instructions: create a change,
+      write these artifacts, stop before code. That is your homemade Prompt B, checked into the repo so every
+      session loads it. You still talk to the <em>model</em>; the file only sets the job description. The CLI
+      is what the skill is allowed to call for mkdir/templates/status — so the model is not inventing folder names.
+    </p>
+  </div>
+
+  <h2>7. Core profile vs expanded profile</h2>
+  <p>New installs default to the <strong>core</strong> profile. That is what we want for lessons 04–07.</p>
+  <table>
+    <thead>
+      <tr><th>Profile</th><th>Chat commands you get</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>core</strong> (default)</td>
+        <td><code>explore</code>, <code>propose</code>, <code>apply</code>, <code>update</code>, <code>sync</code>, <code>archive</code></td>
+      </tr>
+      <tr>
+        <td><strong>expanded / custom</strong></td>
+        <td>Above, plus <code>new</code>, <code>continue</code>, <code>ff</code>, <code>verify</code>, <code>bulk-archive</code>, <code>onboard</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <p>Do <strong>not</strong> switch profiles yet. Lesson 08 is when complexity earns the extra commands.</p>
+  <p>
+    Profile lives in <em>global</em> CLI settings (machine-wide JSON), not in
+    <code>openspec/config.yaml</code>. To peek without changing anything:
+  </p>
+  <pre><code>openspec config list</code></pre>
+  <p>A fresh install should look like this (telemetry lines may differ):</p>
+  <pre><code>featureFlags: {}
+profile: core
+delivery: both
+
+Profile settings:
+  profile: core (default)
+  delivery: both (default)
+  workflows: propose, explore, apply, update, sync, archive (from core profile)</code></pre>
+  <p>
+    One-value check: <code>openspec config get profile</code> should print <code>core</code>.
+    Bare <code>openspec config</code> only prints help and exits with an error — it does not show settings.
+    The interactive switcher is <code>openspec config profile</code>; skip it until lesson 08.
+  </p>
+  <p>
+    If you already see <code>profile: custom</code> and extra workflows (<code>new</code>, <code>ff</code>, …),
+    this machine was configured earlier. Leave it for now; do not run the picker here.
+  </p>
+
+  <h2>8. Give the project a voice: config context</h2>
+  <p>
+    OpenSpec can inject short project facts into every planning session via <code>openspec/config.yaml</code>.
+    That file is a safety net: even if the agent did not explore the repo, planning artifacts still mention the real stack.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create or edit <code>openspec/config.yaml</code> so ShopLite’s constraints are always visible.</p>
+  </div>
+  <pre><code>schema: spec-driven
+
+# Shown to the AI when it plans and implements.
+context: |
+  ShopLite is Nile Retail's teaching store (mini-Amazon).
+  Stack: Python 3.11+, FastAPI, vanilla HTML/CSS/JS (no React).
+  Run with: uvicorn app.main:app --reload --port 8000
+  Persist data in a local JSON file or SQLite — keep it simple.
+  Do not add real payment processors. Checkout is a mock "Place order".
+  One intent per change. Prefer small, reviewable deltas.
+  Specs describe what a shopper or staff member can see, not framework choices.
+  Every scenario in a spec SHALL have one automated test.
+  The test name includes the scenario title.
+  A scenario with no passing test is not done.</code></pre>
+  <p>If init already created a config, merge these ideas into it rather than deleting unknown keys.</p>
+  <div class="behind">
+    <div class="behind-title">This file replaces the paragraph you used to paste</div>
+    <p>
+      In a homemade prompt you might write “We use FastAPI, no React, port 8000” at the top every time. If you forget, the assistant may build a different stack.
+      The <code>context:</code> block is that paragraph. OpenSpec shows it to the assistant when it plans and when it writes code.
+      It is not the spec. The spec still says what the shopper can see. The last lines tell the assistant our class rule: one automated test for each scenario, and the test name includes the scenario title.
+    </p>
+  </div>
+
+  <h2>9. Upgrade path (bookmark this)</h2>
+  <p>When a new OpenSpec version ships:</p>
+  <pre><code>npm install -g @fission-ai/openspec@latest
+cd shoplite
+openspec update</code></pre>
+  <p>The first line upgrades the machine CLI. The second refreshes this project’s generated skills/commands. They are not the same step.</p>
+
+  <h2>10. Confirm chat commands</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Open Cursor (or your agent) on the <code>shoplite</code> folder. In a <strong>new chat</strong>, type the prefix below and confirm the commands appear. Do not run propose yet.</p>
+  </div>
+  <pre><code>/opsx</code></pre>
+  <p>You want to see at least explore, propose, apply, archive. If nothing appears:</p>
+  <ol>
+    <li>Confirm you opened the <code>shoplite</code> folder as the workspace root (not a parent directory).</li>
+    <li>Run <code>openspec update</code>.</li>
+    <li>Reload the window.</li>
+    <li>On skills-only tools (e.g. Codex), <code>/opsx</code> may never autocomplete — use that tool’s skill name from init’s printed instructions.</li>
+  </ol>
+
+  <h2>11. Optional: AI-assisted sanity check</h2>
+  <p>In chat you may ask (this is a normal prompt, not an OpenSpec command):</p>
+  <pre><code>What OpenSpec files exist in this project? Summarize the folder layout.
+Do not create a change and do not write application code.</code></pre>
+  <p>You should get a tour of <code>openspec/</code> and the agent folders. If the agent starts building a store, stop it. We are still in setup.</p>
+
+  <h2>12. Common issues</h2>
+  <table>
+    <thead>
+      <tr><th>Symptom</th><th>Likely fix</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>openspec: command not found</code></td><td>Node/npm PATH; reinstall global package under the Node version you are using (nvm switches drop globals).</td></tr>
+      <tr><td>Slash commands missing</td><td><code>openspec update</code>, reload window, confirm workspace root.</td></tr>
+      <tr><td>You typed <code>/opsx:propose</code> in the terminal</td><td>Wrong half. Slash commands go in AI chat.</td></tr>
+      <tr><td>Bun installed the package but it fails</td><td>Bun can install it; you still need Node to run it.</td></tr>
+      <tr><td>Init ran in the wrong folder</td><td>Delete the stray <code>openspec/</code> there, <code>cd shoplite</code>, init again.</td></tr>
+      <tr><td><code>openspec config</code> prints help / exits 1</td><td>That parent command needs a subcommand. Peek with <code>openspec config list</code> or <code>openspec config get profile</code>.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>13. Reflection</h2>
+  <div class="exercise">
+    <div class="exercise-title">Check your understanding</div>
+    <ol>
+      <li>Where do you run <code>openspec init</code>? Where do you run <code>/opsx:propose</code>?</li>
+      <li>Why reload the editor after init?</li>
+      <li>What is the difference between <code>npm install -g @fission-ai/openspec@latest</code> and <code>openspec update</code>?</li>
+    </ol>
+  </div>
+
+  <div class="checkpoint">
+    <div class="checkpoint-title">Lesson 02 complete</div>
+    <p>The tool is installed. Next lesson is the picture of how the folders work: specs, changes, the difference a change makes, and a test for each scenario. Still no shop code.</p>
+  </div>
+
+  <div class="lesson-nav">
+    <a href="01-why-spec-driven-development.html">← 01 HomeSpec lab</a>
+    <a href="03-core-concepts.html">Next: 03 Core concepts →</a>
+  </div>
+</main>
+<script>
+(function () {
+  const COPY_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  const CHECK_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  function copyText(text, onDone) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(onDone).catch(fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      onDone();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("pre").forEach((pre) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "code-wrapper";
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "copy-btn";
+      btn.innerHTML = COPY_ICON + " Copy";
+      wrapper.appendChild(btn);
+
+      btn.addEventListener("click", () => {
+        const code = pre.querySelector("code");
+        const text = (code ? code.innerText : pre.innerText).trimEnd();
+        copyText(text, () => {
+          btn.innerHTML = CHECK_ICON + " Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.innerHTML = COPY_ICON + " Copy";
+            btn.classList.remove("copied");
+          }, 2000);
+        });
+      });
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>08 · Expanded Workflow: Order Lifecycle – OpenSpec ShopLite</title>
+  <style>
+:root {
+  --ink: #0f172a;
+  --muted: #475569;
+  --accent: #1d4ed8;
+  --line: rgba(37, 99, 235, 0.18);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.65;
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+  color: #111827;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(15, 23, 42, 0.94);
+  color: #e5e7eb;
+  backdrop-filter: blur(8px);
+}
+
+.topbar-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0.7rem 1.25rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.topbar a {
+  color: #bfdbfe;
+  text-decoration: none;
+  font-size: 0.88rem;
+}
+
+.topbar a:hover { color: #fff; text-decoration: underline; }
+
+.brand {
+  font-weight: 700;
+  color: #fff !important;
+  letter-spacing: -0.02em;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+main {
+  max-width: 960px;
+  margin: 1.5rem auto 3rem;
+  padding: 2.25rem 2rem 3rem;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(148, 163, 184, 0.12);
+}
+
+h1 {
+  font-size: 2.05rem;
+  margin: 0 0 1.1rem;
+  letter-spacing: -0.03em;
+  text-align: center;
+  color: #0f172a;
+  padding: 1rem 1.4rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+  box-shadow:
+    0 10px 25px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(148, 163, 184, 0.35);
+}
+
+h2 {
+  font-size: 1.55rem;
+  margin-top: 2.15rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 0.35rem;
+  color: #0f172a;
+}
+
+h3 {
+  font-size: 1.2rem;
+  margin-top: 1.6rem;
+  color: #0f172a;
+}
+
+p { margin: 0.5rem 0 0.75rem; }
+
+code {
+  font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+  background-color: #f3f4ff;
+  padding: 0.12rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.95em;
+  color: #1d4ed8;
+}
+
+pre {
+  background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+  color: #e5e7eb;
+  padding: 2.25rem 4.75rem 1rem 1.1rem;
+  border-radius: 10px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+  margin: 0.75rem 0 1.5rem;
+  border: 1px solid rgba(15, 23, 42, 0.6);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.note, .exercise, .warn, .concept, .checkpoint, .behind, .think {
+  padding: 0.9rem 1.1rem;
+  margin: 1rem 0 1.5rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+}
+
+.note {
+  border-left: 4px solid #2563eb;
+  background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+  border-color: rgba(37, 99, 235, 0.4);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(191, 219, 254, 0.9);
+}
+
+.exercise {
+  border-left: 4px solid #16a34a;
+  background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+  border-color: rgba(22, 163, 74, 0.4);
+}
+
+.warn {
+  border-left: 4px solid #d97706;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: rgba(217, 119, 6, 0.4);
+}
+
+.concept {
+  border-left: 4px solid #7c3aed;
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+  border-color: rgba(124, 58, 237, 0.35);
+}
+
+.checkpoint {
+  border-left: 4px solid #0f766e;
+  background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+  border-color: rgba(15, 118, 110, 0.35);
+}
+
+.behind {
+  border-left: 4px solid #0e7490;
+  background: linear-gradient(135deg, #ecfeff, #cffafe);
+  border-color: rgba(14, 116, 144, 0.35);
+}
+
+.think {
+  border-left: 4px solid #c2410c;
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border-color: rgba(194, 65, 12, 0.35);
+}
+
+.exercise-title, .warn-title, .concept-title, .checkpoint-title, .behind-title, .think-title {
+  font-weight: 650;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+}
+
+.exercise-title { color: #166534; }
+.warn-title { color: #92400e; }
+.concept-title { color: #5b21b6; }
+.checkpoint-title { color: #115e59; }
+.behind-title { color: #155e75; }
+.think-title { color: #9a3412; }
+
+ol, ul { padding-left: 1.4rem; }
+li { margin: 0.25rem 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.95rem;
+}
+
+th, td {
+  border: 1px solid #e2e8f0;
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #eff6ff;
+  color: #0f172a;
+}
+
+tr:nth-child(even) td { background: #f8fafc; }
+
+.meta {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0 0 1.25rem;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.kicker {
+  text-align: center;
+  color: var(--muted);
+  margin-top: -0.35rem;
+  margin-bottom: 1.1rem;
+}
+
+.toc a { color: #1d4ed8; }
+
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.lesson-nav a {
+  color: #1d4ed8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.lesson-nav a:hover { text-decoration: underline; }
+
+.sample-output-title {
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+  color: #0f172a;
+}
+
+.code-wrapper { position: relative; }
+
+.copy-btn {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.5rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.55rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  color: #9ca3af;
+  font-family: system-ui, sans-serif;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  user-select: none;
+}
+
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #f9fafb;
+}
+
+.copy-btn.copied {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.45);
+}
+
+.progress {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.progress span {
+  display: block;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  background: #f1f5f9;
+  font-size: 0.82rem;
+  color: #334155;
+  text-align: center;
+}
+
+.progress span.done {
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 600;
+}
+
+.progress span.now {
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 700;
+}
+
+footer.site {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-bottom: 2rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.85rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.95rem 1rem;
+  background: #f8fafc;
+}
+
+.card h3 { margin-top: 0; font-size: 1.05rem; }
+.card a { color: #1d4ed8; font-weight: 650; text-decoration: none; }
+.card a:hover { text-decoration: underline; }
+.card p { margin: 0.35rem 0 0; font-size: 0.92rem; color: #475569; }
+
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="00-index.html">OpenSpec · ShopLite</a>
+    <nav>
+      <a href="00-index.html">Home</a>
+      <a href="01-why-spec-driven-development.html">01</a>
+      <a href="02-install-and-initialize.html">02</a>
+      <a href="03-core-concepts.html">03</a>
+      <a href="04-first-cycle-catalog.html">04</a>
+      <a href="05-explore-and-specify-search.html">05</a>
+      <a href="06-review-artifacts-cart.html">06</a>
+      <a href="07-apply-debug-checkout.html">07</a>
+      <a href="08-expanded-workflow-orders.html">08</a>
+      <a href="09-spec-evolution-inventory.html">09</a>
+      <a href="10-spec-management-and-beyond.html">10</a>
+    </nav>
+  </div>
+</div>
+
+<main>
+  <h1>08 · Expanded Workflow: Order Lifecycle</h1>
+  <p class="kicker">When one propose is too much to review, write the plan one file at a time. Each status change still needs a scenario and a test.</p>
+  <div class="meta">
+    <span class="pill">Lesson 08 of 10</span>
+    <span class="pill">~90 minutes</span>
+    <span class="pill">new / continue / ff / verify</span>
+  </div>
+
+  <div class="progress">
+    <span class="done">Catalog</span><span class="done">Search</span><span class="done">Cart</span>
+    <span class="done">Checkout</span><span class="now">Orders</span><span>Inventory</span>
+  </div>
+
+  <div class="note">
+    <strong>What you will do</strong>
+    <ul>
+      <li>Recognize when core <code>propose</code> is not enough.</li>
+      <li>Switch to the expanded command set.</li>
+      <li>Build Amazon-like order status (placed → packed → shipped → delivered) with <code>new</code> + <code>continue</code>.</li>
+      <li>Use <code>verify</code> before archive, and know when <code>ff</code> is acceptable.</li>
+    </ul>
+  </div>
+
+  <div class="behind">
+    <div class="behind-title">The extra commands are pauses between files</div>
+    <p>
+      In the usual workflow, propose writes the whole plan in one go. That is fine when the change is small.
+      For order status, I would not write the reason, the rules, the design, and the tasks without stopping to look.
+      I would stop after the status diagram. The extra commands are that habit, written down.
+    </p>
+    <p>
+      OpenSpec calls the pipeline a <strong>schema</strong>. The default one is named <code>spec-driven</code>.
+      It says which files exist, and which file has to exist before the next one. The commands are moves on that list:
+    </p>
+    <table>
+      <thead>
+        <tr><th>Command</th><th>What it does</th><th>By hand</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>new</code></td><td>Create the folder. No documents yet.</td><td><code>mkdir changes/add-order-status-lifecycle</code></td></tr>
+        <tr><td><code>continue</code></td><td>Write the next file the list allows, then stop.</td><td>“Write only the proposal, then show me.”</td></tr>
+        <tr><td><code>ff</code></td><td>Keep writing until the plan is ready to build.</td><td>Propose, all at once</td></tr>
+        <tr><td><code>verify</code></td><td>Check the code and the tests against the spec.</td><td>The checklist you would run before you file the change</td></tr>
+      </tbody>
+    </table>
+    <p>
+      <code>openspec config profile</code> and <code>openspec update</code> only install extra instruction files.
+      The <code>openspec/</code> folders do not change. You are choosing which commands show up when you type <code>/opsx</code>.
+    </p>
+  </div>
+  <div class="think">
+    <div class="think-title">Think</div>
+    <p>
+      Why can’t continue write <code>tasks.md</code> before the spec exists? Because a task list with no behavior is a random checklist.
+      The spec has to come first, for the same reason you would not estimate the work before the rules have names.
+    </p>
+  </div>
+
+  <h2>1. When the core workflow is not enough</h2>
+  <p>
+    Core workflow (<code>propose → apply → archive</code>) generates all four planning artifacts at once. That is
+    perfect when you could have written the propose prompt in one breath.
+  </p>
+  <p>Order tracking is not that. Interlocking decisions include:</p>
+  <ul>
+    <li>Which statuses exist, and which transitions are legal.</li>
+    <li>Who can change status (shopper vs Nile staff — we will fake an admin action).</li>
+    <li>Whether the shopper can cancel, and until which status.</li>
+    <li>How this relates to checkout’s confirmation (an order already exists).</li>
+    <li>Whether cancelled orders still show in history.</li>
+  </ul>
+  <p>
+    If you dump all of that into one propose, the specs, design, and tasks are generated from a half-wrong proposal.
+    Review gates exist so you catch a bad status model <em>before</em> tasks.md is written on top of it.
+  </p>
+
+  <h2>2. Expanded commands</h2>
+  <table>
+    <thead>
+      <tr><th>Command</th><th>Cursor spelling</th><th>Purpose</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>/opsx:new</code></td><td><code>/opsx-new</code></td><td>Create the change folder; do not draft artifacts yet</td></tr>
+      <tr><td><code>/opsx:continue</code></td><td><code>/opsx-continue</code></td><td>Create the <em>next</em> artifact; stop for review</td></tr>
+      <tr><td><code>/opsx:ff</code></td><td><code>/opsx-ff</code></td><td>Fast-forward: write all remaining planning artifacts</td></tr>
+      <tr><td><code>/opsx:verify</code></td><td><code>/opsx-verify</code></td><td>Check implementation vs artifacts (completeness, correctness, coherence)</td></tr>
+      <tr><td><code>/opsx:bulk-archive</code></td><td><code>/opsx-bulk-archive</code></td><td>Archive several completed changes; conflict-aware</td></tr>
+      <tr><td><code>/opsx:onboard</code></td><td><code>/opsx-onboard</code></td><td>Guided tour of the workflow on a codebase</td></tr>
+    </tbody>
+  </table>
+  <p><code>continue</code> vs <code>ff</code>:</p>
+  <table>
+    <thead>
+      <tr><th>Situation</th><th>Use</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Clear remaining scope, time pressure</td><td><code>ff</code></td></tr>
+      <tr><td>You want to inspect the proposal before specs exist</td><td><code>continue</code></td></tr>
+      <tr><td>Complex domain, first time through expanded mode</td><td><code>continue</code> (required in this lesson)</td></tr>
+    </tbody>
+  </table>
+  <p>Rule of thumb: if you can describe the full remaining scope with confidence, <code>ff</code> is fine. If you are still figuring it out, <code>continue</code>.</p>
+
+  <h2>3. Switch profile</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>In the terminal, enable expanded workflows, then refresh this project’s generated commands.</p>
+  </div>
+  <pre><code>openspec config profile</code></pre>
+  <p>
+    Choose the custom/expanded set so that <code>new</code>, <code>continue</code>, <code>ff</code>, <code>verify</code>,
+    <code>bulk-archive</code>, and <code>onboard</code> are included. Keep the core commands too. Then:
+  </p>
+  <pre><code>cd path\to\shoplite
+openspec update</code></pre>
+  <p>Reload the editor. Type <code>/opsx</code> and confirm the new commands appear. If <code>config profile</code> is a TUI you cannot drive here, this equivalent often works (check <code>openspec config --help</code> on your version):</p>
+  <pre><code>openspec config --help
+openspec update</code></pre>
+  <p>Look under <code>.cursor/</code> or <code>.claude/commands/opsx/</code> for <code>new</code>, <code>continue</code>, <code>verify</code> files after update.</p>
+
+  <h2>4. Scaffold the change</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New chat. Create the change <em>without</em> generating artifacts.</p>
+  </div>
+  <pre><code>/opsx-new add-order-status-lifecycle
+
+Create the change named add-order-status-lifecycle.
+Do not write proposal.md yet. Wait for continue.</code></pre>
+  <p>You should have an empty-ish folder <code>openspec/changes/add-order-status-lifecycle/</code> (maybe only metadata). If the agent jumped ahead and wrote everything, that is <code>ff</code> behavior — still pause and review the proposal as if you had gates.</p>
+
+  <h2>5. Continue: proposal, then stop</h2>
+  <pre><code>/opsx-continue
+
+Write only the proposal for ShopLite order lifecycle (Amazon "Your Orders", tiny).
+
+Intent: after Place order, the shopper can see the order and its status.
+Nile staff (a simple admin action on the same machine is enough) can move status forward.
+
+Statuses: placed → packed → shipped → delivered.
+Cancel is allowed only from placed or packed, not after shipped.
+Shopper can view a list of their orders (browser-persisted or server-persisted — pick in design later).
+
+Out of scope: carriers, email notifications, returns, refunds, multi-user auth, changing line items after place.
+
+Read checkout specs so we extend existing orders rather than inventing a second order model.</code></pre>
+  <div class="exercise">
+    <div class="exercise-title">Your Task — review gate 1</div>
+    <p>Read <code>proposal.md</code>. Fix status names if the AI added “out_for_delivery” or skipped packed. Confirm cancel rules. Only then continue.</p>
+  </div>
+
+  <h2>6. Continue: specs, then stop</h2>
+  <pre><code>/opsx-continue
+
+Write delta specs only. Include:
+- Order list and detail show status
+- Legal transitions only
+- Cancel rules
+- Delivered is terminal
+- Cancelled is terminal
+- Unknown transition is rejected without corrupting the order
+
+Scenarios for: happy path to delivered; cancel from placed; reject cancel after shipped; reject skipping packed.
+End the spec with the test requirement below, unless the orders spec already has it.
+If it is already there, do not add a second copy. Still give each new scenario a test task.
+### Requirement: Test for each scenario
+The project SHALL include one automated test for each scenario in this spec.
+The test name SHALL include the scenario title.
+The test SHALL fail when that scenario's THEN is not met.</code></pre>
+  <div class="exercise">
+    <div class="exercise-title">Your Task — review gate 2</div>
+    <p>
+      Check delta type: this is mostly ADDED on an <code>orders</code> capability. If checkout already defined an
+      order as “confirmation page only,” you may need a MODIFIED requirement — only if a named requirement is
+      actually changing. Do not MODIFIED a requirement that does not exist.
+    </p>
+    <p>State-machine check: draw the statuses on paper. Every arrow should have a scenario. A missing arrow is a missing spec. Every scenario should have a test task.</p>
+  </div>
+  <pre><code>placed ──► packed ──► shipped ──► delivered
+   │          │
+   └── cancel ┘
+shipped/delivered: cancel REJECTED</code></pre>
+
+  <h2>7. Continue: design, then tasks</h2>
+  <pre><code>/opsx-continue
+
+Write design.md only: how we store orders, how we expose shopper vs admin actions
+(a hidden /admin/orders page or a status dropdown in teaching mode is fine).
+No new frameworks. Persist orders so they survive refresh (JSON or SQLite).</code></pre>
+  <p>Review: if design invents JWT auth, cut it. Then:</p>
+  <pre><code>/opsx-continue
+
+Write tasks.md as small checkboxes covering list, detail, transitions, cancel, persistence.</code></pre>
+  <p>If you are comfortable after specs, you <em>may</em> <code>/opsx-ff</code> to generate design+tasks together. This lesson prefers continue so you feel the gates.</p>
+
+  <h2>8. Apply, then verify</h2>
+  <pre><code>/opsx-apply add-order-status-lifecycle</code></pre>
+  <p>Manual path:</p>
+  <ol>
+    <li>Place an order from checkout.</li>
+    <li>Open “Your orders” (whatever the UI called it).</li>
+    <li>Status starts at placed.</li>
+    <li>Advance placed → packed → shipped → delivered.</li>
+    <li>Place a second order and cancel it from placed.</li>
+    <li>Try to cancel a shipped order — must fail.</li>
+    <li>Restart the server — orders still there if you specified persistence.</li>
+  </ol>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Run verify. It is not a hard gate on archive, but it is the expanded workflow’s quality check.</p>
+  </div>
+  <pre><code>/opsx-verify add-order-status-lifecycle</code></pre>
+  <p>Verify typically reports three dimensions:</p>
+  <table>
+    <thead>
+      <tr><th>Dimension</th><th>Meaning</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Completeness</td><td>Tasks ticked; requirements have code; each scenario has a test whose name includes the scenario title</td></tr>
+      <tr><td>Correctness</td><td>Behavior matches spec intent and edge cases</td></tr>
+      <tr><td>Coherence</td><td>Design decisions show up in the code (or design should be updated)</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Treat warnings as work. A scenario “cancel after shipped” with no test is useful information. Add the test, or fix the code so the test can pass.
+    If the design said one approach and the code does another, change the code or change the design. Do not leave them disagreeing.
+  </p>
+
+  <h2>9. Specification silence during verify</h2>
+  <p>
+    You may discover unspecified behavior: can a delivered order be returned? We said returns are out of scope.
+    If the UI still shows a Return button, that is extra. Remove it or specify it as a future change — do not let
+    verify pressure you into building Amazon Returns in the last ten minutes.
+  </p>
+  <p>If a status was implemented that is not in the spec, that is drift in the other direction. Align them.</p>
+
+  <h2>10. Archive and look at the suite</h2>
+  <pre><code>/opsx-archive add-order-status-lifecycle</code></pre>
+  <p>Optional: <code>/opsx-sync</code> first if archive asks. Then browse:</p>
+  <pre><code>openspec view
+openspec list</code></pre>
+  <p>You now have catalog, search, cart, checkout, and orders. That is a real (tiny) store spec suite. Point at it: this is what a new teammate would read on day one.</p>
+
+  <h2>11. ff on a small leftover (optional)</h2>
+  <p>If you want to feel the fast path in expanded mode, pick a tiny, clear leftover (e.g. show order date on the list) <em>only if</em> it is truly small:</p>
+  <pre><code>/opsx-new add-order-placed-timestamp
+/opsx-ff
+# review quickly
+/opsx-apply
+/opsx-verify
+/opsx-archive</code></pre>
+  <p>Do not use ff to skip review on the lifecycle itself.</p>
+
+  <h2>12. Spec drift (preview)</h2>
+  <p>
+    After archive, if someone hotfixes a fifth status in code and never updates specs, the suite becomes a liar the
+    next agent will read. Lesson 10 treats drift as a first-class problem. For now: if you changed behavior while
+    applying, update the artifacts <em>before</em> archive, or use <code>/opsx-update</code>.
+  </p>
+
+  <h2>13. Common issues</h2>
+  <table>
+    <thead>
+      <tr><th>Symptom</th><th>Fix</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Expanded commands missing</td><td>Profile + <code>openspec update</code> + reload</td></tr>
+      <tr><td>Agent used ff when you asked continue</td><td>You still own review. Read proposal first; delete extra artifact files if they lock in a bad model</td></tr>
+      <tr><td>Context window overflows on long continue chains</td><td>New chat per artifact; “continue this change, next artifact is design”</td></tr>
+      <tr><td>Orders lost on reload</td><td>Design promised persistence; implement it or change the spec honestly</td></tr>
+      <tr><td>Checkout confirmation and orders list are different databases</td><td>Dependent-spec miss. Unify in design and apply again</td></tr>
+    </tbody>
+  </table>
+
+  <h2>14. Reflection</h2>
+  <ol>
+    <li>Which review gate caught a problem that all-at-once propose would have baked into tasks?</li>
+    <li>When will you still use core <code>propose</code> after today?</li>
+    <li>What does verify add that “the page loaded” does not?</li>
+  </ol>
+
+  <div class="checkpoint">
+    <div class="checkpoint-title">Lesson 08 complete</div>
+    <p>ShopLite has Your Orders. Next: inventory changes rules the catalog already has. You write those changes by hand, and you skip the process for a typo on purpose.</p>
+  </div>
+
+  <div class="lesson-nav">
+    <a href="07-apply-debug-checkout.html">← 07 Checkout</a>
+    <a href="09-spec-evolution-inventory.html">Next: 09 Inventory (MODIFIED / REMOVED) →</a>
+  </div>
+</main>
+<script>
+(function () {
+  const COPY_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  const CHECK_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  function copyText(text, onDone) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(onDone).catch(fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      onDone();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("pre").forEach((pre) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "code-wrapper";
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "copy-btn";
+      btn.innerHTML = COPY_ICON + " Copy";
+      wrapper.appendChild(btn);
+
+      btn.addEventListener("click", () => {
+        const code = pre.querySelector("code");
+        const text = (code ? code.innerText : pre.innerText).trimEnd();
+        copyText(text, () => {
+          btn.innerHTML = CHECK_ICON + " Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.innerHTML = COPY_ICON + " Copy";
+            btn.classList.remove("copied");
+          }, 2000);
+        });
+      });
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

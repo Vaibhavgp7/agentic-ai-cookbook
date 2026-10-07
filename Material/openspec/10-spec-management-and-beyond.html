@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10 · Spec Management and Beyond – OpenSpec ShopLite</title>
+  <style>
+:root {
+  --ink: #0f172a;
+  --muted: #475569;
+  --accent: #1d4ed8;
+  --line: rgba(37, 99, 235, 0.18);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.65;
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+  color: #111827;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(15, 23, 42, 0.94);
+  color: #e5e7eb;
+  backdrop-filter: blur(8px);
+}
+
+.topbar-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0.7rem 1.25rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.topbar a {
+  color: #bfdbfe;
+  text-decoration: none;
+  font-size: 0.88rem;
+}
+
+.topbar a:hover { color: #fff; text-decoration: underline; }
+
+.brand {
+  font-weight: 700;
+  color: #fff !important;
+  letter-spacing: -0.02em;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+main {
+  max-width: 960px;
+  margin: 1.5rem auto 3rem;
+  padding: 2.25rem 2rem 3rem;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(148, 163, 184, 0.12);
+}
+
+h1 {
+  font-size: 2.05rem;
+  margin: 0 0 1.1rem;
+  letter-spacing: -0.03em;
+  text-align: center;
+  color: #0f172a;
+  padding: 1rem 1.4rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+  box-shadow:
+    0 10px 25px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(148, 163, 184, 0.35);
+}
+
+h2 {
+  font-size: 1.55rem;
+  margin-top: 2.15rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 0.35rem;
+  color: #0f172a;
+}
+
+h3 {
+  font-size: 1.2rem;
+  margin-top: 1.6rem;
+  color: #0f172a;
+}
+
+p { margin: 0.5rem 0 0.75rem; }
+
+code {
+  font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+  background-color: #f3f4ff;
+  padding: 0.12rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.95em;
+  color: #1d4ed8;
+}
+
+pre {
+  background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+  color: #e5e7eb;
+  padding: 2.25rem 4.75rem 1rem 1.1rem;
+  border-radius: 10px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+  margin: 0.75rem 0 1.5rem;
+  border: 1px solid rgba(15, 23, 42, 0.6);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.note, .exercise, .warn, .concept, .checkpoint, .behind, .think {
+  padding: 0.9rem 1.1rem;
+  margin: 1rem 0 1.5rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+}
+
+.note {
+  border-left: 4px solid #2563eb;
+  background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+  border-color: rgba(37, 99, 235, 0.4);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(191, 219, 254, 0.9);
+}
+
+.exercise {
+  border-left: 4px solid #16a34a;
+  background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+  border-color: rgba(22, 163, 74, 0.4);
+}
+
+.warn {
+  border-left: 4px solid #d97706;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: rgba(217, 119, 6, 0.4);
+}
+
+.concept {
+  border-left: 4px solid #7c3aed;
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+  border-color: rgba(124, 58, 237, 0.35);
+}
+
+.checkpoint {
+  border-left: 4px solid #0f766e;
+  background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+  border-color: rgba(15, 118, 110, 0.35);
+}
+
+.behind {
+  border-left: 4px solid #0e7490;
+  background: linear-gradient(135deg, #ecfeff, #cffafe);
+  border-color: rgba(14, 116, 144, 0.35);
+}
+
+.think {
+  border-left: 4px solid #c2410c;
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border-color: rgba(194, 65, 12, 0.35);
+}
+
+.exercise-title, .warn-title, .concept-title, .checkpoint-title, .behind-title, .think-title {
+  font-weight: 650;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+}
+
+.exercise-title { color: #166534; }
+.warn-title { color: #92400e; }
+.concept-title { color: #5b21b6; }
+.checkpoint-title { color: #115e59; }
+.behind-title { color: #155e75; }
+.think-title { color: #9a3412; }
+
+ol, ul { padding-left: 1.4rem; }
+li { margin: 0.25rem 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.95rem;
+}
+
+th, td {
+  border: 1px solid #e2e8f0;
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #eff6ff;
+  color: #0f172a;
+}
+
+tr:nth-child(even) td { background: #f8fafc; }
+
+.meta {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0 0 1.25rem;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.kicker {
+  text-align: center;
+  color: var(--muted);
+  margin-top: -0.35rem;
+  margin-bottom: 1.1rem;
+}
+
+.toc a { color: #1d4ed8; }
+
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.lesson-nav a {
+  color: #1d4ed8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.lesson-nav a:hover { text-decoration: underline; }
+
+.sample-output-title {
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+  color: #0f172a;
+}
+
+.code-wrapper { position: relative; }
+
+.copy-btn {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.5rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.55rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  color: #9ca3af;
+  font-family: system-ui, sans-serif;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  user-select: none;
+}
+
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #f9fafb;
+}
+
+.copy-btn.copied {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.45);
+}
+
+.progress {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.progress span {
+  display: block;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  background: #f1f5f9;
+  font-size: 0.82rem;
+  color: #334155;
+  text-align: center;
+}
+
+.progress span.done {
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 600;
+}
+
+.progress span.now {
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 700;
+}
+
+footer.site {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-bottom: 2rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.85rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.95rem 1rem;
+  background: #f8fafc;
+}
+
+.card h3 { margin-top: 0; font-size: 1.05rem; }
+.card a { color: #1d4ed8; font-weight: 650; text-decoration: none; }
+.card a:hover { text-decoration: underline; }
+.card p { margin: 0.35rem 0 0; font-size: 0.92rem; color: #475569; }
+
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="00-index.html">OpenSpec · ShopLite</a>
+    <nav>
+      <a href="00-index.html">Home</a>
+      <a href="01-why-spec-driven-development.html">01</a>
+      <a href="02-install-and-initialize.html">02</a>
+      <a href="03-core-concepts.html">03</a>
+      <a href="04-first-cycle-catalog.html">04</a>
+      <a href="05-explore-and-specify-search.html">05</a>
+      <a href="06-review-artifacts-cart.html">06</a>
+      <a href="07-apply-debug-checkout.html">07</a>
+      <a href="08-expanded-workflow-orders.html">08</a>
+      <a href="09-spec-evolution-inventory.html">09</a>
+      <a href="10-spec-management-and-beyond.html">10</a>
+    </nav>
+  </div>
+</div>
+
+<main>
+  <h1>10 · Spec Management and Beyond</h1>
+  <p class="kicker">Take the ShopLite habits to a real team: keep the spec honest, use the terminal, and still write a test for every scenario.</p>
+  <div class="meta">
+    <span class="pill">Lesson 10 of 10</span>
+    <span class="pill">~70 minutes</span>
+    <span class="pill">Independence</span>
+  </div>
+
+  <div class="progress">
+    <span class="done">Catalog</span><span class="done">Search</span><span class="done">Cart</span>
+    <span class="done">Checkout</span><span class="done">Orders</span><span class="done">Inventory</span>
+  </div>
+
+  <div class="note">
+    <strong>What you will be able to do after this lesson</strong>
+    <ul>
+      <li>Keep specs and code in sync (drift, sync, archive, bulk-archive).</li>
+      <li>Use the CLI as a dashboard, not only slash commands.</li>
+      <li>Adopt OpenSpec on an existing repo without boiling the ocean.</li>
+      <li>Choose, on a real project, whether to use the short loop, the step-by-step loop, or no spec at all.</li>
+    </ul>
+  </div>
+
+  <div class="behind">
+    <div class="behind-title">What is still worth installing</div>
+    <p>
+      You could rebuild most of OpenSpec in a weekend: folders, four Markdown files, four instruction files, and a short program that copies rules by their headings.
+      I want you to believe that. People still install it for a few reasons:
+    </p>
+    <ul>
+      <li><strong>Shared words</strong> — teammates, and you next month, do not each invent a different prompt.</li>
+      <li><strong>Many tools</strong> — init writes the Cursor spelling, the Claude spelling, and the Copilot spelling from one setup.</li>
+      <li><strong>A careful copy</strong> — a wrong heading fails loudly, instead of quietly leaving two SHALL lines that disagree.</li>
+      <li><strong>The extra pauses</strong> — continue, ff, and verify, without each team inventing its own.</li>
+      <li><strong>A separate planning repo</strong> — later, if one feature spans several code repos. You do not need that yet.</li>
+    </ul>
+    <p>
+      Drift is what happens when you treat the tool as a draft generator and then fix the code on Friday without touching the spec.
+      The tool will not stop you. For a team, the pull request should contain both products: the app and the spec, and the tests that match the scenarios.
+    </p>
+  </div>
+  <div class="think">
+    <div class="think-title">Think</div>
+    <p>
+      If your company banned extra command-line tools, what would you still keep from this course?
+      The folders, the habit of reading the plan, a messy chat before you decide, skipping the process for a typo, and a test for each scenario.
+      If the answer is “almost everything,” the tool did its job. It taught a way of working.
+    </p>
+  </div>
+
+  <h2>1. You already built two products</h2>
+  <p>ShopLite is a small amazon.com. Beside it sits a second product: the spec suite. The suite outlives any chat.</p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Walk the archive. You should be able to tell the story of the store from folder names alone.</p>
+  </div>
+  <pre><code>dir openspec\changes\archive
+dir openspec\specs</code></pre>
+  <p>A healthy history looks like: catalog → search → cart → checkout → orders → inventory. That is how you explain Nile Retail to a new hire — or to a new model next year.</p>
+
+  <h2>2. Spec drift</h2>
+  <p>
+    <strong>Drift</strong> is when code and specs disagree. The next agent will read the spec and “fix” the code back,
+    or will read the code and ignore the spec. Either way you lose the contract.
+  </p>
+  <p>How drift happens on a store:</p>
+  <ul>
+    <li>Hotfix: shipping waiver raised to 75 in code on Friday; specs still say 50.</li>
+    <li>Partial apply: tasks 1–3 done, 4–7 forgotten, then someone archives anyway.</li>
+    <li>Two active changes both edit <code>specs/cart/</code> and archive in the wrong order.</li>
+  </ul>
+  <p>Invariant to protect: <strong>at commit boundaries, specs and code tell the same story.</strong> A PR should include archived (or still-open but consistent) spec updates next to the diff.</p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task — detect a lie</div>
+    <p>
+      Temporarily break the invariant on purpose: change the shipping waiver in code to 75 without touching specs.
+      In a new chat ask: “What is the free-shipping threshold?” If it cites 50 from specs, you just saw why drift is
+      dangerous. Revert the code (or immediately start a tiny change to MODIFIED the requirement). Do not leave the lie.
+    </p>
+  </div>
+
+  <h2>3. Sync, archive, bulk-archive</h2>
+  <table>
+    <thead>
+      <tr><th>Move</th><th>Meaning</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>/opsx:sync</code></td>
+        <td>Merge this change’s delta into <code>openspec/specs/</code> without necessarily filing the folder away.</td>
+      </tr>
+      <tr>
+        <td><code>/opsx:archive</code></td>
+        <td>File the change under <code>changes/archive/</code>; usually offers sync if needed.</td>
+      </tr>
+      <tr>
+        <td><code>/opsx:bulk-archive</code></td>
+        <td>Several completed changes at once. Detects two changes touching the same spec and applies in a sensible order.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>CLI archive (non-interactive):</p>
+  <pre><code>openspec archive change-name --yes</code></pre>
+  <p>Parallel work is allowed: you can have <code>add-reviews</code> and <code>fix-tax-rounding</code> open together. Keep each focused. If both touch checkout specs, talk to each other before bulk-archive.</p>
+  <p>When to update a change vs start a new one:</p>
+  <ul>
+    <li><strong>Update</strong> — same intent, narrower MVP, you learned the codebase was different.</li>
+    <li><strong>New change</strong> — intent changed, scope exploded, original work could ship without the extra.</li>
+  </ul>
+
+  <h2>4. CLI you should actually use</h2>
+  <pre><code>openspec --help
+openspec list
+openspec show add-inventory-availability
+openspec validate --all
+openspec status
+openspec view
+openspec doctor
+openspec update</code></pre>
+  <p>
+    Agents also call some of these with <code>--json</code>. You do not need that daily. You do need
+    <code>validate</code> when Markdown headings drifted from the expected ADDED/MODIFIED/REMOVED shape.
+  </p>
+  <p>Other CLI families (know they exist; do not require them for ShopLite):</p>
+  <ul>
+    <li><code>openspec schema ...</code> — custom workflows.</li>
+    <li><code>openspec store ...</code> — planning repo shared across code repos (beta).</li>
+    <li><code>openspec workset ...</code> — personal working views.</li>
+    <li><code>openspec config</code> — language, profile, telemetry.</li>
+  </ul>
+
+  <h2>5. Brownfield: existing projects</h2>
+  <p>
+    OpenSpec’s sweet spot is incrementally improving a codebase that already exists. You do <strong>not</strong>
+    retro-spec all of amazon.com. You init, write a short <code>config.yaml</code> context, and spec the next change.
+    The suite grows where it hurts.
+  </p>
+  <pre><code>cd existing-app
+openspec init --tools cursor
+# edit openspec/config.yaml context: stack, how to run tests, what not to touch
+# then /opsx-explore the one feature you will change this sprint</code></pre>
+  <p>
+    <code>/opsx:onboard</code> (expanded profile) walks a complete change on your own repo while narrating. Use it
+    once on a scratch branch of a real project this week.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Pick a real repository you work on (not ShopLite). Write five bullets: (1) where you would run init,
+      (2) which AI tool, (3) the first change name in kebab-case, (4) whether that change is core propose or expanded,
+      (5) one change you would not write a spec for. You do not have to run it during class.
+    </p>
+  </div>
+
+  <h2>6. Teams and pull requests</h2>
+  <p>A change maps cleanly onto a branch:</p>
+  <pre><code>git checkout -b change/add-product-reviews
+# propose → review → apply → verify
+# commit code AND openspec/ files together
+# open PR: reviewers read proposal.md + delta specs, then the diff</code></pre>
+  <p>
+    Reviewers often catch product issues faster in the spec than in Python. Require spec review for behavior changes
+    the same way you require tests for regressions.
+  </p>
+  <p>Tooling is not a lock-in: Claude Code, Cursor, Copilot, Codex all share the same <code>openspec/</code> files. Only the slash spelling differs.</p>
+
+  <h2>7. Stores (beta) and customization</h2>
+  <p>
+    When one feature spans api-server, web-app, and a mobile repo, a <strong>store</strong> is a dedicated planning
+    repository with the same <code>openspec/</code> shape, shared via git. Platform teams can own specs; product teams
+    consume them. Start with the
+    <a href="https://github.com/Fission-AI/OpenSpec/blob/main/docs/stores-beta/user-guide.md" target="_blank" rel="noopener">Stores user guide</a>
+    when you actually have that problem — not before.
+  </p>
+  <p>
+    Customization: <code>config.yaml</code> context, artifact language, custom schemas, community schema bundles.
+    Default <code>spec-driven</code> is enough until your org’s workflow is genuinely different.
+  </p>
+  <p>Multi-language: you can generate artifacts in a language other than English via init/config. Specs still need the same precision.</p>
+
+  <h2>8. Comparison recap (for the skeptic at work)</h2>
+  <table>
+    <thead>
+      <tr><th>Question</th><th>Short answer</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Isn’t this just documentation?</td><td>Docs describe the past. Specs are a contract upstream of code, consumed by agents.</td></tr>
+      <tr><td>Isn’t this Jira?</td><td>Stories are requests in a tracker. Specs live in git and are executable context.</td></tr>
+      <tr><td>Do I spec every change?</td><td>No. You fixed a typo without a spec. Behavior changes still get a scenario and a test.</td></tr>
+      <tr><td>Does this lock us to Cursor?</td><td>No. 30+ tools. Files are portable.</td></tr>
+      <tr><td>Can we use it without AI?</td><td>Yes. The Markdown still helps humans. AI is acceleration.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>9. Recommended default rhythm at work</h2>
+  <pre><code>Unsure what to build?     /opsx:explore     then new chat
+Know the change?          /opsx:propose     (core)
+Too many decisions?       /opsx:new + continue (expanded)
+Trivial presentation?     just edit the code
+Done and true?            /opsx:verify? then archive
+Friday hotfix to specs?   tiny change or honest spec edit in the same PR</code></pre>
+  <p>One line for chats: think in a messy chat, propose in a clean chat, apply while you stay on the task list, archive only when the spec is true.</p>
+
+  <h2>10. Capstone (do this to graduate)</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task — independent feature</div>
+    <p>
+      Without copying a prompt from this course, add <strong>one</strong> of the following to ShopLite using the
+      workflow you now choose (core or expanded). Keep it one intent.
+    </p>
+    <ul>
+      <li>Product reviews: 1–5 stars + text, listed on detail; no moderation queue.</li>
+      <li>Order receipt page: printable summary that reuses checkout math (watch spec dependencies).</li>
+      <li>Simple category filter (distinct from search): e.g. Electronics vs Home.</li>
+    </ul>
+    <p>Definition of done:</p>
+    <ol>
+      <li>Change named in kebab-case.</li>
+      <li>Artifacts reviewed (you edited at least one thing).</li>
+      <li>App demonstrates the scenarios, and each scenario has a passing test whose name includes the scenario title.</li>
+      <li>Archived; main specs tell the truth.</li>
+      <li>You can explain whether you used explore, continue, or no spec at all, and why.</li>
+    </ol>
+  </div>
+
+  <h2>11. Troubleshooting pocket card</h2>
+  <table>
+    <thead>
+      <tr><th>Problem</th><th>Move</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Slash commands missing</td><td><code>openspec update</code>, reload, correct workspace root</td></tr>
+      <tr><td>Wrong Node after nvm switch</td><td>Reinstall global CLI under that Node</td></tr>
+      <tr><td>Typed /opsx in terminal</td><td>Use AI chat</td></tr>
+      <tr><td>Agent ignored specs</td><td>Weaker model or filthy context; new chat + point at files</td></tr>
+      <tr><td>Validate fails</td><td>Heading structure; ADDED/MODIFIED/REMOVED; requirement titles</td></tr>
+      <tr><td>Two sources of truth</td><td>You drifted; pick code or spec, then align the other in a PR</td></tr>
+    </tbody>
+  </table>
+  <p>Official help: <a href="https://openspec.dev/docs" target="_blank" rel="noopener">openspec.dev/docs</a>, Discord linked from the GitHub README, <code>openspec feedback "..."</code>.</p>
+
+  <h2>12. What “ready to work” looks like</h2>
+  <p>You are done with this course when you can do the following without the HTML open:</p>
+  <ol>
+    <li>Install and init OpenSpec on a repo.</li>
+    <li>Explain specs vs changes vs archive to a teammate in two minutes.</li>
+    <li>Drive explore / propose / apply / archive (and expanded gates when needed).</li>
+    <li>Reject a vague SHALL and a spec that names a framework.</li>
+    <li>Trace a bad total to a missing scenario, then add the scenario and its test.</li>
+    <li>Write a MODIFIED delta when behavior changes.</li>
+    <li>Skip the workflow for a one-line fix, on purpose.</li>
+    <li>Keep specs in the same PR as code.</li>
+  </ol>
+
+  <div class="checkpoint">
+    <div class="checkpoint-title">Course complete</div>
+    <p>
+      Nile Retail’s ShopLite is not Amazon. It was never meant to be. It was a spine to hang every OpenSpec concept
+      on, in the order you will use them at work. Pick one feature on a current project and spec-drive it this week
+      while the muscle memory is fresh.
+    </p>
+  </div>
+
+  <h2>Further reading</h2>
+  <ul>
+    <li><a href="https://github.com/Fission-AI/OpenSpec" target="_blank" rel="noopener">Fission-AI/OpenSpec</a></li>
+    <li><a href="https://raw.githubusercontent.com/Fission-AI/OpenSpec/main/docs/getting-started.md" target="_blank" rel="noopener">Getting Started</a></li>
+    <li><a href="https://raw.githubusercontent.com/Fission-AI/OpenSpec/main/docs/writing-specs.md" target="_blank" rel="noopener">Writing Good Specs</a></li>
+    <li><a href="https://raw.githubusercontent.com/Fission-AI/OpenSpec/main/docs/workflows.md" target="_blank" rel="noopener">Workflows</a></li>
+    <li><a href="https://raw.githubusercontent.com/Fission-AI/OpenSpec/main/docs/existing-projects.md" target="_blank" rel="noopener">Existing Projects</a></li>
+    <li><a href="00-index.html">Course home</a></li>
+  </ul>
+
+  <div class="lesson-nav">
+    <a href="09-spec-evolution-inventory.html">← 09 Inventory</a>
+    <a href="00-index.html">Back to course home</a>
+  </div>
+</main>
+<script>
+(function () {
+  const COPY_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  const CHECK_ICON =
+    '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  function copyText(text, onDone) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(onDone).catch(fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      onDone();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("pre").forEach((pre) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "code-wrapper";
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "copy-btn";
+      btn.innerHTML = COPY_ICON + " Copy";
+      wrapper.appendChild(btn);
+
+      btn.addEventListener("click", () => {
+        const code = pre.querySelector("code");
+        const text = (code ? code.innerText : pre.innerText).trimEnd();
+        copyText(text, () => {
+          btn.innerHTML = CHECK_ICON + " Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.innerHTML = COPY_ICON + " Copy";
+            btn.classList.remove("copied");
+          }, 2000);
+        });
+      });
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

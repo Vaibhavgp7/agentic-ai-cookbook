@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Handoff (Swarm) Pattern Lab: The Debit the Customer Does Not Recognize</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 980px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.05rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.55rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 { font-size: 1.2rem; margin-top: 1.6rem; color: #0f172a; }
+    p { margin: 0.45rem 0 0.7rem; }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.92em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.86rem;
+      margin: 0.7rem 0 1.3rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+      line-height: 1.45;
+    }
+    pre code { background: none; padding: 0; color: inherit; }
+    .diagram pre, pre.mermaid {
+      background: #ffffff;
+      color: #111827;
+      border: none;
+      margin: 0;
+      padding: 0.35rem 0.2rem 0.1rem;
+      box-shadow: none;
+    }
+    .note, .exercise, .instructor, .predict, .case {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.4rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .instructor {
+      border-left: 4px solid #d97706;
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: rgba(217, 119, 6, 0.35);
+    }
+    .predict {
+      border-left: 4px solid #9333ea;
+      background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+      border-color: rgba(147, 51, 234, 0.35);
+    }
+    .case {
+      border-left: 4px solid #b45309;
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: rgba(180, 83, 9, 0.35);
+    }
+    .exercise-title, .instructor-title, .predict-title, .case-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+    }
+    .exercise-title { color: #166534; }
+    .instructor-title { color: #92400e; }
+    .predict-title { color: #6b21a8; }
+    .case-title { color: #92400e; }
+    .glossary dt { font-weight: 650; margin-top: 0.75rem; }
+    .glossary dd { margin: 0.15rem 0 0.3rem 0; }
+    ol, ul { padding-left: 1.35rem; }
+    li { margin: 0.28rem 0; }
+    table { border-collapse: collapse; width: 100%; margin: 0.7rem 0 1.2rem; font-size: 0.92rem; }
+    th, td { border: 1px solid #e5e7eb; padding: 0.45rem 0.6rem; text-align: left; vertical-align: top; }
+    th { background: #eff6ff; }
+    .diagram {
+      background: #fafafa;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 0.4rem 0.6rem 0.2rem;
+      margin: 0.5rem 0 0.4rem;
+      overflow-x: auto;
+    }
+    .caption { font-size: 0.85rem; color: #475569; margin: 0 0 1rem; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Handoff (Swarm) Pattern Lab: The Debit the Customer Does Not Recognize</h1>
+
+  <div class="note">
+    <strong>How to use this guide</strong>
+    <ol>
+      <li>Open this page beside a Jupyter notebook named <code>09a-handoff-swarm.ipynb</code> in the <code>03-langgraph</code> folder.</li>
+      <li>Use the <code>.env</code> already in that folder (<code>OPENAI_API_KEY</code> and <code>MODEL_NAME</code>).</li>
+      <li>Whenever you see <strong>Your Task</strong>, paste the code into a <strong>new notebook cell</strong> and run it before you continue.</li>
+      <li>Read the printed <code>HANDOFF</code> line after every node. That line is the specialist choosing the next specialist.</li>
+    </ol>
+    <p>Pattern 1 of 5. The overview is <code>09-more-multi-agent-patterns.html</code>. The supervisor lab (<code>07-supervisor-pattern.html</code>) is the pattern this one is not.</p>
+  </div>
+
+  <h2>1. Why this lab exists</h2>
+  <p>
+    In the supervisor lab, every worker’s only arrow goes back to the center. The worker reports a finding. It does not name the next worker. That is the right shape when one desk can read each result and pick the next step.
+  </p>
+  <p>
+    This case is different. The person who just opened the record is the only one who knows which colleague should see it next. If a center node tries to choose, it either guesses from the customer’s angry words, or it has to understand every product itself.
+  </p>
+
+  <h3>What you will build</h3>
+  <ol>
+    <li>A <strong>service desk</strong> that reads the complaint and hands it to the NACH desk. It does not guess the product.</li>
+    <li>A <strong>NACH desk</strong> that opens the mandate and can hand the case straight to home loans, then accept the case back.</li>
+    <li>A <strong>home-loan desk</strong> that explains the amount, sends the case back for one check, and is allowed to finish.</li>
+  </ol>
+  <p>There is no supervisor node. Each specialist has its own dotted exits.</p>
+
+  <h2>2. The business story</h2>
+  <div class="case">
+    <div class="case-title">What the customer typed</div>
+    <p>“₹18,450 left my savings account yesterday. The description only says NACH DR. I never approved a payment. I think someone has taken my money.”</p>
+  </div>
+  <ul>
+    <li>NACH (National Automated Clearing House) is how a bank pulls money the customer already allowed. The statement does not print the product name. “DR” means debit.</li>
+    <li>The same line can be a home-loan EMI (the monthly installment), an insurance premium, a mutual-fund installment, or a bill. The customer never says “home loan,” because the app never showed those words.</li>
+    <li>The service desk can see two things: the customer thinks this is theft, and the line says NACH. A NACH debit is a pre-approved pull. It is not a stolen-card charge and not a UPI payment. The desk passes the message to the NACH team, the only team that can open that pull.</li>
+    <li>The NACH team looks up the UMRN (Unique Mandate Reference Number, the id of the customer’s permission). The party allowed to pull the money is this bank’s home loan <strong>HL-2291</strong>. It is the October installment. The money has already left the account, but the return file (the end-of-day list of debits that bounced) is not ready yet. The NACH team does not explain loan amounts, so it passes the loan number, the amount, and “return file not ready” to home loans.</li>
+    <li>Home loans finds the agreed EMI is ₹15,200. The extra ₹3,250 is interest for the days between last month’s loan payout and the first EMI date. Both amounts were pulled in one debit. The loan screen still says “unpaid” until the return file is ready. The loan team will not tell the customer the EMI is final while a bounce is still possible, so it sends the case back to the NACH desk for that one check.</li>
+    <li>The NACH desk sees the return file is now ready, and this debit did not bounce. It sends the case back to home loans. The loan team writes a plain reply and finishes.</li>
+  </ul>
+
+  <h3>Words you need</h3>
+  <div class="note glossary">
+    <dl>
+      <dt>NACH</dt>
+      <dd>The clearing system a bank uses to pull an agreed amount from an account. The statement often shows only “NACH DR.”</dd>
+      <dt>UMRN</dt>
+      <dd>The id of one mandate: who may pull, from which account, and for what.</dd>
+      <dt>Mandate</dt>
+      <dd>The stored permission to pull this money. If the mandate exists, the debit was allowed, even when the customer does not remember approving “a payment” yesterday.</dd>
+      <dt>EMI</dt>
+      <dd>The monthly installment on a loan.</dd>
+      <dt>Return file</dt>
+      <dd>The end-of-day list that says which NACH debits bounced. Until it is published, the loan screen can still say unpaid.</dd>
+      <dt>Handoff</dt>
+      <dd>The specialist who just ran writes the name of the next node, or <code>FINISH</code>.</dd>
+    </dl>
+  </div>
+
+  <h2>3. Why a keyword rule cannot do this</h2>
+  <ul>
+    <li>“NACH DR” is not the name of a product. A keyword rule cannot tell a home-loan EMI from insurance or a mutual fund.</li>
+    <li>The words “someone has taken my money” would send a keyword rule to a fraud team. The mandate says the pull was allowed. Only the team that opened the UMRN can see that.</li>
+    <li>Seeing that ₹18,450 is ₹15,200 plus ₹3,250, and that the loan screen is simply waiting, is a loan decision. The NACH team should not guess it.</li>
+  </ul>
+
+  <h2>4. Why a supervisor cannot run this case</h2>
+  <table>
+    <thead>
+      <tr><th></th><th>Supervisor (lab 07)</th><th>Swarm / handoff (this lab)</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Who chooses the next node</td>
+        <td>One supervisor node, on every turn</td>
+        <td>The specialist who just ran</td>
+      </tr>
+      <tr>
+        <td>Where a worker’s arrow goes</td>
+        <td>Always back to the supervisor</td>
+        <td>Straight to a colleague, or to <code>__end__</code></td>
+      </tr>
+      <tr>
+        <td>What the worker writes</td>
+        <td>A finding. It does not name the next worker</td>
+        <td>A finding, plus the name of the next worker</td>
+      </tr>
+      <tr>
+        <td>What the router must know</td>
+        <td>Enough about every specialty to pick the next one</td>
+        <td>Each agent only knows the colleagues it is allowed to call</td>
+      </tr>
+      <tr>
+        <td>Who may finish</td>
+        <td>Only the supervisor</td>
+        <td>Any specialist that has <code>FINISH</code> in its own map</td>
+      </tr>
+      <tr>
+        <td>Shape of the graph</td>
+        <td>A star. Every worker points back to the center</td>
+        <td>Specialists point at each other</td>
+      </tr>
+    </tbody>
+  </table>
+  <ul>
+    <li>In the supervisor lab, <code>nach_desk</code> could report what it found. It could not pass the case to <code>home_loan</code>. The arrow only goes back to the center.</li>
+    <li>The customer’s words say “someone has taken my money.” A supervisor that chooses from those words sends the case to fraud. The home loan shows up only after someone reads the UMRN. That is the NACH team’s job.</li>
+    <li>If the supervisor reads the UMRN itself, it must understand mandate ids, return files, EMI dates, and the extra interest. One node then has to know every product.</li>
+    <li><code>home_loan</code> knows the reply is not safe until the return file is checked. A supervisor that reads “the amount is explained” can close the case and skip that check. The loan team must be allowed to call <code>nach_desk</code> back.</li>
+    <li>Only the supervisor may finish. After the return file is clear, <code>home_loan</code> still cannot send the reply. The first message still says “taken my money,” so the supervisor can send the case to fraud at the end.</li>
+  </ul>
+  <p>Use a supervisor when one center can read each result and pick the next worker. Use a swarm when the specialist who just did the work is the right one to choose the next specialist.</p>
+
+  <h2>5. The graph</h2>
+  <div class="diagram">
+    <pre class="mermaid">
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	service_desk(service_desk)
+	nach_desk(nach_desk)
+	home_loan(home_loan)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> service_desk;
+	service_desk -.-> nach_desk;
+	service_desk -.-> home_loan;
+	service_desk -.-> __end__;
+	nach_desk -.-> home_loan;
+	nach_desk -.-> service_desk;
+	nach_desk -.-> __end__;
+	home_loan -.-> nach_desk;
+	home_loan -.-> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+    </pre>
+  </div>
+  <p class="caption">Solid arrow: always happens (<code>add_edge</code>). Dotted arrow: the node that just ran chooses (<code>add_conditional_edges</code>). There is no supervisor node.</p>
+  <ul>
+    <li>The graph always starts at <code>service_desk</code>.</li>
+    <li>Each specialist adds what it found to <code>messages</code>, and sets <code>next</code> to a colleague’s name or <code>FINISH</code>.</li>
+    <li>The dotted arrow reads <code>next</code> and goes there. The next specialist can see the earlier notes.</li>
+    <li>Any specialist whose map includes <code>FINISH</code> may finish. In this case the loan team is the one that should.</li>
+    <li>A loop is a dotted arrow back to an earlier node. <code>recursion_limit</code> stops a confused model from spinning.</li>
+  </ul>
+
+  <div class="predict">
+    <div class="predict-title">Predict before you code</div>
+    <p>Write down the node names in order. You will check this after the run. The path has five specialist visits, and <code>nach_desk</code> and <code>home_loan</code> each appear twice.</p>
+  </div>
+
+  <h2>6. Setup</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>In a terminal, from the <code>03-langgraph</code> folder:</p>
+  </div>
+  <pre><code>pip install langgraph langchain langchain-openai python-dotenv</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. It should print your model name, not an error.</p>
+  </div>
+  <pre><code>import os
+import operator
+from typing import Literal
+from typing_extensions import TypedDict, Annotated
+from pydantic import BaseModel, Field
+from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langgraph.graph import StateGraph, START, END
+
+load_dotenv()
+model_name = os.getenv("MODEL_NAME", "gpt-4.1-mini")
+llm = ChatOpenAI(model=model_name, temperature=0)
+print("Model:", model_name)</code></pre>
+
+  <h2>7. The bank records</h2>
+  <p>
+    Python holds the records. The model does not invent the UMRN, the EMI, or whether the debit bounced.
+    The model’s job is the judgment: who should see this next, and what to tell them.
+    The return file is not ready on the first NACH visit. It becomes ready only after the loan team has had the case once. That matches the story: the file lands while the loan team is working.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. You should see the complaint and <code>return file published: False</code>.</p>
+  </div>
+  <pre><code>COMPLAINT = (
+    "₹18,450 left my savings account SB-441908 yesterday. "
+    "The description only says NACH DR. I never approved a payment. "
+    "I think someone has taken my money."
+)
+
+MANDATE = {
+    "umrn": "UMRN7721904",
+    "account": "SB-441908",
+    "creditor": "Horizon Bank Home Loans",
+    "loan_id": "HL-2291",
+    "pull_amount": 18450,
+    "narration_on_statement": "NACH DR",
+    "value_date": "2026-10-02",
+}
+
+LOAN = {
+    "loan_id": "HL-2291",
+    "emi": 15200,
+    "pre_emi_interest": 3250,
+    "why_extra": "Interest for the days between last month's loan payout and the first EMI date.",
+    "screen_status": "unpaid",
+    "screen_note": "The loan screen stays unpaid until the NACH return file confirms the debit did not bounce.",
+}
+
+CASE = {"return_file_published": False}
+
+def lookup_mandate():
+    return dict(MANDATE)
+
+def check_return_file(umrn):
+    if not CASE["return_file_published"]:
+        return {
+            "umrn": umrn,
+            "return_file": "not_ready",
+            "bounced": None,
+            "note": "End-of-day return file is not published yet. A bounce is still possible.",
+        }
+    return {
+        "umrn": umrn,
+        "return_file": "ready",
+        "bounced": False,
+        "note": "Return file is in. This debit is present and did not bounce.",
+    }
+
+def reset_case():
+    CASE["return_file_published"] = False
+
+print(COMPLAINT)
+print("return file published:", CASE["return_file_published"])</code></pre>
+
+  <h2>8. Shared state</h2>
+  <p>
+    <code>messages</code> uses <code>operator.add</code>, so each handoff keeps the notes from earlier steps.
+    <code>next</code> is replaced on every hop. It is the string the dotted arrow reads.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>class State(TypedDict):
+    messages: Annotated[list, operator.add]
+    next: str
+
+def transcript(state):
+    return "\n\n".join(m.content for m in state["messages"])
+
+print("State schema ready.")</code></pre>
+
+  <h2>9. Three handoff schemas</h2>
+  <p>
+    <code>Literal[...]</code> means the model can only pick a real destination.
+    Each specialist gets its <strong>own</strong> list. <code>home_loan</code> cannot name <code>service_desk</code>, because that name is not in its schema.
+    <code>reason</code> comes before <code>next</code>, so the model explains first and chooses second.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>class ServiceHandoff(BaseModel):
+    reason: str = Field(description="One sentence: what you read, and why this colleague is next.")
+    next: Literal["nach_desk", "home_loan", "FINISH"]
+
+class NachHandoff(BaseModel):
+    reason: str = Field(description="One sentence: the UMRN finding, and why this colleague is next.")
+    next: Literal["home_loan", "service_desk", "FINISH"]
+
+class LoanHandoff(BaseModel):
+    reason: str = Field(description="One sentence if you are handing back. If next is FINISH, this is the plain customer reply.")
+    next: Literal["nach_desk", "FINISH"]
+
+print("Handoff schemas ready.")</code></pre>
+
+  <h2>10. The three prompts</h2>
+  <p>Read these slowly. Each prompt lists only the colleagues that desk may call. A shared prompt that knows every desk would turn this back into a supervisor.</p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. Nothing prints except the last line. Read the prompts in the cell before you run later steps.</p>
+  </div>
+  <pre><code>SERVICE_PROMPT = """You are the service desk at Horizon Bank.
+You read the customer's message and choose the next desk. You do not look up mandates or loans.
+
+Colleagues you may call:
+- nach_desk: the description is a NACH pull (the words NACH or NACH DR). A NACH pull is money the customer already allowed someone to take. It is not a stolen-card charge and not a UPI payment.
+- home_loan: only when an earlier note already names a home-loan id. The customer will not name it. Do not guess the product from the amount.
+- FINISH: only when an earlier note is already a finished customer reply. Never on the first message.
+
+The words "someone has taken my money" describe how the customer feels. They do not choose the desk.
+If the description says NACH, next is nach_desk.
+"""
+
+NACH_PROMPT = """You are the NACH desk. FACTS is the mandate and the return-file check you just ran.
+You do not explain loan math. You do not write the customer reply.
+
+Colleagues you may call:
+- home_loan: FACTS names a home-loan id. Tell them the loan id, the amount, and whether the return file is ready. Also call home_loan after you have re-checked the return file for them.
+- service_desk: only if FACTS cannot identify the creditor.
+- FINISH: do not use it on this case.
+
+Rules:
+- If no home_loan note exists yet, next is home_loan.
+- If the latest home_loan note asked you to check the return file, report these FACTS and set next to home_loan again.
+- Do not split 18450 into EMI and interest. That is the loan team's job.
+"""
+
+LOAN_PROMPT = """You are the home-loan team. LOAN is the only loan record you may use.
+Earlier notes from nach_desk tell you the pull amount and the return-file status. Use the LATEST nach_desk note.
+
+Colleagues you may call:
+- nach_desk: you need the return file checked, or the latest note says it is not ready. Do not tell the customer the amount is final while a bounce is still possible.
+- FINISH: only when the latest nach_desk note says the return file is ready and bounced is false. reason must then be a plain reply of 3 or 4 sentences: the EMI, the extra interest, why both were pulled together, and that the debit did not bounce.
+
+Rules:
+- 18450 must equal emi plus pre_emi_interest. Use the numbers in LOAN. Do not invent fees.
+- screen_status unpaid is not proof the customer was not charged. The screen waits for the return file.
+- If the return file is not_ready, or no nach_desk note says bounced is false, next is nach_desk, not FINISH.
+"""
+
+print("Prompts ready.")</code></pre>
+
+  <h2>11. One chain per desk</h2>
+  <p>Each chain returns that desk’s schema only. The NACH chain cannot emit <code>home_loan</code>’s destinations, and the loan chain cannot emit <code>service_desk</code>.</p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>def handoff_chain(system_prompt, schema):
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", system_prompt),
+        MessagesPlaceholder("messages"),
+        ("human", "{packet}"),
+    ])
+    return prompt | llm.with_structured_output(schema)
+
+service_chain = handoff_chain(SERVICE_PROMPT, ServiceHandoff)
+nach_chain = handoff_chain(NACH_PROMPT, NachHandoff)
+loan_chain = handoff_chain(LOAN_PROMPT, LoanHandoff)
+print("Chains ready.")</code></pre>
+
+  <h2>12. The three nodes</h2>
+  <p>
+    <code>service_desk</code> only reads the complaint.
+    <code>nach_desk</code> always reads the mandate and the return file in Python, then the model chooses the next desk from those facts.
+    <code>home_loan</code> reads the loan record, chooses, and only then marks the return file as published. The first NACH visit therefore still sees “not ready.” The second NACH visit sees “ready, did not bounce.”
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>def service_desk(state):
+    decision = service_chain.invoke({
+        "messages": state["messages"],
+        "packet": "Choose the next desk from the customer message only.",
+    })
+    print(f"\n[service_desk] -> {decision.next}")
+    print("   ", decision.reason)
+    note = f"service_desk: {decision.reason}"
+    return {"messages": [HumanMessage(content=note, name="service_desk")], "next": decision.next}
+
+def nach_desk(state):
+    mandate = lookup_mandate()
+    return_file = check_return_file(mandate["umrn"])
+    packet = f"FACTS\nMandate: {mandate}\nReturn file: {return_file}"
+    decision = nach_chain.invoke({"messages": state["messages"], "packet": packet})
+    print(f"\n[nach_desk] return_file={return_file['return_file']} bounced={return_file['bounced']} -> {decision.next}")
+    print("   ", decision.reason)
+    note = f"nach_desk: {decision.reason}\n{packet}"
+    return {"messages": [HumanMessage(content=note, name="nach_desk")], "next": decision.next}
+
+def home_loan(state):
+    packet = f"LOAN\n{LOAN}"
+    decision = loan_chain.invoke({"messages": state["messages"], "packet": packet})
+    print(f"\n[home_loan] -> {decision.next}")
+    print("   ", decision.reason)
+    # The file lands while this desk is working, so the next NACH check can see it.
+    CASE["return_file_published"] = True
+    note = f"home_loan: {decision.reason}\n{packet}"
+    return {"messages": [HumanMessage(content=note, name="home_loan")], "next": decision.next}
+
+def route(state):
+    return state["next"]
+
+print("Nodes ready.")</code></pre>
+
+  <div class="note">
+    <strong>Why the route function is shared, and the maps are not.</strong>
+    <code>route</code> only reads <code>state["next"]</code>. It does not decide. The decision was made inside the node.
+    Each <code>add_conditional_edges</code> map is that node’s list of legal exits. One shared map of every node in the bank would be a supervisor drawn in a different shape.
+  </div>
+
+  <h2>13. Wire the graph</h2>
+  <p>One conditional edge map per specialist. <code>service_desk</code> may call <code>home_loan</code>, but on this complaint it should not. The map is permission. The prompt is the judgment.</p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. It should finish with no error.</p>
+  </div>
+  <pre><code>g = StateGraph(State)
+g.add_node("service_desk", service_desk)
+g.add_node("nach_desk", nach_desk)
+g.add_node("home_loan", home_loan)
+
+g.add_edge(START, "service_desk")
+
+g.add_conditional_edges("service_desk", route, {
+    "nach_desk": "nach_desk",
+    "home_loan": "home_loan",
+    "FINISH": END,
+})
+g.add_conditional_edges("nach_desk", route, {
+    "home_loan": "home_loan",
+    "service_desk": "service_desk",
+    "FINISH": END,
+})
+g.add_conditional_edges("home_loan", route, {
+    "nach_desk": "nach_desk",
+    "FINISH": END,
+})
+
+graph = g.compile()
+print("Graph compiled.")</code></pre>
+
+  <h2>14. Draw the graph</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. This needs a network connection. If it fails, skip it. The graph is already compiled.</p>
+  </div>
+  <pre><code>from IPython.display import Image
+Image(graph.get_graph().draw_mermaid_png())</code></pre>
+  <div class="note">
+    <strong>What to look for.</strong> There is no node called supervisor.
+    <code>nach_desk</code> has a dotted arrow to <code>home_loan</code>, and <code>home_loan</code> has a dotted arrow back to <code>nach_desk</code>.
+    <code>home_loan</code> also has a dotted arrow to the end. In the supervisor lab, a worker never had that arrow.
+  </div>
+
+  <h2>15. Run the complaint</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. Read each handoff line as it prints. Do not scroll past a hop you cannot explain.</p>
+  </div>
+  <pre><code>def run_complaint():
+    reset_case()
+    print("=" * 70)
+    print(COMPLAINT)
+    print("=" * 70)
+    result = graph.invoke(
+        {"messages": [HumanMessage(content=COMPLAINT, name="customer")], "next": ""},
+        config={"recursion_limit": 12},
+    )
+    path = [m.name for m in result["messages"] if m.name and m.name != "customer"]
+    print("\nPATH:", " -> ".join(path + ["FINISH"]))
+    print("\nFINAL NOTE:\n")
+    # The loan record is attached under the reply. Print only the reply.
+    print(result["messages"][-1].content.split("\nLOAN")[0])
+    return result
+
+result = run_complaint()</code></pre>
+
+  <h3>The path you should see</h3>
+  <pre><code>service_desk -> nach_desk -> home_loan -> nach_desk -> home_loan -> FINISH</code></pre>
+  <table>
+    <thead>
+      <tr><th>Hop</th><th>Who just ran</th><th>What they learned</th><th>Who they call</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>service_desk</td>
+        <td>The customer says theft, but the line is NACH DR. This desk cannot open a UMRN.</td>
+        <td>nach_desk</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>nach_desk</td>
+        <td>UMRN7721904 is home loan HL-2291 for ₹18,450. Return file is not ready.</td>
+        <td>home_loan</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>home_loan</td>
+        <td>₹15,200 EMI + ₹3,250 interest. The screen says unpaid only because the file is not in. A reply would be early.</td>
+        <td>nach_desk</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>nach_desk</td>
+        <td>The file is in. This debit did not bounce.</td>
+        <td>home_loan</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>home_loan</td>
+        <td>The amount is explained and the pull did not bounce.</td>
+        <td>FINISH, with the customer reply</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>The final note should mention <strong>₹15,200</strong>, <strong>₹3,250</strong>, and that the debit <strong>did not bounce</strong>. It should be language a customer can read. It should not say the bank was robbed.</p>
+
+  <h3>If the path is different</h3>
+  <ul>
+    <li><strong>service_desk goes to home_loan first.</strong> It guessed the product from the amount. The service prompt forbids that. Re-read hop 1’s reason.</li>
+    <li><strong>home_loan finishes on hop 3.</strong> It closed the case while a bounce was still possible. The loan prompt says <code>FINISH</code> is legal only after a nach note says <code>bounced</code> is false.</li>
+    <li><strong>nach_desk finishes.</strong> The NACH desk wrote the customer reply. Its prompt says not to. The loan team owns the reply.</li>
+    <li><strong>The graph hits the recursion limit.</strong> A specialist is calling the same colleague without a new fact. Check that the second <code>nach_desk</code> line prints <code>return_file=ready</code>.</li>
+  </ul>
+
+  <h2>16. What this graph is allowed to do</h2>
+  <ul>
+    <li><code>nach_desk</code> can call <code>home_loan</code> without going back through <code>service_desk</code>. That arrow does not exist in a supervisor graph.</li>
+    <li><code>home_loan</code> can call <code>nach_desk</code> back. The specialist who knows the reply is unsafe is the one who asks for the missing check.</li>
+    <li><code>home_loan</code> can finish. The first message still says “taken my money,” and that does not force another trip through a center that might send the case to fraud.</li>
+    <li>Each <code>Literal</code> is only that desk’s phone list. <code>home_loan</code> has no edge to <code>service_desk</code>.</li>
+  </ul>
+
+  <h2>17. Key takeaways</h2>
+  <ul>
+    <li><strong>The specialist who just did the work chooses the next specialist.</strong> That is the whole difference from the supervisor lab.</li>
+    <li><strong>One conditional map per node.</strong> A single router that knows every destination is a supervisor, even if you do not name it that.</li>
+    <li><strong>Permission and judgment are different.</strong> The edge map is who you may call. The prompt plus the record is who you should call.</li>
+    <li><strong>Python holds the records. The model holds the handoff.</strong> The UMRN, the EMI split, and the bounce flag are not guessed from the customer’s sentence.</li>
+    <li><strong>A loop needs a stop.</strong> <code>recursion_limit</code> is the hard stop when a handoff prompt is unclear.</li>
+  </ul>
+
+  <div class="instructor">
+    <div class="instructor-title">Try this on your own</div>
+    <ol>
+      <li>Change <code>MANDATE["creditor"]</code> to <code>"Northwind Insurance"</code> and remove <code>loan_id</code>. Predict who <code>nach_desk</code> calls. Then run. Put the mandate back when you are done.</li>
+      <li>Delete <code>"home_loan"</code> from <code>NachHandoff</code> and from the <code>nach_desk</code> edge map, and run again. The case should be unable to reach the loan team. That is the point of a private phone list.</li>
+      <li>Add a fourth node, <code>cards_desk</code>, with a fixed edge only from <code>service_desk</code>. Give the service desk a second complaint whose description is <code>UPI DR AMAZON</code>, and make the prompt send that one to cards, not to NACH.</li>
+    </ol>
+  </div>
+</main>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: "base",
+    securityLevel: "loose",
+    flowchart: { curve: "linear", htmlLabels: true, padding: 14, nodeSpacing: 40, rankSpacing: 45 },
+    themeVariables: {
+      fontFamily: "system-ui, Segoe UI, sans-serif",
+      fontSize: "15px",
+      primaryColor: "#f2f0ff",
+      primaryTextColor: "#111827",
+      primaryBorderColor: "#a78bfa",
+      lineColor: "#64748b",
+    },
+  });
+</script>
+</body>
+</html>

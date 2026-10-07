@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Give the Coverage Officer a Skill</title>
+  <style>
+    :root {
+      --bg-gradient-start: #eef2ff;
+      --bg-gradient-mid: #f9fafb;
+      --bg-gradient-end: #fdf2ff;
+      --text-primary: #111827;
+      --text-heading: #0f172a;
+      --accent-blue: #2563eb;
+      --accent-green: #16a34a;
+      --accent-amber: #d97706;
+      --accent-red: #dc2626;
+      --card-bg: #ffffff;
+      --border-subtle: rgba(148, 163, 184, 0.35);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65; margin: 0; padding: 0;
+      background: radial-gradient(circle at top left, var(--bg-gradient-start) 0, var(--bg-gradient-mid) 40%, var(--bg-gradient-end) 100%);
+      color: var(--text-primary);
+    }
+    main {
+      max-width: 980px; margin: 2rem auto 3rem; padding: 2.5rem 2rem 3rem;
+      background-color: var(--card-bg); border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08), 0 0 0 1px var(--border-subtle);
+    }
+    h1 {
+      font-size: 2.05rem; margin: 0 0 1rem; letter-spacing: -0.03em; text-align: center; color: var(--text-heading);
+      padding: 1rem 1.5rem; border-radius: 999px; background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12), 0 0 0 1px var(--border-subtle);
+    }
+    h2 { font-size: 1.5rem; margin-top: 2.25rem; margin-bottom: 0.5rem; border-bottom: 2px solid rgba(37, 99, 235, 0.18); padding-bottom: 0.35rem; color: var(--text-heading); }
+    h3 { font-size: 1.18rem; margin-top: 1.75rem; color: var(--text-heading); }
+    p { margin: 0.5rem 0 0.75rem; }
+    a { color: var(--accent-blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace; background-color: #f3f4ff; padding: 0.12rem 0.3rem; border-radius: 4px; font-size: 0.93em; color: #1d4ed8; }
+    pre { background: linear-gradient(145deg, #020617, #0b1120); color: #e5e7eb; padding: 1rem 1.1rem; border-radius: 10px; overflow-x: auto; font-size: 0.86rem; line-height: 1.5; margin: 0.75rem 0 1.5rem; border: 1px solid rgba(15, 23, 42, 0.6); }
+    pre code { background: none; padding: 0; color: inherit; }
+    .note, .exercise, .warning, .tip, .student-edit { padding: 0.9rem 1.1rem; margin: 1rem 0 1.5rem; border-radius: 10px; font-size: 0.95rem; border: 1px solid transparent; }
+    .note { border-left: 4px solid var(--accent-blue); background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%); border-color: rgba(37, 99, 235, 0.4); }
+    .exercise { border-left: 4px solid var(--accent-green); background: linear-gradient(135deg, #ecfdf3, #f0fdf4); border-color: rgba(22, 163, 74, 0.4); }
+    .warning { border-left: 4px solid var(--accent-red); background: linear-gradient(135deg, #fef2f2, #fee2e2); border-color: rgba(220, 38, 38, 0.4); }
+    .tip { border-left: 4px solid var(--accent-amber); background: linear-gradient(135deg, #fffbeb, #fef3c7); border-color: rgba(217, 119, 6, 0.4); }
+    .student-edit { border-left: 4px solid var(--accent-green); background: linear-gradient(135deg, #f0fdf4, #ecfdf5); border-color: rgba(22, 163, 74, 0.45); }
+    .exercise-title, .label { font-weight: 650; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.78rem; }
+    .exercise-title { color: #166534; }
+    .label-amber { color: #92400e; }
+    .label-green { color: #166534; }
+    ol, ul { padding-left: 1.4rem; }
+    li { margin: 0.3rem 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.93rem; }
+    table th { background: linear-gradient(135deg, #dbeafe, #e0f2fe); color: var(--text-heading); font-weight: 600; padding: 0.7rem 0.9rem; text-align: left; border-bottom: 2px solid var(--accent-blue); }
+    table td { padding: 0.7rem 0.9rem; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+    table tr:hover { background-color: #f8fafc; }
+    .subtitle { text-align: center; color: #64748b; margin-bottom: 1.5rem; font-size: 1.05rem; }
+    .file-tree { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem 1.1rem; margin: 0.75rem 0 1.5rem; font-family: "Fira Code", Menlo, Monaco, Consolas, monospace; font-size: 0.86rem; white-space: pre; overflow-x: auto; line-height: 1.55; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Give the Coverage Officer a Skill</h1>
+  <p class="subtitle">A written procedure in a folder. The officer sees the name first. The full instructions load only when the question needs that procedure.</p>
+
+  <div class="note">
+    <strong>How to follow this page.</strong>
+    Do Step 1, then Step 2, then the small edit in Step 3, then the logging in Step 4, then run <code>skill_check.py</code> in Step 5 before you trust the claims chat. Copy the skill file and the check files exactly. The code has already been tested. The skill mark <code>SKILL MARK: PRELIMINARY-OPINION</code> is the proof the procedure was loaded. If that line is missing, the body was not loaded. New words are explained in parentheses the first time they appear.
+  </div>
+
+  <h2>The story, in plain words</h2>
+  <p>The coverage officer already knows two kinds of help. <strong>Knowledge</strong> (the claims manual) is facts, retrieved in pieces. <strong>Tools</strong> (Policy Record and Earlier Claims) are functions the model can call. A <strong>skill</strong> is neither. It is a written procedure (a checklist of how to shape the preliminary opinion). The opinion is still a first reading. It still must not say the claim is paid or declined.</p>
+  <p>You will put that procedure in a folder. At the start, the officer sees only the name and a one-line description. The full instructions load only when the question is actually an opinion. A question such as "what is two plus two?" must not load them.</p>
+  <p>CrewAI reads skills from the filesystem (the folders on your computer). Each skill is a directory (a folder). The required file is <code>SKILL.md</code>. The top of that file is YAML (a small block of <code>name:</code> and <code>description:</code> lines) between two <code>---</code> lines. That block is the frontmatter (the label at the top). The markdown under it is the procedure.</p>
+  <p>The path you put on the agent is a <strong>search folder</strong>, not the skill folder itself. From <code>suraksha_claims_desk</code>, <code>skills</code> is that folder. CrewAI looks inside each subdirectory for <code>SKILL.md</code>. It finds <code>skills/preliminary-opinion/SKILL.md</code>. If you point <code>skills</code> at <code>skills/preliminary-opinion</code>, it looks inside that folder for another skill directory and finds none.</p>
+
+  <div class="note">
+    <strong>The body is not in the first prompt.</strong>
+    At setup the officer receives the skill name and the description. That is disclosure level 1 (the name and the one-line description only; the full procedure is not in the prompt yet). The body stays out until the model calls the built-in tool <code>load_skill</code> (a tool CrewAI adds for you; you do not write it) with the exact name <code>preliminary-opinion</code>. The tool returns the body for that execution. That is disclosure level 2 (the full procedure, loaded for this task only). The next question does not keep it. An activated <code>Skill</code> object, passed from Python, would be always-on. This page does not do that.
+  </div>
+
+  <div class="warning">
+    <strong><code>allowed-tools</code> does not add tools.</strong>
+    That frontmatter field is experimental metadata. Policy Record stays on the agent file, under <code>tools</code>. The skill does not open the database by itself.
+  </div>
+
+  <h2>Where you are working</h2>
+  <p>Stay inside <code>suraksha_claims_desk</code>. This page adds the skill directory, the <code>skills</code> field on the coverage officer, the first step of the coverage task in <code>crew.jsonc</code>, skill logs in <code>desk.py</code>, a small check crew, and <code>skill_check.py</code>. Leave the flow, <code>app.py</code>, and the mail clerk as they are.</p>
+  <p>The skill is on the coverage officer, so the claims chat uses it whenever that officer runs. The examiner brief writer does not get it. A <code>skills</code> list on <code>crew.jsonc</code> would apply to every agent. Agent-level skills win when the same name appears in both places. This page keeps the list on the officer only.</p>
+  <pre><code>$env:PYTHONUTF8="1"</code></pre>
+
+  <h2>Step 1: Write the procedure</h2>
+  <p>In this step you create the folder and the procedure file. The folder name and the <code>name</code> inside the file must both be <code>preliminary-opinion</code>. Copy the block exactly, including the skill mark. That line appears nowhere else. If an answer contains it, the procedure was loaded.</p>
+  <div class="student-edit">
+    <div class="label label-green">Create skills/preliminary-opinion/SKILL.md</div>
+    <p>The directory name and the <code>name</code> field must be the same: lowercase letters, digits, and hyphens. The description says when to use the skill. The body holds a line that appears nowhere else: <code>SKILL MARK: PRELIMINARY-OPINION</code>. If that line shows up in an answer, the body was loaded.</p>
+  </div>
+  <pre><code>---
+name: preliminary-opinion
+description: Use this when writing a preliminary coverage opinion for a Suraksha claim. It is the procedure for that opinion. Do not use it for arithmetic, mail, or a question that does not ask for an opinion.
+metadata:
+  author: suraksha-desk
+  version: "1.0"
+---
+
+## Preliminary opinion procedure
+
+This is a procedure, not a fact from the claims manual and not a database tool.
+
+When you write the opinion:
+
+1. Call Policy Record before you quote a clause.
+2. Do not say the claim is paid, approved, or declined.
+3. Put this exact line on its own, after the first heading:
+
+SKILL MARK: PRELIMINARY-OPINION
+
+That line is the proof the procedure was loaded. Do not invent a different mark.</code></pre>
+  <p>Optional folders next to <code>SKILL.md</code> are <code>scripts/</code>, <code>references/</code>, and <code>assets/</code>. This page does not use them. They are catalogued only if you promote the skill to disclosure level 3 in Python with <code>load_resources</code>. <code>load_skill</code> stops at the body.</p>
+
+  <h2>Step 2: Attach it in the agent file</h2>
+  <p>In this step you tell the coverage officer where to look for skills. Add the <code>skills</code> list to <code>agents/coverage_officer.jsonc</code>. The value <code>skills</code> is the search folder (the parent folder), not the skill folder itself. Do not put this list on the examiner brief writer, and do not put it in <code>crew.jsonc</code>. A list on the crew file would apply to every agent.</p>
+  <div class="student-edit">
+    <div class="label label-green">Add skills to agents/coverage_officer.jsonc</div>
+    <p>This is the whole officer file after the change. The new field is <code>skills</code>. The value <code>skills</code> is the search folder, relative to the directory you run from. The goal also names <code>load_skill</code> and the skill name, so the claims desk calls the procedure before it writes an opinion.</p>
+  </div>
+  <pre><code>{
+  "role": "Coverage Officer for claim {claim_id}",
+  "goal": "Give a preliminary coverage opinion for {claim_id} using the accident story in the task and the database rows you open with your tools. Before that opinion, call load_skill with the exact name preliminary-opinion and follow the loaded procedure.",
+  "backstory": "You are a coverage officer at Suraksha General Insurance in India. You interpret policy wording and short internal circulars. You read the policies table and the earlier_claims table instead of guessing. You do not invent policy numbers, dates, amounts, clauses, or older claims. You never mark a claim paid or declined. A senior examiner decides every payment and every denial.",
+  "llm": "openai/gpt-4o-mini",
+  "tools": [
+    "custom:policy_record"
+  ],
+  "skills": [
+    "skills"
+  ],
+  "settings": {
+    "verbose": true,
+    "allow_delegation": false,
+    "max_iter": 12
+  }
+}</code></pre>
+
+  <h2>Step 3: Name the procedure in the coverage task</h2>
+  <p>In this step you make the coverage task call the procedure before it opens the database. The officer's goal is not enough on its own. Edit only the numbered list that starts with <code>Before you answer:</code>, as the green box says. Leave the rest of the task as it is. Save the file.</p>
+  <div class="student-edit">
+    <div class="label label-green">Edit the coverage_opinion task in crew.jsonc</div>
+    <p>The officer's goal is not enough on its own. The manager copies the task into the handoff, and that handoff currently says to open Policy Record first. Replace the numbered list that starts with <code>Before you answer:</code> so <code>load_skill</code> is step 1. Leave the manager lines, the story, and the rest of the task as they are.</p>
+  </div>
+  <pre><code>Before you answer:
+1. Call load_skill with the exact name preliminary-opinion. Follow the loaded procedure, including its skill mark.
+2. Call Policy Record with this claim id.
+3. If the story names a garage, call Earlier Claims with that garage name.</code></pre>
+
+  <h2>Step 4: Log the skill on the claims desk</h2>
+  <p>In this step you add print lines so the terminal tells you whether the procedure was found, whether its body is still unloaded, and whether the chat note contains the skill mark. Follow the green boxes in order. Do not change the flow or the mail clerk.</p>
+  <div class="student-edit">
+    <div class="label label-green">Add the listener and the ready line in desk.py</div>
+    <p>Add <code>_skill_logs_on = False</code> and <code>_listen_for_skills</code> above <code>_get_crew</code>. Call the listener before <code>load_crew</code>, and print <code>Skill ready:</code> after the officer is configured. These lines run once, the first time a complex file builds the crew.</p>
+  </div>
+  <pre><code>_skill_logs_on = False
+
+
+def _listen_for_skills() -&gt; None:
+    """Print skill discovery and load_skill. Once per process."""
+    global _skill_logs_on
+    if _skill_logs_on:
+        return
+    _skill_logs_on = True
+    from crewai.events.event_bus import crewai_event_bus
+    from crewai.events.types.skill_events import (
+        SkillDiscoveryCompletedEvent,
+        SkillUsedEvent,
+    )
+
+    @crewai_event_bus.on(SkillDiscoveryCompletedEvent)
+    def _on_skills_found(source, event) -&gt; None:
+        print(
+            f"Skill found: {', '.join(event.skill_names)} in {event.search_path}",
+            flush=True,
+        )
+
+    @crewai_event_bus.on(SkillUsedEvent)
+    def _on_skill_used(source, event) -&gt; None:
+        print(
+            f"Skill used: {event.skill_name}. Disclosure level {event.disclosure_level}.",
+            flush=True,
+        )
+
+
+def _get_crew():
+    global _crew, _defaults
+    if _crew is None:
+        _listen_for_skills()
+        manuals = _open_manuals()
+        _crew, _defaults = load_crew(Path(__file__).parent / "crew.jsonc")
+        coverage_officer = _crew.agents[0]
+        # The manager hands this agent a fresh task.
+        # A tool pinned only to coverage_opinion does not travel with that handoff.
+        coverage_officer.tools = list(coverage_officer.tools or []) + [earlier_claims]
+        # crew.jsonc must not list knowledge_sources. An empty list here
+        # keeps a later question from embedding the files again.
+        coverage_officer.knowledge_sources = []
+        if manuals is not None:
+            coverage_officer.knowledge = manuals
+        ready = list(coverage_officer.skills or [])
+        if not ready:
+            print("Skill ready: none on the coverage officer.", flush=True)
+        for skill in ready:
+            print(
+                f"Skill ready: {skill.name}. Disclosure level {skill.disclosure_level}.",
+                flush=True,
+            )
+    return _crew, _defaults</code></pre>
+  <div class="student-edit">
+    <div class="label label-green">Add the chat-note line in run_crew</div>
+    <p>After the two task answers are joined into <code>body</code>, add this print, then return <code>body</code>. It looks at the note the chat will show. The manager writes that note. The coverage officer's own final answer is a separate box in the terminal.</p>
+  </div>
+  <pre><code>    body = "\n\n".join(parts)
+    mark = "SKILL MARK: PRELIMINARY-OPINION"
+    print(
+        f"Skill mark in the chat note for {claim['claim_id']}: "
+        f"{'present' if mark in body else 'absent'}.",
+        flush=True,
+    )
+    return body</code></pre>
+
+  <h2>Step 5: Check it without the claims chat</h2>
+  <p>In this step you run a small second crew that is not the claims chat. The first task must load the procedure and print the skill mark. The second task is "what is two plus two?" and must not print the mark. Create the two files below, then run the command from <code>suraksha_claims_desk</code>. Only after those lines match should you restart the claims chat and ask about CLM-20481.</p>
+  <div class="student-edit">
+    <div class="label label-green">Create skill_crew.jsonc</div>
+    <p>Save this next to <code>crew.jsonc</code>. It is a second crew. It uses the same coverage officer, so it uses the same skill. Two tasks run in order. The first asks for an opinion and tells the officer to call <code>load_skill</code>. The second is arithmetic and forbids that call. The mark is not in either task. It can appear only if the body was loaded.</p>
+  </div>
+  <pre><code>{
+  "name": "Suraksha Skill Check",
+  "agents": ["coverage_officer"],
+  "tasks": [
+    {
+      "name": "opinion_with_skill",
+      "agent": "coverage_officer",
+      "description": "A claims officer asked: {officer_question}\n\nClaim id: {claim_id}\n\nAccident story:\n{narrative}\n\nWrite a preliminary coverage opinion. The skill whose description is about a preliminary coverage opinion applies. Call load_skill with that skill's exact name before you write. Then follow the loaded instructions. Call Policy Record with this claim id. Do not say the claim is paid, approved, or declined.",
+      "expected_output": "A short preliminary opinion. It must contain the exact skill mark from the loaded instructions."
+    },
+    {
+      "name": "arithmetic_without_skill",
+      "agent": "coverage_officer",
+      "description": "What is two plus two? Answer with the number only. Do not call load_skill. Do not write a coverage opinion.",
+      "expected_output": "The number only."
+    }
+  ],
+  "process": "sequential",
+  "verbose": true,
+  "inputs": {
+    "claim_id": "CLM-10021",
+    "officer_question": "Is this loss covered?",
+    "narrative": "Date of loss: 2 March 2026. Place: Banjara Hills, Hyderabad. The insured reversed into a pillar in a marked parking bay. Own damage only. No third party. No injury. Garage estimate from City Shine Garage: INR 18000."
+  }
+}</code></pre>
+  <div class="student-edit">
+    <div class="label label-green">Create skill_check.py</div>
+    <p>Save this next to <code>desk.py</code>. The two handlers are the log. <code>Skill found:</code> is discovery. <code>Skill ready:</code> prints disclosure level 1, which means the body is not loaded yet. <code>Skill used:</code> prints when <code>load_skill</code> returns the body. Level 2 is that body.</p>
+  </div>
+  <pre><code>from pathlib import Path
+
+from dotenv import load_dotenv
+from crewai.events.event_bus import crewai_event_bus
+from crewai.events.types.skill_events import (
+    SkillDiscoveryCompletedEvent,
+    SkillUsedEvent,
+)
+from crewai.project import load_crew
+
+load_dotenv()
+
+HERE = Path(__file__).resolve().parent
+
+
+@crewai_event_bus.on(SkillDiscoveryCompletedEvent)
+def _on_skills_found(source, event) -&gt; None:
+    print(
+        f"Skill found: {', '.join(event.skill_names)} in {event.search_path}",
+        flush=True,
+    )
+
+
+@crewai_event_bus.on(SkillUsedEvent)
+def _on_skill_used(source, event) -&gt; None:
+    print(
+        f"Skill used: {event.skill_name}. Disclosure level {event.disclosure_level}.",
+        flush=True,
+    )
+
+
+if __name__ == "__main__":
+    print(
+        "Skill check: loading skill_crew.jsonc. The claims chat is not started.",
+        flush=True,
+    )
+    crew, defaults = load_crew(HERE / "skill_crew.jsonc")
+    officer = crew.agents[0]
+    for skill in officer.skills or []:
+        print(
+            f"Skill ready: {skill.name}. Disclosure level {skill.disclosure_level}.",
+            flush=True,
+        )
+    result = crew.kickoff(inputs=defaults)
+    for task_output in result.tasks_output:
+        print(f"\nTask {task_output.name}:\n{task_output.raw}", flush=True)</code></pre>
+  <pre><code>uv run python skill_check.py</code></pre>
+  <p>Run it from <code>suraksha_claims_desk</code>. Search the terminal for these lines.</p>
+  <ul>
+    <li><code>Skill found: preliminary-opinion in skills</code> before the tasks. It can print twice. The officer is prepared more than once. Both lines name the same skill.</li>
+    <li><code>Skill ready: preliminary-opinion. Disclosure level 1.</code> The body is still unloaded.</li>
+    <li>On the opinion task, a tool box whose name is <code>load_skill</code>, then <code>Skill used: preliminary-opinion. Disclosure level 2.</code></li>
+    <li>The opinion task's printed answer contains <code>SKILL MARK: PRELIMINARY-OPINION</code>. It does not say the claim is paid.</li>
+    <li>The arithmetic task prints a number. It does not contain the skill mark, and it does not print another <code>Skill used:</code> line.</li>
+  </ul>
+  <p>Restart the claims chat, select <strong>CLM-20481</strong>, and ask whether the loss is covered. The terminal beside the chat is the log. Search it in this order.</p>
+  <ul>
+    <li><code>Chat: CLM-20481. Starting a flow. The crew has not started.</code></li>
+    <li><code>Crew start: CLM-20481.</code></li>
+    <li><code>Skill found: preliminary-opinion in skills</code> the first time this process builds the crew. A later question in the same process does not print it again.</li>
+    <li><code>Skill ready: preliminary-opinion. Disclosure level 1.</code> The body is still unloaded. This also prints only on that first build.</li>
+    <li>A tool box named <code>load_skill</code>, then <code>Skill used: preliminary-opinion. Disclosure level 2.</code> That line prints on every complex question that loads the procedure, including a later question in the same process.</li>
+    <li>The coverage officer's own final-answer box contains <code>SKILL MARK: PRELIMINARY-OPINION</code>. The examiner brief writer has no <code>skills</code> field, so that agent does not call <code>load_skill</code>.</li>
+    <li><code>Skill mark in the chat note for CLM-20481: present.</code> or <code>absent.</code> This line reads the note the page shows. That note is the manager's task answer. <code>absent</code> means the manager did not copy the mark into the page. The officer's final-answer box is still the proof the procedure was loaded.</li>
+  </ul>
+  <p>A fast door, CLM-10021 or CLM-10044, still prints no <code>Crew start:</code>, no <code>Skill found:</code>, and no <code>load_skill</code>.</p>
+
+  <h2>What just happened</h2>
+  <div class="file-tree">skills/preliminary-opinion/SKILL.md
+        │
+        ▼
+agents/coverage_officer.jsonc  skills: ["skills"]
+        │
+        ▼
+Setup shows the name and the description. Level 1.
+        │
+        ▼
+Opinion task calls load_skill
+        │
+        ▼
+The body is injected for that task. Level 2.
+        │
+        ▼
+Arithmetic task does not load it.</div>
+  <ul>
+    <li>A skill is instructions. A tool is a function. Knowledge is retrieved facts. This officer now has all three, and they are configured separately.</li>
+    <li><code>skills</code> on the agent file is a list of search folders, inline <code>SKILL.md</code> text, or <code>@org/name</code> registry references. This page uses the folder <code>skills</code>.</li>
+    <li><code>load_skill</code> is added by CrewAI when a skill is still at metadata level. You do not write that tool.</li>
+    <li>The directory name must match <code>name</code> in the frontmatter.</li>
+  </ul>
+
+  <h2>If something goes wrong</h2>
+  <table>
+    <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td><code>Skill search path does not exist</code></td><td>Run from <code>suraksha_claims_desk</code>. The value in <code>skills</code> is <code>skills</code>, the folder next to <code>agents</code>.</td></tr>
+      <tr><td><code>Skill ready: none on the coverage officer.</code></td><td>The officer file has no <code>skills</code> field, or the search folder has no child directory containing <code>SKILL.md</code>. Restart the chat after you fix the file. The crew is built once.</td></tr>
+      <tr><td><code>Skill found</code> never prints on a complex file</td><td><code>_listen_for_skills</code> must run before <code>load_crew</code>. A chat that was already running does not see a new <code>desk.py</code> until you restart it.</td></tr>
+      <tr><td>Directory name does not match skill name</td><td>The folder must be <code>preliminary-opinion</code> and the frontmatter <code>name</code> must be the same string.</td></tr>
+      <tr><td>The opinion has no skill mark</td><td>Search for <code>load_skill</code>. If that tool did not run, the body was never injected. The description must say when the skill applies, and the task must name <code>load_skill</code>.</td></tr>
+      <tr><td>The arithmetic answer contains the mark</td><td>That task called <code>load_skill</code> anyway. Its text must say not to call <code>load_skill</code> and not to write an opinion.</td></tr>
+      <tr><td>The examiner brief also contains the mark</td><td><code>skills</code> was added to <code>crew.jsonc</code> or to <code>agents/examiner_brief.jsonc</code>. Remove it. Only the coverage officer should list this folder.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="exercise">
+    <div class="exercise-title">Try this on your own</div>
+    <ol>
+      <li>Add a second skill, <code>skills/examiner-note</code>, and put <code>skills</code> on the examiner brief writer only. Its mark must be different. A coverage opinion must not contain that second mark.</li>
+      <li>Change the description so it no longer mentions a coverage opinion. Run the check again. <code>load_skill</code> should stay unused on the opinion task, and the mark should be absent.</li>
+      <li>Point <code>skills</code> at <code>skills/preliminary-opinion</code> instead of <code>skills</code>. Discovery finds nothing, because that path is the skill directory, not the search folder.</li>
+    </ol>
+  </div>
+</main>
+</body>
+</html>

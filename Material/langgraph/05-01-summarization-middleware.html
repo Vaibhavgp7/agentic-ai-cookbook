@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Summarization Middleware for LangChain Agents – Hands-on Guide</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+      color: #0f172a;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .note, .exercise {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .exercise-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #166534;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Summarization Middleware for LangChain Agents – Hands-on Guide</h1>
+
+  <div class="note">
+    <strong>How to use this guide</strong>
+    <ol>
+      <li>Open your editor (VS Code / Cursor / Jupyter / any IDE) and a terminal.</li>
+      <li>Create or open the notebook file <code>09-summarization-middleware.ipynb</code> (or a new Python script).</li>
+      <li>Place this HTML guide side‑by‑side with your notebook.</li>
+      <li>Whenever you see a section titled <strong>Your Task</strong>, create a <strong>new cell</strong> in your notebook, paste or type the code, and run it.</li>
+      <li>Read the short explanation before each task so you understand <em>why</em> you are running that code, not just how.</li>
+    </ol>
+  </div>
+
+  <h2>1. Why Summarization Middleware?</h2>
+  <p>
+    Long conversations inflate token usage, slow responses, and can degrade model quality.
+    <strong>Trimming</strong> drops old messages entirely; <strong>summarization</strong> compresses older turns into a short summary
+    so the agent keeps high‑level context without storing every raw message.
+  </p>
+  <p>
+    LangChain’s <code>SummarizationMiddleware</code> runs when message count crosses a threshold, summarizes older content with a model,
+    and keeps a configurable number of recent messages verbatim—ideal for production agents with long threads.
+  </p>
+
+  <h2>2. Environment Setup and Imports</h2>
+  <p>
+    Import what you need for an agent with <code>SummarizationMiddleware</code>, <code>SQLDatabaseToolkit</code>, Tavily search,
+    and an in‑memory checkpointer. Load API keys with <code>python-dotenv</code> (<code>OPENAI_API_KEY</code>, <code>TAVILY_API_KEY</code>).
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste or type the code below, and run it to set up imports and environment variables.
+    </p>
+  </div>
+
+  <pre><code># Import required libraries
+import warnings
+warnings.filterwarnings("ignore")
+
+import sqlite3
+from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+from langchain.agents import create_agent
+from langchain.agents.middleware import SummarizationMiddleware
+from langchain_community.utilities import SQLDatabase
+from langchain_community.agent_toolkits import SQLDatabaseToolkit
+from langchain_community.tools.tavily_search import TavilySearchResults
+from langchain_core.runnables import RunnableConfig
+from langgraph.checkpoint.memory import InMemorySaver
+
+load_dotenv()</code></pre>
+
+  <p class="note" style="margin-top: 1rem;">
+    <strong>Dependencies.</strong> Install community tools if needed:
+    <code>pip install langchain-community</code>.
+    Tavily requires <code>TAVILY_API_KEY</code> in your <code>.env</code> (get a key at
+    <a href="https://tavily.com" target="_blank" rel="noopener">tavily.com</a>).
+  </p>
+
+  <h2>3. Sample Database, Built‑in Toolkits, and Conversation Helper</h2>
+  <p>
+    The agent uses two <strong>prebuilt</strong> tool sources: <code>SQLDatabaseToolkit</code> (model writes SQL against a small SQLite file)
+    and <code>TavilySearchResults</code> for web search. No custom <code>@tool</code> functions—only wiring and a tiny seed database.
+    A helper runs multi‑turn chats and prints <strong>message counts and sizes</strong> so you can see when summarization kicks in without
+    dumping full transcripts.
+  </p>
+
+  <h3>3.1 SQLite + SQLDatabaseToolkit + Tavily</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste or type the code below, and run it to create the demo DB and tool list.
+    </p>
+  </div>
+
+  <pre><code>DB_PATH = "summarize_middleware_demo.db"
+
+def create_demo_database(path: str = DB_PATH) -> None:
+    conn = sqlite3.connect(path)
+    cur = conn.cursor()
+    cur.execute("DROP TABLE IF EXISTS orders")
+    cur.execute("""
+        CREATE TABLE orders (
+            id INTEGER PRIMARY KEY,
+            customer_name TEXT NOT NULL,
+            sku TEXT,
+            status TEXT,
+            tracking TEXT
+        )
+    """)
+    rows = [
+        (12345, "John Doe", "WIDGET-A", "shipped", "TRK123456"),
+        (12346, "John Doe", "WIDGET-B", "delivered", "TRK123457"),
+        (12347, "Jane Smith", "GADGET-1", "processing", None),
+        (12348, "Jane Smith", "GADGET-2", "shipped", "TRK123458"),
+    ]
+    cur.executemany(
+        "INSERT INTO orders (id, customer_name, sku, status, tracking) VALUES (?, ?, ?, ?, ?)",
+        rows,
+    )
+    conn.commit()
+    conn.close()
+    print(f"Demo DB ready: {path}")
+
+create_demo_database()
+
+model = ChatOpenAI(model="gpt-4.1-mini", temperature=0)
+db = SQLDatabase.from_uri(f"sqlite:///{DB_PATH}")
+sql_tools = SQLDatabaseToolkit(db=db, llm=model).get_tools()
+search_tool = TavilySearchResults(max_results=2)
+tools = [*sql_tools, search_tool]
+
+print("Tools loaded:", len(tools), "total")
+for t in tools:
+    print(f"  • {t.name}")</code></pre>
+
+  <h3>3.2 Conversation Simulator (sizes only)</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste or type the code below, and run it to define the simulator used in the next section.
+    </p>
+  </div>
+
+  <pre><code>def _msg_chars(msg) -> int:
+    c = msg.content
+    if isinstance(c, str):
+        return len(c)
+    return len(str(c))
+
+
+def _print_message_sizes(messages, label: str) -> None:
+    total_chars = sum(_msg_chars(m) for m in messages)
+    print(f"  {label}: {len(messages)} messages, {total_chars} total chars")
+    for idx, msg in enumerate(messages):
+        print(f"    [{idx}] type={msg.type} chars={_msg_chars(msg)}")
+
+
+def simulate_conversation(agent, config, messages_list, title="Conversation"):
+    """Run turns and print counts/sizes only (no full message bodies)."""
+    print(f"\n🗣️ {title}")
+    print("=" * 60)
+
+    for i, message in enumerate(messages_list):
+        response = agent.invoke(
+            {"messages": [{"role": "user", "content": message}]},
+            config,
+        )
+        msgs = response["messages"]
+        last = msgs[-1]
+        print(f"\n— Turn {i + 1}/{len(messages_list)} —")
+        print(f"  user prompt chars: {len(message)}")
+        print(f"  last message type: {last.type}, chars: {_msg_chars(last)}")
+        _print_message_sizes(msgs, "checkpoint messages")</code></pre>
+
+  <h2>4. Summarization Middleware</h2>
+  <p>
+    <code>SummarizationMiddleware</code> triggers when the message list reaches a size you configure (here: every 10 messages),
+    keeps the latest messages verbatim (here: 4), and summarizes the rest with a lightweight model.
+    The main agent still sees prior context via the summary, without holding every old message.
+  </p>
+
+  <h3>4.1 Create a Summarization-Enabled Agent</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste or type the code below, and run it to build the agent with
+      <code>SummarizationMiddleware</code>.
+    </p>
+  </div>
+
+  <pre><code># Agent with summarization middleware (same model instance as the SQL toolkit)
+summarize_agent = create_agent(
+    model=model,
+    tools=tools,
+    system_prompt="""You are a helpful assistant with:
+    - SQL tools: answer questions about the local SQLite database (orders table). Use read-only SELECT queries; use the toolkit to list tables/schema before querying.
+    - Web search: use tavily_search for public, up-to-date facts (shipping carriers, industry news) when the database is not enough.
+
+    Be concise. If you see a conversation summary, use it for continuity across turns.""",
+    middleware=[
+        SummarizationMiddleware(
+            model=ChatOpenAI(model="gpt-4.1-mini"),
+            trigger=("messages", 10),
+            keep=("messages", 4),
+        )
+    ],
+    checkpointer=InMemorySaver(),
+)
+
+print("📝 Summarization-enabled agent created (SQL toolkit + Tavily search)!")
+print("🧠 This agent will summarize old messages when the trigger threshold is reached.")
+print("⚙️ Settings: trigger every 10 messages, keep last 4 messages verbatim")</code></pre>
+
+  <h3>4.2 Run an Extended Conversation</h3>
+  <p>
+    Use a longer script of related questions so the thread crosses the trigger threshold and the middleware summarizes older turns.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, paste or type the code below, and run it to observe summarization behavior.
+    </p>
+  </div>
+
+  <pre><code>config_summarize: RunnableConfig = {"configurable": {"thread_id": "customer_thread_summarize"}}
+
+extended_messages = [
+    "Hi — I'm John Doe. What orders do you see for me in the database?",
+    "Give me status and tracking for order 12345.",
+    "List every order in the database with status processing or shipped.",
+    "How does that compare to Jane Smith's orders?",
+    "What's the average number of orders per customer in the database?",
+    "Search the web: what is UPS Next Day Air in one sentence?",
+    "Any public guidance on when 'processing' vs 'shipped' is typical for small parcels?",
+    "Which SKUs appear more than once in our orders table?",
+    "Summarize my open questions so far in a bullet list.",
+    "Run one more SQL check: count rows in orders.",
+    "Search briefly for FedEx vs UPS express options (one fact each).",
+    "What did we establish about order 12345 earlier in this chat?",
+    "Close with a one-line recap of John vs Jane from the DB only.",
+]
+
+simulate_conversation(
+    summarize_agent,
+    config_summarize,
+    extended_messages,
+    "Memory with SUMMARIZATION Pattern",
+)</code></pre>
+
+  <h3>4.3 Visualizing the Summarization Pattern</h3>
+  <p>
+    Unlike hard trimming, summarization keeps important earlier information in compressed form: a summary plus recent turns
+    stays within limits while preserving more nuance than dropping old messages entirely. Your simulator output shows
+    <strong>how many</strong> messages remain and <strong>how large</strong> they are—enough to verify summarization without pasting full text.
+  </p>
+
+  <pre><code>Summarization Pattern in Action:
+
+Before Summarization (12 messages):       After Summarization (9 messages):
+┌─────────────────────────┐               ┌─────────────────────────┐
+│ [System] You are...     │ ──────────────→│ [System] You are...     │
+│ [Human] Hi, I'm John    │ ┐              │                         │
+│ [AI] Hello John!        │ │              │                         │
+│ [Human] Look up info    │ │ SUMMARIZED   │ [AI] 📝 SUMMARY:        │
+│ [AI] Customer: John...  │ │    INTO      │ Customer John Doe is a  │
+│ [Human] Check order     │ │              │ premium member who had  │
+│ [AI] Order #12345...    │ ┘              │ issues with order       │
+│ [Human] Address update  │ ──────────────→│ #12345 delivery delay   │
+│ [AI] Address updated    │ ──────────────→│ and updated address to  │
+│ [Human] Other orders?   │ ──────────────→│ 789 Business Plaza...   │
+│ [AI] Order details...   │ ──────────────→│                         │
+│ [Human] Express ship?   │ ──────────────→│ [Human] Address update  │
+└─────────────────────────┘               │ [AI] Address updated    │
+                                          │ [Human] Other orders?   │
+                                          │ [AI] Order details...   │
+                                          │ [Human] Express ship?   │
+                                          └─────────────────────────┘
+
+Benefits:
+✅ Preserves important context
+✅ Manages memory efficiently
+✅ Smaller footprint than full history
+
+Considerations:
+⚠️ Extra API calls for the summarizer model
+⚠️ Summary quality depends on the summarization model and prompt</code></pre>
+
+  <h2>5. Wrap-Up</h2>
+  <p>In this focused lab you:</p>
+  <ul>
+    <li>Configured <code>SummarizationMiddleware</code> with <code>trigger</code> and <code>keep</code> tuple selectors on messages.</li>
+    <li>Wired <code>SQLDatabaseToolkit</code> and <code>TavilySearchResults</code>—no custom tools—and ran a long thread mixing SQL and search.</li>
+    <li>Used per-turn <strong>message counts and character sizes</strong> to see when history grows and when summarization compacts it.</li>
+    <li>Compared the tradeoffs: better retention than naive trimming, with summarization cost and model dependency.</li>
+  </ul>
+  <p>
+    Tune <code>trigger</code> and <code>keep</code> for your token budget and how much recency the task requires.
+  </p>
+
+</main>
+</body>
+</html>

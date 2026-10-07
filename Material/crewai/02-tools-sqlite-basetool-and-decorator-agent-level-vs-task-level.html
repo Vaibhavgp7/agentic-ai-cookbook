@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Let the Coverage Officer Agent Look Things Up</title>
+  <style>
+    :root {
+      --bg-gradient-start: #eef2ff;
+      --bg-gradient-mid: #f9fafb;
+      --bg-gradient-end: #fdf2ff;
+      --text-primary: #111827;
+      --text-heading: #0f172a;
+      --accent-blue: #2563eb;
+      --accent-green: #16a34a;
+      --accent-amber: #d97706;
+      --accent-red: #dc2626;
+      --card-bg: #ffffff;
+      --border-subtle: rgba(148, 163, 184, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, var(--bg-gradient-start) 0, var(--bg-gradient-mid) 40%, var(--bg-gradient-end) 100%);
+      color: var(--text-primary);
+    }
+
+    main {
+      max-width: 980px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08), 0 0 0 1px var(--border-subtle);
+    }
+
+    h1 {
+      font-size: 2.05rem;
+      margin: 0 0 1rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: var(--text-heading);
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12), 0 0 0 1px var(--border-subtle);
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: var(--text-heading);
+    }
+
+    h3 { font-size: 1.18rem; margin-top: 1.75rem; color: var(--text-heading); }
+
+    p { margin: 0.5rem 0 0.75rem; }
+
+    a { color: var(--accent-blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.93em;
+      color: #1d4ed8;
+    }
+
+    pre {
+      background: linear-gradient(145deg, #020617, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.86rem;
+      line-height: 1.5;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+
+    pre code { background: none; padding: 0; color: inherit; }
+
+    .note, .exercise, .warning, .tip, .student-edit {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+
+    .note {
+      border-left: 4px solid var(--accent-blue);
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+    }
+
+    .exercise {
+      border-left: 4px solid var(--accent-green);
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+
+    .warning {
+      border-left: 4px solid var(--accent-red);
+      background: linear-gradient(135deg, #fef2f2, #fee2e2);
+      border-color: rgba(220, 38, 38, 0.4);
+    }
+
+    .tip {
+      border-left: 4px solid var(--accent-amber);
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: rgba(217, 119, 6, 0.4);
+    }
+
+    .student-edit {
+      border-left: 4px solid var(--accent-green);
+      background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+      border-color: rgba(22, 163, 74, 0.45);
+    }
+
+    .exercise-title, .label {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.78rem;
+    }
+
+    .exercise-title { color: #166534; }
+    .label-amber { color: #92400e; }
+    .label-green { color: #166534; }
+
+    ol, ul { padding-left: 1.4rem; }
+    li { margin: 0.3rem 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.93rem;
+    }
+
+    table th {
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      color: var(--text-heading);
+      font-weight: 600;
+      padding: 0.7rem 0.9rem;
+      text-align: left;
+      border-bottom: 2px solid var(--accent-blue);
+    }
+
+    table td {
+      padding: 0.7rem 0.9rem;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+
+    table tr:hover { background-color: #f8fafc; }
+
+    .subtitle {
+      text-align: center;
+      color: #64748b;
+      margin-bottom: 1.5rem;
+      font-size: 1.05rem;
+    }
+
+    .file-tree {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      margin: 0.75rem 0 1.5rem;
+      font-family: "Fira Code", Menlo, Monaco, Consolas, monospace;
+      font-size: 0.86rem;
+      white-space: pre;
+      overflow-x: auto;
+      line-height: 1.55;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Let the Coverage Officer Agent Look Things Up</h1>
+  <p class="subtitle">The same Suraksha chat. The contract wording and the old garage notes now live in a small database. The coverage officer agent has to open them before it writes.</p>
+
+  <div class="note">
+    <strong>How to follow this page.</strong>
+    You already have the chat from the previous exercise: one coverage officer agent, one task, and no lookups. Do Step 1 through Step 9 in order. Copy every code block exactly. The code has already been tested. Do not rewrite it. After a step, check what you should see before you continue. New words are explained in parentheses the first time they appear.
+  </div>
+
+  <h2>The story, in plain words</h2>
+  <p>You are still the <strong>claims officer</strong> (the human at the keyboard) at Suraksha General Insurance (the made-up car-insurance company). A <strong>claim</strong> is one customer's accident file. The <strong>coverage officer agent</strong> (the AI worker that writes a first reading of the file) already writes a <strong>coverage opinion</strong> (that first reading: "does the contract seem to cover this accident?"). The opinion stays <strong>preliminary</strong> (a first draft) and <strong>non-binding</strong> (it does not pay anyone). A <strong>senior examiner</strong> (a more senior human, not in this chat) still decides the money.</p>
+  <p>Up to now we were generous. We pasted the policy lines, the office rule, and the older claims straight into the <strong>task</strong> (the job we assign). A person at a claims desk does not work like that. The accident story arrives in front of them. The policy booklet and the old files sit in the company's records. They have to go and open them.</p>
+  <p>A <strong>tool</strong> is a lookup the agent is allowed to call by name. The agent decides when to call it. The tool only reads. It does not decide the claim. We will store the records in a small <strong>SQLite</strong> database (a single file on disk that holds tables, the way a spreadsheet holds sheets). One tool opens the <strong>policy row</strong> (the one database line for that claim: the contract wording, the papers, the garage bill, and a review mark). The other opens earlier claims for a <strong>garage</strong> (the repair shop named in the story). If the row does not contain a fact, the agent must still say it is missing.</p>
+
+  <div class="note">
+    <strong>Why a tool is the right next step.</strong>
+    Exclusion 4 (the contract sentence about a driver with no valid licence) and circular CL-17 (the office rule: a licence that expired within 30 days is sent to a senior examiner, not rejected on the spot) will live only in the policy table. The two older Highway Motors notes will live only in the earlier-claims table. They will not be pasted into the task. If the opinion quotes those lines, the agent opened the database. If we had left them in the task, we would never know whether the agent looked anything up.
+  </div>
+
+  <div class="warning">
+    <strong>These records are made up.</strong> The opinion is still for a person to read. The agent must not say the claim has been paid or rejected.
+  </div>
+
+  <h2>Where you are working</h2>
+  <p>Stay inside <code>suraksha_claims_desk</code>, the folder that already has <code>app.py</code>, <code>desk.py</code>, and <code>crew.jsonc</code>. If you still have the chat running, stop it with Ctrl+C. We will start it again after the agent can use the new tools. On Windows PowerShell, set this once in that terminal so CrewAI can print its checkmarks:</p>
+  <pre><code>$env:PYTHONUTF8="1"</code></pre>
+
+  <h2>A tool on the agent, or a tool on the task</h2>
+  <p>You can give a tool to the agent (then every job that agent does can use it) or give it to one task (then only that job can use it). Those are different. Read this before you write the files, so you know why the two tools are attached in two places.</p>
+  <table>
+    <thead>
+      <tr><th></th><th>On the agent</th><th>On the task</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>In the files</td><td><code>tools</code> inside <code>agents/coverage_officer.jsonc</code></td><td>Added onto the coverage task in <code>desk.py</code></td></tr>
+      <tr><td>Who can use it</td><td>Every task this agent does, when that task does not bring its own list</td><td>Only the task you attach it to</td></tr>
+      <tr><td>Our choice</td><td>Policy Record. Every coverage task needs the policy wording.</td><td>Earlier Claims. Only this coverage opinion task needs the old garage files.</td></tr>
+    </tbody>
+  </table>
+  <p>There is one rule I want you to remember. If a task names its own tools, that list is the list for the task. The agent's other tools are not added on top. So when I give this task the garage tool, I first copy the policy tool the agent already carries, and then add the garage tool. The agent's own list stays just the policy. Another task for the same agent would still open only the policy.</p>
+
+  <h2>Two ways to write a tool</h2>
+  <p>Both tools read the same database. I am writing them in the two styles CrewAI accepts, so you can see both. A <strong>class</strong> (a blueprint Python uses to build an object) is one style. A <strong>function</strong> with a decorator (a line starting with <code>@</code> that turns an ordinary function into a tool) is the other. You will copy both exactly.</p>
+  <table>
+    <thead>
+      <tr><th></th><th>Policy Record</th><th>Earlier Claims</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Style</td><td>A class that extends <code>BaseTool</code></td><td>A function with the <code>@tool</code> decorator</td></tr>
+      <tr><td>File</td><td><code>tools/policy_record.py</code></td><td><code>tools/earlier_claims.py</code></td></tr>
+      <tr><td>How it is attached</td><td><code>"custom:policy_record"</code> on the agent. The JSON loader builds the class for you.</td><td>Imported in <code>desk.py</code> and added to this task. The decorator already builds a finished tool, so the JSON loader, which looks for a class, is the wrong place for it.</td></tr>
+      <tr><td>What you ask it</td><td>A claim id, such as CLM-20481</td><td>A garage name, such as Highway Motors</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Step 1: Create the database and the dummy rows</h2>
+  <p>In this step you create the records the agent will look up. Create <code>setup_claims_db.py</code> next to <code>crew.jsonc</code> and paste the block below exactly. It builds <code>suraksha_claims.db</code> with two tables and the made-up rows. SQLite is already part of Python, so there is nothing extra to install. The task will not contain this text. The tools will read it. The rows are dummy data (made-up records for class, not a real customer's file).</p>
+  <pre><code>import sqlite3
+from pathlib import Path
+
+DB_PATH = Path(__file__).resolve().parent / "suraksha_claims.db"
+
+
+def main() -&gt; None:
+    if DB_PATH.exists():
+        DB_PATH.unlink()
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(
+        """
+        CREATE TABLE policies (
+            claim_id TEXT PRIMARY KEY,
+            policy_number TEXT NOT NULL,
+            status_on_date_of_loss TEXT NOT NULL,
+            sum_insured_inr INTEGER NOT NULL,
+            wording TEXT NOT NULL,
+            papers_on_file TEXT NOT NULL,
+            injury TEXT NOT NULL,
+            rules_mark TEXT NOT NULL,
+            estimate_inr INTEGER NOT NULL,
+            simple_pay_limit_inr INTEGER NOT NULL
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE earlier_claims (
+            id INTEGER PRIMARY KEY,
+            garage_name TEXT NOT NULL,
+            note TEXT NOT NULL
+        )
+        """
+    )
+
+    conn.executemany(
+        """
+        INSERT INTO policies (
+            claim_id, policy_number, status_on_date_of_loss, sum_insured_inr,
+            wording, papers_on_file, injury, rules_mark, estimate_inr, simple_pay_limit_inr
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        [
+            (
+                "CLM-10021",
+                "PSC-10021",
+                "ACTIVE",
+                650000,
+                "Private Car Package Policy, Section I Own Damage. Accidental loss to the insured vehicle is covered, subject to the compulsory deductible. Exclusion 4 applies only when the driver has no effective licence. The licence on this file is effective.",
+                "Customer report, photos, and estimate. A police report is not required for this parking loss.",
+                "none",
+                "none",
+                18000,
+                25000,
+            ),
+            (
+                "CLM-10044",
+                "PSC-10044",
+                "ACTIVE",
+                700000,
+                "Private Car Package Policy, Section I Own Damage. A police report is required when the insured says an unknown vehicle left the scene.",
+                "Customer report and estimate. Police report: NOT ON FILE.",
+                "none",
+                "none",
+                22000,
+                25000,
+            ),
+            (
+                "CLM-20481",
+                "PSC-44821",
+                "ACTIVE",
+                850000,
+                "Private Car Package Policy, Section I Own Damage. The company indemnifies the insured against accidental loss or damage to the vehicle, subject to the deductions in the schedule. Exclusion 4: the company is not liable while the vehicle is driven by a person who does not hold an effective driving licence. Internal circular CL-17: a licence that expired within the previous 30 days is referred to a senior examiner. It is not an automatic decline. Record the lapse in days and cite Exclusion 4.",
+                "Customer report, police report, and garage estimate. Photographs are mentioned but the pictures themselves are not in this record.",
+                "A third-party whiplash bill of INR 42000 is attached.",
+                "REVIEW. This mark is not a fraud finding.",
+                185000,
+                25000,
+            ),
+        ],
+    )
+    conn.executemany(
+        "INSERT INTO earlier_claims (garage_name, note) VALUES (?, ?)",
+        [
+            (
+                "Highway Motors",
+                "Five months ago this same policyholder reported a bumper claim repaired at Highway Motors.",
+            ),
+            (
+                "Highway Motors",
+                "Another policyholder had a similar side-panel claim at Highway Motors last year.",
+            ),
+        ],
+    )
+    conn.commit()
+    conn.close()
+    print(f"Database created: {DB_PATH}")
+
+
+if __name__ == "__main__":
+    main()</code></pre>
+  <p>From <code>suraksha_claims_desk</code>, create the file on disk:</p>
+  <pre><code>uv run python setup_claims_db.py</code></pre>
+  <p>When this step works, the terminal prints <code>Database created:</code> and a path, and you see <code>suraksha_claims.db</code> beside <code>crew.jsonc</code>. Running the script again deletes that file and inserts the same rows, so you can reset the dummy data whenever you want.</p>
+
+  <h2>Step 2: Policy Record, a class on the agent</h2>
+  <p>In this step you write the lookup that opens one claim's policy row. First create a folder named <code>tools</code> next to <code>crew.jsonc</code>. Inside it, create an empty file <code>tools/__init__.py</code> so Python can import the folder. Then create <code>tools/policy_record.py</code> and paste the block below exactly. This tool is a class that extends <code>BaseTool</code> (CrewAI's built-in starting point for a tool you write as a class). The agent file knows how to build that style: it looks in <code>tools/policy_record.py</code> for a class, and creates one. The <code>name</code> is what the agent sees and decides to call. The <code>description</code> tells the agent when to call it.</p>
+  <pre><code>import sqlite3
+from pathlib import Path
+
+from crewai.tools import BaseTool
+from pydantic import BaseModel, Field
+
+DB_PATH = Path(__file__).resolve().parents[1] / "suraksha_claims.db"
+
+
+class PolicyRecordInput(BaseModel):
+    claim_id: str = Field(..., description="The claim id, for example CLM-20481.")
+
+
+class PolicyRecordTool(BaseTool):
+    name: str = "Policy Record"
+    description: str = (
+        "Reads the policies table for one claim id. "
+        "Returns the policy status, the wording that applies, and which papers are on file. "
+        "Call this before giving a coverage opinion. Do not guess a clause."
+    )
+    args_schema: type[BaseModel] = PolicyRecordInput
+
+    def _run(self, claim_id: str) -&gt; str:
+        print("Lookup: Policy Record", flush=True)
+        with sqlite3.connect(DB_PATH) as conn:
+            conn.row_factory = sqlite3.Row
+            row = conn.execute(
+                "SELECT * FROM policies WHERE claim_id = ?",
+                (claim_id.strip().upper(),),
+            ).fetchone()
+        if row is None:
+            return f"No policy record for {claim_id}."
+        lines = [f"{key}: {row[key]}" for key in row.keys()]
+        return "\n".join(lines)</code></pre>
+
+  <div class="tip">
+    <div class="label label-amber">How to read this file</div>
+    <p><code>_run</code> is the function that actually queries (asks) the database. <code>args_schema</code> tells the agent that the only input is a claim id. <code>print</code> writes <code>Lookup: Policy Record</code> in the terminal the moment this tool runs, so you can see the call. <code>flush=True</code> makes that line appear at once. <code>parents[1]</code> steps from the <code>tools</code> folder up to the project folder, where <code>suraksha_claims.db</code> sits. When this step works, both <code>tools/__init__.py</code> and <code>tools/policy_record.py</code> exist.</p>
+  </div>
+
+  <h2>Step 3: Earlier Claims, a decorated function on this task</h2>
+  <p>In this step you write the lookup for older notes about a garage. Create <code>tools/earlier_claims.py</code> and paste it exactly. This one is a normal function. The line <code>@tool("Earlier Claims")</code> turns that function into a tool. The docstring (the triple-quoted text directly under <code>def</code>) is required: it becomes the description the agent reads. The argument needs a type, here <code>str</code> (text), so CrewAI knows what to pass in.</p>
+  <p>Do not list this file as <code>custom:earlier_claims</code>. That loader only builds a class. A decorated function is already a finished tool, so we will attach it to this one task in Step 7.</p>
+  <pre><code>import sqlite3
+from pathlib import Path
+
+from crewai.tools import tool
+
+DB_PATH = Path(__file__).resolve().parents[1] / "suraksha_claims.db"
+
+
+@tool("Earlier Claims")
+def earlier_claims(garage_name: str) -&gt; str:
+    """Reads the earlier_claims table for one garage name.
+    Call this when the accident story names a garage.
+    If the garage is not in the table, say so. Do not invent older claims.
+    """
+    print("Lookup: Earlier Claims", flush=True)
+    with sqlite3.connect(DB_PATH) as conn:
+        rows = conn.execute(
+            """
+            SELECT note FROM earlier_claims
+            WHERE lower(garage_name) = lower(?)
+            ORDER BY id
+            """,
+            (garage_name.strip(),),
+        ).fetchall()
+    if not rows:
+        return f"No earlier claims on file for garage {garage_name}."
+    lines = [f"- {note_text}" for (note_text,) in rows]
+    return f"Garage: {garage_name}\n" + "\n".join(lines)</code></pre>
+  <p>The <code>print</code> writes <code>Lookup: Earlier Claims</code> in the terminal when this tool runs. That line is the check. You do not keep a separate list.</p>
+
+  <h2>Step 4: Give the agent the policy tool</h2>
+  <div class="student-edit">
+    <div class="label label-green">Change the agent file</div>
+    <p>In this step you let the agent use Policy Record on every job it does. Open <code>agents/coverage_officer.jsonc</code> and replace the whole file with the block below. The <code>tools</code> list has only the policy tool. The word before the colon is the folder. The word after it is the file name without <code>.py</code>. So <code>custom:policy_record</code> loads <code>tools/policy_record.py</code> and builds the class. This is an agent-level tool: every task this agent does can open the policy, unless that task brings its own list. Leave Earlier Claims off this list. <code>max_iter</code> is 12 so the agent has enough tries to query the database and then write. When this step works, the file contains <code>"custom:policy_record"</code> and does not contain <code>earlier_claims</code>.</p>
+  </div>
+  <pre><code>{
+  "role": "Coverage Officer for claim {claim_id}",
+  "goal": "Give a preliminary coverage opinion for {claim_id} using the accident story in the task and the database rows you open with your tools.",
+  "backstory": "You are a coverage officer at Suraksha General Insurance in India. You interpret policy wording and short internal circulars. You read the policies table and the earlier_claims table instead of guessing. You do not invent policy numbers, dates, amounts, clauses, or older claims. You never mark a claim paid or declined. A senior examiner decides every payment and every denial.",
+  "llm": "openai/gpt-4o-mini",
+  "tools": [
+    "custom:policy_record"
+  ],
+  "settings": {
+    "verbose": true,
+    "allow_delegation": false,
+    "max_iter": 12
+  }
+}</code></pre>
+
+  <h2>Step 5: Take the records out of the question</h2>
+  <p>In this step you stop pasting the contract into the question. Replace the whole of <code>crew.jsonc</code> with the block below. The accident story is still in the task. The policy wording and the older claims are not. The task now tells the agent to call the two tools by the names you gave them: Policy Record and Earlier Claims. Save the file. If Exclusion 4 or CL-17 is still sitting in this file, the later check will not prove that the agent opened the database.</p>
+  <pre><code>{
+  "name": "Suraksha Coverage Desk",
+  "agents": ["coverage_officer"],
+  "tasks": [
+    {
+      "name": "coverage_opinion",
+      "description": "A claims officer asked: {officer_question}\n\nClaim id: {claim_id}\n\nAccident story:\n{narrative}\n\nThe policy wording, the papers on file, and any older claims are NOT in this message.\n\nBefore you answer:\n1. Call Policy Record with this claim id.\n2. If the story names a garage, call Earlier Claims with that garage name.\n\nThen write a preliminary coverage opinion.\n1. Restate what the accident story says.\n2. Quote the clause or circular that matters, using only the Policy Record text.\n3. If you opened Earlier Claims, say what that record contained.\n4. Say whether cover looks available, partly unclear, or should be referred.\n5. If Policy Record shows a simple complete claim under the simple-pay limit, say a rules check could settle it. Do not mark it paid.\n6. If the question asks for a fact that is in neither the story nor the records, say it is not on file.\n\nCONSTRAINTS:\n- Amounts in INR.\n- Do not say the claim is paid, approved, or declined.\n- Label the opinion PRELIMINARY and NON-BINDING.",
+      "expected_output": "Markdown, no code fences, with these sections:\n- File as stated\n- Records opened\n- Clause that matters\n- Preliminary opinion\n- Not on file\n- What a human examiner should check next\nMax 450 words. First line must be: PRELIMINARY COVERAGE OPINION — NON-BINDING.",
+      "agent": "coverage_officer",
+      "markdown": true,
+      "output_file": "output/coverage_{claim_id}.md"
+    }
+  ],
+  "process": "sequential",
+  "verbose": true,
+  "inputs": {
+    "claim_id": "CLM-20481",
+    "officer_question": "Is this loss covered?",
+    "narrative": "Date of loss: 12 March 2026. Place: Outer Ring Road, Hyderabad. The customer's report: the insured says a truck swerved and struck the rear of the private car. Police report: the insured struck a divider. Garage estimate from Highway Motors: INR 185000 for side and rear panels. A typical surveyor figure for this description is about INR 75000. Driving licence expired on 28 February 2026, which is 12 days before the accident."
+  }
+}</code></pre>
+
+  <h2>Step 6: Shorten what the chat already knows</h2>
+  <p>In this step you do the same cleanup in the chat's story file. Replace the whole of <code>sample_claims.py</code> with the version below. The stories no longer contain the policy wording or the older claims. Those live in <code>suraksha_claims.db</code> now. A <strong>simple-pay limit</strong> (the largest garage bill, ₹25,000 on every row here, that a checklist may pass without a person reading the wording) stays in the database, not in this file.</p>
+  <pre><code>CLAIMS = {
+    "CLM-10021": {
+        "claim_id": "CLM-10021",
+        "title": "Simple bumper scrape",
+        "narrative": (
+            "Date of loss: 2 March 2026. Place: Banjara Hills, Hyderabad. "
+            "The insured reversed into a pillar in a marked parking bay. "
+            "Own damage only. No third party. No injury. "
+            "Garage estimate from City Shine Garage: INR 18000 for a rear bumper repaint."
+        ),
+    },
+    "CLM-10044": {
+        "claim_id": "CLM-10044",
+        "title": "Bumper scrape, police report missing",
+        "narrative": (
+            "Date of loss: 4 March 2026. Place: Necklace Road, Hyderabad. "
+            "The insured reports a low-speed rear tap by an unknown car that left the scene. "
+            "Garage estimate from City Shine Garage: INR 22000. No injury mentioned."
+        ),
+    },
+    "CLM-20481": {
+        "claim_id": "CLM-20481",
+        "title": "Conflicting crash, licence lapse",
+        "narrative": (
+            "Date of loss: 12 March 2026. Place: Outer Ring Road, Hyderabad. "
+            "The customer's report: the insured says a truck swerved and struck the rear of the private car. "
+            "Police report: the insured struck a divider. "
+            "Garage estimate from Highway Motors: INR 185000 for side and rear panels. "
+            "A typical surveyor figure for this description is about INR 75000. "
+            "Driving licence expired on 28 February 2026, which is 12 days before the accident."
+        ),
+    },
+}
+
+CLAIM_ORDER = ["CLM-10021", "CLM-10044", "CLM-20481"]</code></pre>
+
+  <h2>Step 7: Put the garage tool on this task only</h2>
+  <p>In this step you attach Earlier Claims to this one task. Open <code>desk.py</code>. The chat still sends only the claim id, the accident story, and the question. Follow the green box: add the import near the other imports, then replace <code>_get_crew</code>, <code>claim_to_inputs</code>, and <code>respond</code> with the block below. Do not change <code>app.py</code>.</p>
+  <div class="student-edit">
+    <div class="label label-green">What to change in desk.py</div>
+    <p>Add the import near the other imports. Replace <code>_get_crew</code>, <code>claim_to_inputs</code>, and <code>respond</code>.</p>
+  </div>
+  <pre><code>from tools.earlier_claims import earlier_claims
+
+
+def _get_crew():
+    global _crew, _defaults
+    if _crew is None:
+        _crew, _defaults = load_crew(Path(__file__).parent / "crew.jsonc")
+        coverage_task = _crew.tasks[0]
+        # This task keeps the policy tool and adds the garage tool.
+        # The agent's own list is left unchanged.
+        coverage_task.tools = list(coverage_task.tools or []) + [earlier_claims]
+    return _crew, _defaults
+
+
+def claim_to_inputs(claim: dict, officer_question: str) -&gt; dict:
+    return {
+        "claim_id": claim["claim_id"],
+        "narrative": claim["narrative"],
+        "officer_question": officer_question,
+    }
+
+
+# ===== CHANGE THIS FUNCTION =====
+def respond(user_message: str, claim: dict) -&gt; str:
+    """Answer the question. The agent must query the database; the rows are not in the task."""
+    crew, defaults = _get_crew()
+    inputs = {**defaults, **claim_to_inputs(claim, user_message)}
+    result = crew.kickoff(inputs=inputs)
+    return result.raw
+# ===== END OF THE CHANGE =====
+
+
+if __name__ == "__main__":
+    from sample_claims import CLAIMS
+    print(respond("Is this loss covered?", CLAIMS["CLM-20481"]))</code></pre>
+  <p><code>list(coverage_task.tools or [])</code> copies the policy tool the agent already carries. Adding <code>earlier_claims</code> puts the decorated function on this task only. <code>kickoff</code> runs the task. <code>app.py</code> stays as it is. It still only draws the page and calls <code>respond</code>.</p>
+
+  <div class="warning">
+    <strong>Restart the chat after this change.</strong> The desk loads the crew once and keeps that copy. If the chat was already open, it still has the agent who cannot look anything up. Stop it with Ctrl+C, then start it again.
+  </div>
+
+  <h2>Step 8: Run it from the terminal first</h2>
+  <p>In this step you check the lookups in the terminal before you open the chat. Stay inside <code>suraksha_claims_desk</code>. This asks "Is this loss covered?" about CLM-20481, through the same <code>respond</code> the chat uses.</p>
+  <pre><code>uv run python desk.py</code></pre>
+  <p>This asks "Is this loss covered?" about CLM-20481, through the same <code>respond</code> the chat uses. We do not use <code>crewai run</code> here, because that command reads only the JSON file and would see the policy tool on the agent. The garage tool is added to this task inside <code>desk.py</code>. In the terminal you should see the lines <code>Lookup: Policy Record</code> and <code>Lookup: Earlier Claims</code>, because the story names Highway Motors. Open <code>output/coverage_CLM-20481.md</code>. A good opinion quotes Exclusion 4 and circular CL-17, mentions the 12-day lapse as a referral, mentions the older Highway Motors claims, and does not pay or reject the claim.</p>
+
+  <h2>Step 9: Ask the same questions in the chat</h2>
+  <p>In this step you ask the same questions in the browser. Start the chat only after Step 8 looked right. Changing the claim in the sidebar starts a fresh chat. The opinion has a Records opened section. That section should name the lookups the terminal already showed.</p>
+  <pre><code>uv run streamlit run app.py</code></pre>
+  <table>
+    <thead>
+      <tr><th>What to do</th><th>A good answer</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Select <strong>CLM-20481</strong>. Click <strong>Is this loss covered?</strong></td><td>The first line is <code>PRELIMINARY COVERAGE OPINION — NON-BINDING</code>. It quotes Exclusion 4 and circular CL-17 from the policy record. Records opened names Policy Record and Earlier Claims.</td></tr>
+      <tr><td>Same claim. Ask <strong>What is the chassis number?</strong></td><td>The chassis number is not in the story or either record. The reply says it is not on file. It does not invent one.</td></tr>
+      <tr><td>Select <strong>CLM-10044</strong>. Click <strong>Is this loss covered?</strong></td><td>The reply says the police report is not on file, because that sentence is in the policy record. Records opened names Policy Record.</td></tr>
+      <tr><td>Select <strong>CLM-10021</strong>. Click <strong>Should we pay this claim now?</strong></td><td>The agent sees a small complete file under the simple-pay limit, says a rules check could settle it, and still does not mark it paid. Earlier Claims may report that City Shine Garage has no older claims. That is a correct empty tool result.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>What just happened</h2>
+  <div class="file-tree">You pick a claim and ask a question
+        │
+        ▼
+The chat sends only the story and the question
+        │
+        ▼
+The agent calls Policy Record and, if needed, Earlier Claims
+        │
+        ▼
+Those functions read suraksha_claims.db and print their names
+        │
+        ▼
+The opinion comes back, with a Records opened section</div>
+  <ul>
+    <li>A tool fetches a fact. It does not decide the claim.</li>
+    <li>The agent still does the reading: a 12-day lapse is a referral under circular CL-17, because that is what the record says.</li>
+    <li>Each tool prints its own name. Search the terminal for <code>Lookup:</code>. The opinion's Records opened section should name the same lookups.</li>
+    <li>Policy Record sits on the agent, because every coverage task needs the policy table.</li>
+    <li>Earlier Claims sits on this task, because only this opinion needs the old garage rows.</li>
+    <li>The chat page did not change. The tools the agent is allowed to open did.</li>
+  </ul>
+
+  <h2>If something goes wrong</h2>
+  <table>
+    <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td><code>Custom tool 'custom:policy_record' not found</code></td><td>The file must be <code>tools/policy_record.py</code>, and the agent file must say <code>custom:policy_record</code>.</td></tr>
+      <tr><td><code>No BaseTool subclass found</code> on <code>earlier_claims</code></td><td>Do not register the decorated function as <code>custom:earlier_claims</code>. That loader looks for a class. Attach <code>earlier_claims</code> in <code>desk.py</code>, as in Step 7.</td></tr>
+      <tr><td><code>Function must have a docstring</code></td><td>The <code>@tool</code> function needs the triple-quoted description under its <code>def</code> line, and <code>garage_name: str</code>.</td></tr>
+      <tr><td><code>no such table: policies</code></td><td>Run <code>uv run python setup_claims_db.py</code> from the project folder so <code>suraksha_claims.db</code> exists.</td></tr>
+      <tr><td>The terminal never prints <code>Lookup: Policy Record</code></td><td>The agent answered without calling the tool. Check that the task still says to call Policy Record, then restart the chat so it reloads the crew.</td></tr>
+      <tr><td>The opinion quotes CL-17 but the terminal never prints <code>Lookup: Policy Record</code></td><td>The clause is still pasted into <code>crew.jsonc</code> or <code>sample_claims.py</code>. Remove it from those files. It should exist only in the <code>policies</code> table.</td></tr>
+      <tr><td>The chat still behaves as if there are no tools</td><td>Stop Streamlit and start it again. The first load of the crew is kept until you restart.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="exercise">
+    <div class="exercise-title">Try these on your own</div>
+    <ol>
+      <li>On CLM-20481, ask “Has Highway Motors appeared before?” The terminal should print <code>Lookup: Earlier Claims</code>, and the answer should mention the bumper claim from five months ago.</li>
+      <li>Open <code>setup_claims_db.py</code> and change <code>30 days</code> to <code>5 days</code> in the CLM-20481 wording. Run <code>uv run python setup_claims_db.py</code> again, then ask the coverage question. A 12-day lapse should no longer be treated as that referral. Change the wording back to 30 days and run the script once more when you are done.</li>
+      <li>Ask about a garage that is not in the file, for example “What earlier claims does Lakeside Motors have?” The tool should say there are none, and the agent should not invent one.</li>
+    </ol>
+  </div>
+</main>
+</body>
+</html>

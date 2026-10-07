@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LangChain ToolRuntime Context &amp; Long-Term Memory – Hands-on Guide</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+      color: #0f172a;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .note, .exercise {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .exercise-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #166534;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      padding: 0.5rem 0.65rem;
+      text-align: left;
+    }
+    th {
+      background: #f1f5f9;
+    }
+    .part-label {
+      margin-top: 2.75rem;
+      margin-bottom: 0.25rem;
+      font-size: 0.85rem;
+      font-weight: 650;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>LangChain ToolRuntime Context &amp; Long-Term Memory – Hands-on Guide</h1>
+
+  <div class="note">
+    <strong>How to use this guide</strong>
+    <ol>
+      <li>Open your code editor (VS Code / Cursor / Jupyter / any IDE) and a terminal. Use a Python 3.10+ environment with LangChain and LangGraph installed.</li>
+      <li>Create a new Jupyter notebook file named, for example, <code>07-toolruntime-ltm.ipynb</code> in the same folder as this HTML file.</li>
+      <li>Place this HTML guide side‑by‑side with your editor.</li>
+      <li>Work through the sections in order: first <strong>ToolRuntime context</strong>, then <strong>long-term memory</strong> (namespaces and store), then the LTM hands-on lab.</li>
+      <li>Whenever you see a section titled <strong>Your Task</strong>, follow the instructions and copy or type the code into a <strong>new cell in your notebook</strong>.</li>
+      <li>Run each new notebook cell step‑by‑step and observe the outputs to understand how <code>ToolRuntime</code> makes tools context‑aware and how the store provides long-term memory across sessions.</li>
+    </ol>
+  </div>
+
+  <p class="part-label">Part A — ToolRuntime context</p>
+
+  <h2>1. What is ToolRuntime?</h2>
+  <p>
+    <code>ToolRuntime</code> is a LangChain feature that gives your tools rich access to
+    <strong>runtime information</strong> such as context, state, memory, and streaming helpers.
+    Instead of manually wiring all of this into every tool, you can inject a single object:
+    <code>runtime: ToolRuntime[YourContextType]</code>.
+  </p>
+  <p>Key capabilities you will explore in this lab:</p>
+  <ul>
+    <li><strong>Context access</strong>: user‑specific data such as IDs, roles, session information.</li>
+    <li><strong>State management</strong>: full conversation state (messages, tool calls, etc.).</li>
+    <li><strong>Memory store</strong>: persistent key–value store shared across sessions.</li>
+    <li><strong>Commands</strong>: a way to modify agent state and control flow.</li>
+    <li><strong>Stream writer</strong>: send incremental progress updates during long‑running tools.</li>
+  </ul>
+  <p>
+    In the following sections, you will build realistic tools that use these capabilities in a
+    customer support scenario with context‑aware tools. Later in this same guide, you will use the
+    same <code>ToolRuntime</code> pattern to read and write long-term memory via <code>runtime.store</code>.
+  </p>
+
+  <h2>2. Initial Setup</h2>
+  <p>
+    First, you will set up your environment, load environment variables, and create a base
+    <code>ChatOpenAI</code> model that will be used by the different agents in this notebook.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong> in your notebook, paste or type the code below, and run it to
+      import the required packages, load environment variables, and initialize the base model.
+    </p>
+  </div>
+
+  <pre><code>import os
+from typing import Any, Dict, List, TypedDict
+from langchain_openai import ChatOpenAI
+from langchain.agents import create_agent
+from langchain.tools import tool, ToolRuntime
+
+from dotenv import load_dotenv
+load_dotenv()
+
+model = ChatOpenAI(model="gpt-4.1-mini")</code></pre>
+
+  <h2>3. Understanding ToolRuntime</h2>
+  <p>
+    Before writing tools, let’s clarify what <code>ToolRuntime</code> actually gives you.
+    Think of it as a single object that carries everything your tool needs to know
+    about the current run.
+  </p>
+  <h3>3.1 Key ToolRuntime Capabilities</h3>
+  <ul>
+    <li><strong>Context access</strong>: immutable, typed context such as <code>user_id</code>, <code>role</code>, or <code>workspace_id</code>.</li>
+    <li><strong>State management</strong>: access to the full conversation state (messages, tool calls, etc.).</li>
+    <li><strong>Memory store</strong>: a shared, persistent store for long‑term memory across conversations.</li>
+    <li><strong>Stream writer</strong>: send partial outputs back to the user during long operations.</li>
+    <li><strong>Config access</strong>: read runtime configuration/settings that influence tool behavior.</li>
+  </ul>
+  <p>
+    The example below shows how to use these capabilities in practice with context‑aware tools.
+  </p>
+
+  <h2>4. Context‑Aware Tools with ToolRuntime</h2>
+  <p>
+    <code>ToolRuntime</code> gives your tools a unified way to access user context, state, and a shared store.
+    Instead of manually passing user IDs or configuration into every tool, you can define a
+    context <code>TypedDict</code> and receive it via <code>runtime.context</code>.
+  </p>
+  <p>
+    You will now build a customer‑support style agent that uses <code>runtime.context</code> to
+    personalize responses based on the current user.
+  </p>
+
+  <h3>4.1 Use Case: Customer Support System with Context</h3>
+  <p>
+    In this example, you will:
+  </p>
+  <ul>
+    <li>Define a simple in‑memory user database.</li>
+    <li>Create a typed <code>UserContext</code> that extends <code>TypedDict</code>.</li>
+    <li>Write tools that read from <code>runtime.context</code> to personalize their behavior.</li>
+    <li>Create an agent that automatically injects context into tools.</li>
+  </ul>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong> in your notebook, paste or type the code below, and run it to
+      define the user context, tools, and agent that use <code>ToolRuntime</code> for personalized support.
+    </p>
+  </div>
+
+  <pre><code># Real-world Example: Customer Support System with Context
+# This demonstrates how ToolRuntime provides context to tools
+
+USER_DATABASE = {
+    "user123": {
+        "name": "Alice Johnson", 
+        "account_type": "Premium",
+        "balance": 5000,
+        "email": "alice@example.com",
+        "support_tier": "Priority"
+    },
+    "user456": {
+        "name": "Bob Smith",
+        "account_type": "Standard", 
+        "balance": 1200,
+        "email": "bob@example.com",
+        "support_tier": "Standard"
+    }
+}
+
+class UserContext(TypedDict):
+    user_id: str
+    session_id: str
+
+@tool
+def get_account_info(runtime: ToolRuntime[UserContext]) -> str:
+    """Get the current user's account information."""
+    user_id = runtime.context["user_id"]
+    
+    if user_id in USER_DATABASE:
+        user = USER_DATABASE[user_id]
+        return f"""Account Information:
+        Name: {user['name']}
+        Type: {user['account_type']}  
+        Balance: ${user['balance']}
+        Email: {user['email']}
+        Support Tier: {user['support_tier']}"""
+    return "User not found in system"
+
+@tool
+def update_support_tier(new_tier: str, runtime: ToolRuntime[UserContext]) -> str:
+    """Update user's support tier (Priority, Standard, Basic)."""
+    user_id = runtime.context["user_id"]
+    
+    if user_id in USER_DATABASE:
+        USER_DATABASE[user_id]['support_tier'] = new_tier
+        return f"Support tier updated to {new_tier} for user {USER_DATABASE[user_id]['name']}"
+    return "User not found"
+
+# Create agent with context
+agent = create_agent(
+    model,
+    tools=[get_account_info, update_support_tier],
+    context_schema=UserContext,
+    system_prompt="You are a customer support assistant. Help users with their account inquiries."
+)
+
+# Test with real agent - Context is automatically injected into tools
+print("=== Testing Context Access ===")
+result = agent.invoke(
+    {"messages": [{"role": "user", "content": "What's my current account information?"}]},
+    context=UserContext(user_id="user123", session_id="session_001")
+)</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      In a <strong>new cell</strong>, run the following code to print the final agent response so you can see
+      how the context‑aware tools personalize the answer for <code>user123</code>.
+    </p>
+  </div>
+
+  <pre><code>print("\nAgent Response:")
+print(result["messages"][-1].content)</code></pre>
+
+  <p>
+    You should see a response that includes the specific account details for Alice Johnson,
+    demonstrating how the tool uses <code>runtime.context["user_id"]</code> to fetch the right user.
+  </p>
+
+  <p class="part-label">Part B — Long-term memory (Store, namespaces &amp; ToolRuntime)</p>
+
+  <h2>5. Why long-term memory matters</h2>
+  <p>
+    Agents need two different kinds of “memory”:
+  </p>
+  <ul>
+    <li>
+      <strong>Short-term (conversation) memory</strong> is usually the running list of messages in the current chat,
+      optionally trimmed or summarized. In LangGraph, this is often tied to a <strong>thread</strong> via a
+      <strong>checkpointer</strong> (for example <code>InMemorySaver</code>).
+    </li>
+    <li>
+      <strong>Long-term memory</strong> is data that should survive across turns, sessions, or even different threads,
+      such as user preferences, approved policies, or facts the user asked you to remember.
+    </li>
+  </ul>
+  <p>
+    This part of the guide focuses on long-term memory using the <strong>LangGraph store</strong> exposed to tools as
+    <code>runtime.store</code> on <code>ToolRuntime</code>. You will persist facts per user, read them back from a
+    <em>different</em> conversation thread (same user), and confirm another user cannot see them.
+  </p>
+
+  <h2>6. Checkpointer vs store (mental model)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Mechanism</th>
+        <th>Typical role</th>
+        <th>Keyed by</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>checkpointer</code> (e.g. <code>InMemorySaver</code>)</td>
+        <td>Saves and resumes <strong>graph state</strong> per conversation (messages, etc.).</td>
+        <td>Often <code>thread_id</code> in <code>config["configurable"]</code>.</td>
+      </tr>
+      <tr>
+        <td><code>store</code> (e.g. <code>InMemoryStore</code>)</td>
+        <td>Application <strong>long-term</strong> key–value data; partition by user/tenant in the namespace.</td>
+        <td><strong>Namespace</strong> tuple + string <strong>key</strong>.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    In the lab below, you will use <em>both</em>: the checkpointer keeps each thread's messages separate, while the
+    store holds long-term facts under <code>("app", "memory", user_id)</code> — shared across threads for the
+    same user, isolated between users.
+  </p>
+
+  <h2>7. Understanding namespaces in the store</h2>
+  <p>
+    The store is not a single flat dictionary. It is organized by <strong>namespace</strong> and <strong>key</strong>.
+  </p>
+
+  <h3>7.1 What is a namespace?</h3>
+  <p>
+    A <strong>namespace</strong> is like a path or folder structure that groups related values. It is a tuple of strings
+    (and optionally other stable identifiers you choose). It helps you:
+  </p>
+  <ul>
+    <li><strong>Organize</strong> data by domain (app area, feature, user, workspace).</li>
+    <li><strong>Isolate</strong> tenants or users in multi-user apps.</li>
+    <li><strong>Avoid key collisions</strong>: the same key string can exist in different namespaces safely.</li>
+    <li><strong>Align with access control</strong>: you can document which namespaces a tool may read or write.</li>
+  </ul>
+
+  <pre><code># Namespace structure (tuple of segments)
+namespace = ("category", "subcategory", "user_id")
+
+# Examples:
+("preferences", "user_prefs")
+("notes", "personal")
+("tasks", "user123", "workspace_alpha")
+("app", "memory", "user123")   # per-user LTM bucket (used in this lab)</code></pre>
+
+  <h3>7.2 Basic store operations</h3>
+  <p>
+    Tools receive the same store instance that you pass into <code>create_agent(..., store=...)</code>. Typical operations:
+  </p>
+  <pre><code># Write (value must be serializable — lists, dicts, strings, etc.)
+store.put(namespace, key, value)
+
+# Read — returns an Item (or None), not always the raw value
+item = store.get(namespace, key)
+if item is None:
+    data = None
+else:
+    data = item.value</code></pre>
+  <p>
+    Always read <code>item.value</code> after <code>get</code> when you need the stored Python object. The lab notebook
+    uses a minimal pattern; the code in <strong>section 9</strong> below uses <code>.value</code> explicitly so behavior is
+    clear across LangGraph versions.
+  </p>
+
+  <h3>7.3 Namespace design — per-user from the start (best practice)</h3>
+  <p>
+    A common beginner mistake is storing everything under one global namespace such as
+    <code>("app", "memory")</code>. That works in a solo notebook demo, but in any app with more than one
+    user, <strong>everyone would share the same long-term memory</strong> — user A could read user B's facts.
+  </p>
+  <p>
+    <strong>Best practice:</strong> always include a <strong>user id</strong> (or tenant id) in the namespace
+    from your first implementation. Each user gets an isolated bucket; the store is still shared infrastructure,
+    but data is partitioned by namespace.
+  </p>
+  <ul>
+    <li><code>("app", "memory", user_id)</code> — long-term snippets for one user (key <code>"messages"</code> in this lab).</li>
+    <li><code>user_id</code> comes from <strong>runtime context</strong> on <code>ToolRuntime</code>, not from the LLM — the agent cannot spoof another user's id if you inject context server-side.</li>
+  </ul>
+  <p>
+    In this lab you will use a small <code>UserContext</code> <code>TypedDict</code> and pass
+    <code>context=UserContext(user_id="...")</code> on every <code>agent.invoke(...)</code> call — the same
+    pattern you used earlier in Part A for customer-support tools.
+    Because a <code>TypedDict</code> is a dict at runtime, read fields with
+    <code>runtime.context["user_id"]</code>.
+  </p>
+
+  <pre><code>class UserContext(TypedDict):
+    user_id: str
+
+
+def memory_namespace(user_id: str) -> tuple[str, ...]:
+    """One LTM bucket per user — use this in every save/retrieve tool."""
+    return ("app", "memory", user_id)</code></pre>
+
+  <h2>8. Initial setup for long-term memory</h2>
+  <p>
+    Install dependencies if needed (example): <code>pip install langchain langchain-openai langgraph python-dotenv</code>.
+    Set <code>OPENAI_API_KEY</code> in a <code>.env</code> file or your environment.
+  </p>
+  <p>
+    You already imported core packages and created <code>model</code> in section 2. For the long-term memory lab,
+    add the LangGraph checkpointer/store imports and redefine a minimal <code>UserContext</code> <code>TypedDict</code> plus
+    <code>memory_namespace</code> as shown below (safe to re-run in a fresh notebook cell).
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <strong>new cell</strong>, run the following imports and model setup.
+    </p>
+  </div>
+
+  <pre><code>import os
+from typing import List, TypedDict
+
+from langchain_openai import ChatOpenAI
+from langchain.agents import create_agent
+from langchain.tools import tool, ToolRuntime
+
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.store.memory import InMemoryStore
+
+from dotenv import load_dotenv
+load_dotenv()
+
+model = ChatOpenAI(model="gpt-4.1-mini")
+
+
+class UserContext(TypedDict):
+    user_id: str
+
+
+def memory_namespace(user_id: str) -> tuple[str, ...]:
+    return ("app", "memory", user_id)</code></pre>
+
+  <h2>9. Tools: save and retrieve long-term memory (per user)</h2>
+  <p>
+    These tools append text blobs to a list under key <code>"messages"</code>, scoped to
+    <code>memory_namespace(runtime.context["user_id"])</code>. The LLM never chooses the namespace — your code
+    derives it from injected context.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Add a <strong>new cell</strong> with the two tools below. Notice <code>runtime.store</code> and explicit use of
+      <code>item.value</code> when reading.
+    </p>
+  </div>
+
+  <pre><code>LTM_KEY = "messages"
+
+
+@tool
+def save_ltm(data: str, runtime: ToolRuntime[UserContext]) -> str:
+    """Save a line of information to this user's long-term memory."""
+    store = runtime.store
+    ns = memory_namespace(runtime.context["user_id"])
+
+    item = store.get(ns, LTM_KEY)
+    if item is None:
+        messages: List[str] = []
+    else:
+        messages = list(item.value) if isinstance(item.value, list) else [str(item.value)]
+
+    messages.append(data)
+    store.put(ns, LTM_KEY, messages)
+    print(f"Saving to LTM for {runtime.context['user_id']}:", data)
+    return "Data saved to long-term memory."
+
+
+@tool
+def retrieve_ltm(data: str, runtime: ToolRuntime[UserContext]) -> str:
+    """Retrieve this user's long-term memory (data arg can hint what to look for)."""
+    store = runtime.store
+    ns = memory_namespace(runtime.context["user_id"])
+
+    print(f"Retrieving from LTM for {runtime.context['user_id']}")
+    item = store.get(ns, LTM_KEY)
+    if item is None:
+        return "No data in long-term memory."
+    return str(item.value)</code></pre>
+
+  <h2>10. Create the agent with store, checkpointer, and context</h2>
+  <p>
+    Pass <code>store=InMemoryStore()</code> so tools can read and write LTM. Pass <code>checkpointer=InMemorySaver()</code>
+    so each <code>thread_id</code> has its own saved conversation state. Pass <code>context_schema=UserContext</code>
+    so every invoke can supply <code>user_id</code> and tools receive it via <code>runtime.context</code>.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Add a <strong>new cell</strong> to define the agent. The system prompt tells the model when to save and to retrieve
+      before answering.
+    </p>
+  </div>
+
+  <pre><code>agent = create_agent(
+    tools=[save_ltm, retrieve_ltm],
+    model=model,
+    store=InMemoryStore(),
+    checkpointer=InMemorySaver(),
+    context_schema=UserContext,
+    system_prompt="""You are a helpful assistant that can answer any queries.
+If the user shares personal information, preferences, or explicit approvals,
+save that information using the save_ltm tool.
+Before answering a query when prior facts might matter, retrieve long-term
+memory using retrieve_ltm and use that context in your answer.
+""",
+)</code></pre>
+
+  <h2>11. Lab: cross-thread recall and user isolation</h2>
+  <p>
+    You will run three scenarios. Always pass <code>context=UserContext(user_id=...)</code> on
+    <code>agent.invoke</code> — in a real app this id comes from auth (logged-in user), not from chat text.
+  </p>
+  <ol>
+    <li><strong>User Siva, thread 1</strong> — say “My name is Siva”; agent calls <code>save_ltm</code>.</li>
+    <li><strong>User Siva, thread 2</strong> — ask “What is my name?”; agent calls <code>retrieve_ltm</code> and answers Siva (cross-thread, same user).</li>
+    <li><strong>User Alex, thread 3</strong> — ask “What is my name?”; Alex has no LTM yet — must not see Siva's name.</li>
+  </ol>
+  <p>
+    Different <code>thread_id</code> values simulate separate conversations. Different <code>user_id</code> values
+    simulate separate users. LTM is shared across threads <em>for the same user</em>, but isolated between users.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task – Siva, thread 1 (save)</div>
+    <p>
+      Run this in a <strong>new cell</strong>. Inspect the message list: you should see a tool call to
+      <code>save_ltm</code> and a friendly reply that uses the name.
+    </p>
+  </div>
+
+  <pre><code>config_siva_t1 = {"configurable": {"thread_id": "siva-chat-1"}}
+siva = UserContext(user_id="siva")
+
+response_1 = agent.invoke(
+    {"messages": [{"role": "user", "content": "My name is Siva"}]},
+    config=config_siva_t1,
+    context=siva,
+)
+response_1</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task – Siva, thread 2 (cross-thread recall)</div>
+    <p>
+      Run in another <strong>new cell</strong> with a different thread id but the <strong>same</strong>
+      <code>UserContext(user_id="siva")</code>. The agent should retrieve LTM and answer “Siva”, even though
+      this thread never saw the first message.
+    </p>
+  </div>
+
+  <pre><code>config_siva_t2 = {"configurable": {"thread_id": "siva-chat-2"}}
+
+response_2 = agent.invoke(
+    {"messages": [{"role": "user", "content": "What is my name?"}]},
+    config=config_siva_t2,
+    context=siva,
+)
+response_2</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task – Alex, thread 3 (user isolation)</div>
+    <p>
+      Run with a <strong>different user id</strong>. Alex's namespace is empty — the assistant should not
+      return Siva's name from long-term memory.
+    </p>
+  </div>
+
+  <pre><code>config_alex_t1 = {"configurable": {"thread_id": "alex-chat-1"}}
+alex = UserContext(user_id="alex")
+
+response_3 = agent.invoke(
+    {"messages": [{"role": "user", "content": "What is my name?"}]},
+    config=config_alex_t1,
+    context=alex,
+)
+response_3</code></pre>
+
+  <p><strong>What you should observe</strong></p>
+  <ul>
+    <li>Console prints such as <code>Saving to LTM for siva:</code> and <code>Retrieving from LTM for siva</code>.</li>
+    <li>Siva's second thread recalls the name; Alex's thread does not.</li>
+    <li>Final assistant messages reflect stored facts only for the matching <code>user_id</code>.</li>
+  </ul>
+
+  <div class="note">
+    <strong>Why context, not a global namespace?</strong>
+    <p>
+      <code>thread_id</code> scopes <strong>conversation history</strong> (checkpointer).
+      <code>user_id</code> in the namespace scopes <strong>long-term facts</strong> (store).
+      Using both from the start mirrors production: many chats per user, many users per app, no memory leaks.
+    </p>
+  </div>
+
+  <h2>12. Summary</h2>
+  <ul>
+    <li><strong>ToolRuntime</strong> injects runtime information into tools — especially typed <code>runtime.context</code>
+      (user ids, session data) so tools can personalize behavior without hard-coding identities into prompts.</li>
+    <li><strong>Long-term memory</strong> in this pattern is application data in <code>runtime.store</code>, organized by
+      <strong>namespaces</strong> and keys.</li>
+    <li><strong>Namespaces</strong> should include <code>user_id</code> (or tenant id) from day one — not added later as an afterthought.</li>
+    <li><strong>ToolRuntime context</strong> injects <code>user_id</code> into tools; derive
+      <code>memory_namespace(runtime.context["user_id"])</code> inside save/retrieve — never trust the model to pick a namespace.</li>
+    <li><strong>Checkpointers</strong> scope conversation state by <code>thread_id</code>; the <strong>store</strong> scopes
+      LTM by namespace — cross-thread recall works for the same user, not across users.</li>
+  </ul>
+
+</main>
+</body>
+</html>

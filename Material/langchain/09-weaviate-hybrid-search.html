@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Weaviate Hybrid Search with LangChain – Hands-on Lab</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.0rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+      color: #0f172a;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .note, .exercise, .warning {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .warning {
+      border-left: 4px solid #dc2626;
+      background: linear-gradient(135deg, #fef2f2, #fff1f2);
+      border-color: rgba(220, 38, 38, 0.35);
+    }
+    .exercise-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #166534;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+    .diagram {
+      margin: 1rem 0 1.5rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      text-align: center;
+    }
+    .diagram svg {
+      max-width: 100%;
+      height: auto;
+    }
+    .diagram-caption {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin: 0.5rem 0 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 0.55rem 0.7rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Weaviate Hybrid Search – Hands-on Lab</h1>
+
+  <div class="note">
+    <strong>How to use this lab</strong>
+    <ol>
+      <li>Complete the install steps in Section 2 <em>before</em> writing notebook code.</li>
+      <li>Create a notebook named <code>09-weaviate-hybrid-search.ipynb</code> next to <code>hybrid-search-docs/</code>.</li>
+      <li>For every <strong>Your Task</strong>, paste the code into a new cell and run it.</li>
+      <li>Goal: use <strong>one Weaviate database</strong> for keyword (BM25) + similarity search — no separate in-memory <code>BM25Retriever</code>.</li>
+    </ol>
+  </div>
+
+  <h2>1. Why Weaviate?</h2>
+  <p>
+    In <code>09-hybrid-search.html</code> you combined Chroma (vectors) with an in-memory BM25 retriever.
+    That works for small labs, but production needs a database that stores <strong>both</strong>
+    keyword and vector indexes persistently.
+  </p>
+  <p>
+    <strong>Weaviate</strong> (open source, BSD-3) does exactly that:
+  </p>
+  <ul>
+    <li><strong>BM25</strong> keyword search over text properties</li>
+    <li><strong>Vector</strong> similarity over embeddings</li>
+    <li><strong>Hybrid</strong> search that fuses both with an <code>alpha</code> weight</li>
+  </ul>
+
+  <div class="diagram">
+    <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Weaviate hybrid search">
+      <rect x="20" y="75" width="130" height="50" rx="8" fill="#dbeafe" stroke="#2563eb"/>
+      <text x="85" y="105" text-anchor="middle" font-size="14" fill="#1e3a8a">Query</text>
+      <path d="M150 100 H200" stroke="#64748b" stroke-width="2"/>
+      <rect x="210" y="20" width="200" height="160" rx="12" fill="#f5f3ff" stroke="#7c3aed"/>
+      <text x="310" y="48" text-anchor="middle" font-size="14" font-weight="600" fill="#5b21b6">Weaviate DB</text>
+      <rect x="230" y="65" width="160" height="40" rx="6" fill="#bbf7d0" stroke="#16a34a"/>
+      <text x="310" y="90" text-anchor="middle" font-size="12" fill="#14532d">BM25 index</text>
+      <rect x="230" y="120" width="160" height="40" rx="6" fill="#fde68a" stroke="#d97706"/>
+      <text x="310" y="145" text-anchor="middle" font-size="12" fill="#92400e">Vector index</text>
+      <path d="M410 100 H460" stroke="#64748b" stroke-width="2"/>
+      <rect x="470" y="75" width="250" height="50" rx="8" fill="#e9d5ff" stroke="#7c3aed"/>
+      <text x="595" y="105" text-anchor="middle" font-size="13" fill="#5b21b6">Hybrid (alpha) → top-k docs</text>
+    </svg>
+    <p class="diagram-caption">One DB, two indexes, fused at query time with <code>alpha</code>.</p>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th><code>alpha</code></th>
+        <th>Meaning</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>0.0</code></td>
+        <td>Pure keyword / BM25</td>
+      </tr>
+      <tr>
+        <td><code>0.5</code></td>
+        <td>Balanced hybrid (typical starting point)</td>
+      </tr>
+      <tr>
+        <td><code>1.0</code></td>
+        <td>Pure vector / similarity</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    LangChain’s <code>WeaviateVectorStore.similarity_search(...)</code> uses Weaviate’s <strong>hybrid</strong> operator under the hood.
+    You control the blend with <code>alpha</code>.
+  </div>
+
+  <h2>2. Installation (do this first)</h2>
+
+  <h3>2.1 Prerequisites</h3>
+  <ol>
+    <li><strong>Docker Desktop</strong> installed and <em>running</em> (whale icon in the system tray on Windows).</li>
+    <li>Python 3.10+ with pip.</li>
+    <li><code>OPENAI_API_KEY</code> in a <code>.env</code> file (same as earlier LangChain labs).</li>
+    <li>The folder <code>hybrid-search-docs/</code> from the previous hybrid lab (same SKU demo files).</li>
+  </ol>
+
+  <div class="warning">
+    <strong>Common failure:</strong> If Docker Desktop is not started, <code>docker compose up</code> fails with
+    <em>“failed to connect to the docker API”</em> / <em>“dockerDesktopLinuxEngine”</em>.
+    Start Docker Desktop, wait until it says “Engine running”, then retry.
+  </div>
+
+  <h3>2.2 Install Python packages</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>In a <strong>terminal</strong>, run:</p>
+  </div>
+
+  <pre><code>pip install -U langchain-weaviate weaviate-client langchain-openai langchain-community python-dotenv</code></pre>
+
+  <h3>2.3 Start Weaviate with Docker Compose</h3>
+  <p>
+    A compose file is provided next to this HTML:
+    <code>docker-compose.weaviate.yml</code>.
+    It exposes HTTP on port <code>8080</code> and gRPC on <code>50051</code>, with a named volume for persistence.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Open a terminal in the <code>02-langchain/htmls</code> folder (where this HTML and the compose file live),
+      then start Weaviate:
+    </p>
+  </div>
+
+  <pre><code>cd 02-langchain/htmls
+docker compose -f docker-compose.weaviate.yml up -d</code></pre>
+
+  <p>Wait ~10–30 seconds for the container to become ready, then check:</p>
+
+  <pre><code>docker compose -f docker-compose.weaviate.yml ps
+curl http://localhost:8080/v1/.well-known/ready</code></pre>
+
+  <p>
+    On Windows PowerShell, if <code>curl</code> is awkward, open
+    <a href="http://localhost:8080/v1/.well-known/ready">http://localhost:8080/v1/.well-known/ready</a>
+    in a browser — you should see a successful response when Weaviate is up.
+  </p>
+
+  <div class="note">
+    <strong>Useful Docker commands</strong>
+    <ul>
+      <li>Logs: <code>docker compose -f docker-compose.weaviate.yml logs -f weaviate</code></li>
+      <li>Stop (keep data): <code>docker compose -f docker-compose.weaviate.yml down</code></li>
+      <li>Stop and delete volume (wipe DB): <code>docker compose -f docker-compose.weaviate.yml down -v</code></li>
+    </ul>
+  </div>
+
+  <h3>2.4 One-line alternative (no compose file)</h3>
+  <p>If you prefer a single command (data is less convenient to persist):</p>
+
+  <pre><code>docker run -d --name weaviate-lab -p 8080:8080 -p 50051:50051 ^
+  -e AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED=true ^
+  -e PERSISTENCE_DATA_PATH=/var/lib/weaviate ^
+  -e CLUSTER_HOSTNAME=node1 ^
+  semitechnologies/weaviate:1.27.0</code></pre>
+  <p>
+    (On PowerShell use backticks <code>`</code> instead of <code>^</code> for line continuation, or paste as one line.)
+  </p>
+
+  <h2>3. Step 1 – Load Environment &amp; Documents</h2>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new notebook cell</strong> and run:</p>
+  </div>
+
+  <pre><code>from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
+
+from langchain_community.document_loaders import DirectoryLoader, TextLoader
+
+docs = DirectoryLoader(
+    "hybrid-search-docs",
+    glob="*.txt",
+    loader_cls=TextLoader,
+    loader_kwargs={"encoding": "utf-8"},
+).load()
+
+print(f"Loaded {len(docs)} documents")
+for d in docs:
+    print("-", Path(d.metadata["source"]).name)</code></pre>
+
+  <h2>4. Step 2 – Connect to Weaviate</h2>
+  <p>
+    The Python client v4 helper <code>connect_to_local()</code> talks to
+    <code>localhost:8080</code> (HTTP) and <code>localhost:50051</code> (gRPC).
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> and run:</p>
+  </div>
+
+  <pre><code>import weaviate
+
+client = weaviate.connect_to_local()
+print("Weaviate ready:", client.is_ready())
+print("Client version:", weaviate.__version__)</code></pre>
+
+  <div class="warning">
+    If <code>is_ready()</code> is <code>False</code> or you get a connection error,
+    go back to Section 2.3 — Weaviate is not running yet.
+  </div>
+
+  <h2>5. Step 3 – Index Documents (Vectors Persist in Weaviate)</h2>
+  <p>
+    LangChain embeds each document with OpenAI and stores text + vectors in Weaviate.
+    Weaviate also builds a BM25 index over the text automatically — you do <strong>not</strong>
+    call <code>BM25Retriever.from_documents</code>.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> and run:</p>
+  </div>
+
+  <pre><code>from langchain_openai import OpenAIEmbeddings
+from langchain_weaviate.vectorstores import WeaviateVectorStore
+
+embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+collection_name = "HybridLabDocs"
+
+if client.collections.exists(collection_name):
+    client.collections.delete(collection_name)
+    print(f"Deleted existing collection: {collection_name}")
+
+vector_store = WeaviateVectorStore.from_documents(
+    documents=docs,
+    embedding=embeddings,
+    client=client,
+    index_name=collection_name,
+    text_key="text",
+)
+
+print(f"✅ Indexed {len(docs)} documents into '{collection_name}'")</code></pre>
+
+  <div class="note">
+    Restart your notebook later and you can reconnect with
+    <code>WeaviateVectorStore(client=client, index_name="HybridLabDocs", text_key="text", embedding=embeddings)</code>
+    without re-embedding — data lives in the Docker volume.
+  </div>
+
+  <h2>6. Step 4 – Pure Vector Search Is Not Enough</h2>
+  <p>
+    Use the same SKU trap as the previous lab.
+    With <code>alpha=1.0</code> (pure vector), Weaviate behaves like similarity-only search.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> and run:</p>
+  </div>
+
+  <pre><code>from pathlib import Path
+
+QUERY = "What is the warranty period for SKU-ZX9001?"
+GOLD = "sku_zx9001_warranty.txt"
+
+def source_name(doc):
+    src = doc.metadata.get("source", "")
+    return Path(src).name if src else str(doc.metadata)
+
+top1 = vector_store.similarity_search(QUERY, k=1, alpha=1.0)[0]
+print("Vector top-1 (alpha=1.0):", source_name(top1))
+print(top1.page_content[:200])
+
+if source_name(top1) != GOLD:
+    print("❌ Wrong doc — often the 12-month general policy.")
+else:
+    print("⚠️ Gold ranked first this run — still compare with keyword/hybrid below.")</code></pre>
+
+  <h2>7. Step 5 – Pure Keyword (BM25) via Weaviate</h2>
+  <p>
+    <code>alpha=0.0</code> asks Weaviate for BM25-only ranking — still served from the same database.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> and run:</p>
+  </div>
+
+  <pre><code>top1 = vector_store.similarity_search(QUERY, k=1, alpha=0.0)[0]
+print("BM25 top-1 (alpha=0.0):", source_name(top1))
+print(top1.page_content[:200])
+
+if source_name(top1) == GOLD:
+    print("✅ BM25 inside Weaviate found the SKU bulletin.")
+else:
+    print("Unexpected — confirm hybrid-search-docs/ content.")</code></pre>
+
+  <h2>8. Step 6 – Hybrid Search (Production Style)</h2>
+  <p>
+    <code>alpha=0.5</code> balances keyword and vector scores inside Weaviate.
+    For ID-heavy queries you can bias toward keywords (e.g. <code>alpha=0.3</code>).
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> and run:</p>
+  </div>
+
+  <pre><code>top1 = vector_store.similarity_search(QUERY, k=1, alpha=0.5)[0]
+print("Hybrid top-1 (alpha=0.5):", source_name(top1))
+print(top1.page_content[:200])
+
+if source_name(top1) == GOLD:
+    print("✅ Hybrid recovered the correct SKU-ZX9001 document.")
+else:
+    print("Try alpha=0.3 (more keyword) if gold is not first.")</code></pre>
+
+  <h2>9. Step 7 – Side-by-Side Comparison</h2>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> and run:</p>
+  </div>
+
+  <pre><code>def top1_name(alpha):
+    return source_name(vector_store.similarity_search(QUERY, k=1, alpha=alpha)[0])
+
+print("Query:", QUERY)
+print("Vector  (alpha=1.0):", top1_name(1.0))
+print("BM25    (alpha=0.0):", top1_name(0.0))
+print("Hybrid  (alpha=0.5):", top1_name(0.5))
+print("Gold:", GOLD)</code></pre>
+
+  <h2>10. Lab vs Production</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Approach</th>
+        <th>Keyword index</th>
+        <th>Persistence</th>
+        <th>Use when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Chroma + <code>BM25Retriever</code></td>
+        <td>In-memory Python</td>
+        <td>Vectors only (unless you pickle BM25)</td>
+        <td>Teaching / tiny demos</td>
+      </tr>
+      <tr>
+        <td><strong>Weaviate hybrid</strong></td>
+        <td>Inside Weaviate (BM25)</td>
+        <td>Both indexes in the DB volume</td>
+        <td>Production-style hybrid RAG</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>11. What You Learned</h2>
+  <ul>
+    <li>How to install and run open-source Weaviate with Docker Compose.</li>
+    <li>How LangChain’s <code>WeaviateVectorStore</code> indexes documents once into a real DB.</li>
+    <li>How <code>alpha</code> switches between vector, BM25, and hybrid — without a second retriever library.</li>
+    <li>Why this is a better production pattern than rebuilding <code>BM25Retriever</code> for every process.</li>
+  </ul>
+
+  <div class="exercise">
+    <div class="exercise-title">Challenge</div>
+    <ul>
+      <li>Sweep <code>alpha</code> from 0.0 to 1.0 in steps of 0.1 and plot which doc is top‑1.</li>
+      <li>Stop Weaviate, restart it, reconnect, and confirm documents are still there (volume persistence).</li>
+      <li>Add a metadata filter (e.g. only product bulletins) using Weaviate <code>Filter</code>.</li>
+    </ul>
+  </div>
+
+</main>
+</body>
+</html>

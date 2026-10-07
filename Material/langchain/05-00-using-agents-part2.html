@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LangChain 1.0 Agents – Hands-on Guide (Part 2)</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+      color: #0f172a;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .note, .exercise {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .exercise-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #166534;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+    .sample-output-title {
+      font-weight: 600;
+      margin-top: 0.75rem;
+      margin-bottom: 0.25rem;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>LangChain 1.0 Agents – Hands-on Lab (Part 2)</h1>
+
+  <div class="note">
+    <strong>About this part</strong>
+    <p>
+      This is <strong>Part 2</strong> of the LangChain 1.0 Agents hands-on lab. It focuses on middleware, dynamic models,
+      error handling, and guardrails. You can complete it independently — run the setup cells below first (no Part 1
+      notebook required).
+    </p>
+  </div>
+
+  <h2>Setup</h2>
+  <p>
+    Create a new notebook (or continue in an existing one). Install the packages, load your API keys, and create the
+    shared <code>model</code> object used throughout this lab.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      In your terminal (not inside the notebook), install the required packages.
+    </p>
+  </div>
+
+  <pre><code>pip install langchain langchain-openai langchain-tavily tavily-python python-dotenv</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      In a new notebook cell, import the core libraries, load environment variables from your <code>.env</code> file,
+      and create a <code>ChatOpenAI</code> model. Put <code>OPENAI_API_KEY</code> (and later <code>TAVILY_API_KEY</code>)
+      in <code>.env</code>.
+    </p>
+  </div>
+
+  <pre><code>from dotenv import load_dotenv
+from langchain.agents import create_agent
+from langchain_openai import ChatOpenAI
+
+load_dotenv()
+
+model = ChatOpenAI(model="gpt-4.1-mini", temperature=0)
+
+print("Model ready!")</code></pre>
+
+  <h2>6. Middleware for Agents</h2>
+
+  <div class="note">
+    <strong>Tavily search</strong>
+    <p>
+      Agents in this part use <strong>Tavily web search</strong>. Set <code>TAVILY_API_KEY</code> in your
+      <code>.env</code>, then run the cell below.
+    </p>
+  </div>
+
+  <pre><code>from langchain_tavily import TavilySearch
+
+tavily_tool = TavilySearch(
+    max_results=3,
+    search_depth="advanced",
+    include_answer=True,
+)
+
+print("Tavily search tool ready!")</code></pre>
+
+  <h3>6.1 What Is Middleware?</h3>
+  <p>
+    <strong>Middleware</strong> is code that runs <em>between</em> different parts of your agent's execution pipeline.
+    You can think of it like a filter or interceptor that can:
+  </p>
+  <ul>
+    <li>Modify requests before they reach the model.</li>
+    <li>Transform responses after the model processes them.</li>
+    <li>Add logging, monitoring, or debugging.</li>
+    <li>Implement custom logic for model selection, prompts, or tool handling.</li>
+  </ul>
+  <p><strong>Why use middleware?</strong></p>
+  <ol>
+    <li><strong>Separation of concerns</strong>: Keep core logic separate from cross-cutting concerns.</li>
+    <li><strong>Reusability</strong>: Reuse middleware across many agents.</li>
+    <li><strong>Flexibility</strong>: Change behavior without changing agent business logic.</li>
+    <li><strong>Monitoring</strong>: Add logging, metrics, and debugging easily.</li>
+  </ol>
+
+  <h3>6.2 Basic Logging Middleware</h3>
+  <p>
+    Let's start with a simple middleware that logs requests and responses around a model call.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a logging middleware using <code>@wrap_model_call</code> and apply it when creating an agent.
+      Copy the code into a new cell and run it.
+    </p>
+  </div>
+
+  <pre><code># Basic Middleware Example: Request/Response Logger
+from langchain.agents.middleware import wrap_model_call
+from datetime import datetime
+
+@wrap_model_call
+def logging_middleware(request, handler):
+    """Simple middleware that logs all model interactions."""
+    print(f" [{datetime.now().strftime('%H:%M:%S')}] Model Request:")
+    print(f"   Model: {request.model}")
+    print(f"   Messages: {len(request.state.get('messages', []))} messages")
+    
+    # Call the actual model (this is where the magic happens)
+    response = handler(request)
+    
+    print(f"✅ [{datetime.now().strftime('%H:%M:%S')}] Model Response received")
+    print(f"   Response type: {type(response)}")
+    print("-" * 50)
+    
+    return response
+
+# Create agent with logging middleware
+basic_agent_with_logging = create_agent(
+    model=model,
+    tools=[tavily_tool],
+    middleware=[logging_middleware],  # Apply our middleware
+    system_prompt=(
+        "You are a helpful research assistant with web search capabilities. "
+        "Use Tavily search when the user needs current or factual information from the web."
+    ),
+)</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Trigger the logging middleware by invoking the agent. Watch the console to see the logged request and response.
+    </p>
+  </div>
+
+  <pre><code># Test the logging middleware in action
+print("=== Testing Logging Middleware ===")
+
+result = basic_agent_with_logging.invoke({
+    "messages": [{"role": "user", "content": "Search the web: what are the latest headlines in AI this week?"}]
+})
+
+print("\nFinal Result:")
+print(result["messages"][-1].content)</code></pre>
+
+  <h3>6.3 Key Middleware Concepts</h3>
+  <p><strong>Execution Order</strong>: Middleware runs in the order you specify in the list.</p>
+  <p><strong>Handler Pattern</strong>:</p>
+  <ul>
+    <li>Always call <code>handler(request)</code> to continue the chain.</li>
+    <li>This is where the actual model call happens.</li>
+    <li>If you skip <code>handler</code>, the request stops at your middleware.</li>
+  </ul>
+  <p><strong>Middleware Types in LangChain</strong>:</p>
+  <ul>
+    <li><code>@wrap_model_call</code> – intercepts model calls.</li>
+    <li><code>@wrap_tool_call</code> – intercepts tool calls.</li>
+    <li><code>@dynamic_prompt</code> – dynamically modifies system prompts.</li>
+  </ul>
+  <p><strong>Best Practices</strong>:</p>
+  <ol>
+    <li>Keep each middleware focused on a single responsibility.</li>
+    <li>Handle exceptions gracefully.</li>
+    <li>Order middleware carefully – order matters.</li>
+    <li>Use middleware for cross-cutting concerns, not core business logic.</li>
+  </ol>
+
+  <h2>7. Dynamic Models</h2>
+
+  <h3>7.1 Dynamic Models with Middleware</h3>
+  <p>
+    A <strong>dynamic model</strong> is chosen at runtime, based on the conversation state and context.
+    For example, you can use a cheaper model for simple queries and a more powerful model when the task is complex.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Implement a dynamic model selection middleware that chooses between a basic and an advanced model based on message
+      count and keywords in the last user message.
+    </p>
+  </div>
+
+  <pre><code># Dynamic model example - Now you understand middleware!
+from langchain.agents.middleware import wrap_model_call, ModelRequest, ModelResponse
+
+# Set up different models for different scenarios
+basic_model = ChatOpenAI(model="gpt-4.1-mini")
+advanced_model = ChatOpenAI(model="gpt-4.1")
+
+@wrap_model_call
+def dynamic_model_selection(request: ModelRequest, handler) -> ModelResponse:
+    """Choose model based on conversation complexity."""
+    message_count = len(request.state["messages"])
+    
+    # Check if the question involves complex calculations or multiple steps
+    last_message = request.state["messages"][-1].content if request.state["messages"] else ""
+    complex_keywords = ["complex", "multiple", "detailed", "analysis", "explain"]
+    
+    if message_count &gt; 5 or any(keyword in last_message.lower() for keyword in complex_keywords):
+        # Use advanced model for complex scenarios
+        print("Using advanced model (GPT-4.1) for complex task")
+        request.model = advanced_model
+    else:
+        # Use basic model for simple tasks
+        print("Using basic model (GPT-4.1-mini) for simple task")
+        request.model = basic_model
+    
+    return handler(request)
+
+# Create dynamic agent
+dynamic_agent = create_agent(
+    model=basic_model,  # Default model
+    tools=[tavily_tool],
+    middleware=[dynamic_model_selection],  # This is middleware in action!
+    system_prompt=(
+        "You are an intelligent research assistant that adapts to task complexity. "
+        "Use Tavily search for questions that need up-to-date information from the web."
+    ),
+)
+
+print("Dynamic agent created successfully!")</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Test the dynamic agent with both a simple and a complex query. Watch the console to see which model is selected.
+    </p>
+  </div>
+
+  <pre><code># Test dynamic agent with simple task
+print("Testing with simple task:")
+result = dynamic_agent.invoke({
+    "messages": [{"role": "user", "content": "What is LangChain?"}]
+})
+print(result["messages"][-1].content)
+print("\n" + "="*50 + "\n")
+
+# Test dynamic agent with complex task
+print("Testing with complex task:")
+result = dynamic_agent.invoke({
+    "messages": [{"role": "user", "content": "Please provide a detailed analysis comparing recent AI agent frameworks and their middleware support."}]
+})
+print(result["messages"][-1].content)</code></pre>
+
+  <h2>8. Error Handling in Tools</h2>
+  <p>
+    Tools can fail due to invalid inputs, network issues, API errors, or bugs. A robust agent should handle these errors
+    gracefully: <strong>retry transient failures</strong>, and if they still fail, return
+    <strong>user-friendly messages</strong> instead of crashing.
+  </p>
+  <p>
+    Many third-party integrations return an <em>error string</em> as a normal tool result instead of raising an
+    exception, so <code>@wrap_tool_call</code> never sees a failure. For this lab we use a <strong>small custom tool</strong>
+    that <strong>raises</strong> on the first two calls and <strong>succeeds on the third</strong>. That lets you see how
+    retry middleware recovers from a flaky service — and how it falls back to a <code>ToolMessage</code> if every
+    attempt fails.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Define a demo tool that raises <code>ConnectionError</code> twice then returns data, add
+      <code>@wrap_tool_call</code> middleware that retries up to 3 times (2-second delay between attempts), and wire
+      both into an agent with your existing <code>tavily_tool</code>.
+    </p>
+  </div>
+
+  <pre><code>import time
+from langchain.agents.middleware import wrap_tool_call
+from langchain_core.messages import ToolMessage
+from langchain_core.tools import tool
+
+_fetch_attempts = {"count": 0}
+
+@tool
+def fetch_live_external_data(topic: str) -&gt; str:
+    """Fetch live or real-time external data for a topic (e.g. weather, stock quote, breaking news).
+
+    Use this when the user asks for up-to-the-minute or live information.
+    """
+    _fetch_attempts["count"] += 1
+    attempt = _fetch_attempts["count"]
+    print(f"fetch_live_external_data call #{attempt} for topic={topic!r}")
+
+    # Demo: fail the first two times, succeed on the third so retry middleware can recover
+    if attempt &lt;= 2:
+        raise ConnectionError("Simulated failure: external data service is unreachable.")
+
+    return (
+        f"Live data for '{topic}': Bengaluru (Bangalore) is currently 27°C, "
+        "partly cloudy, with a light breeze from the east."
+    )
+
+@wrap_tool_call
+def handle_tool_errors(request, handler):
+    """Retry a failed tool call up to 3 times; if all attempts fail, return a user-facing ToolMessage."""
+    max_attempts = 3
+    retry_delay_seconds = 2
+    last_error = None
+
+    for attempt in range(1, max_attempts + 1):
+        try:
+            print(f"Tool call attempt {attempt}/{max_attempts}")
+            return handler(request)
+        except Exception as e:
+            last_error = e
+            print(f"Attempt {attempt} failed: {e}")
+            if attempt &lt; max_attempts:
+                print(f"Retrying in {retry_delay_seconds} seconds...")
+                time.sleep(retry_delay_seconds)
+
+    msg = str(last_error).lower()
+    if "connection" in msg or "timeout" in msg or "unreachable" in msg:
+        return ToolMessage(
+            content=(
+                "The live data service is temporarily unavailable after 3 attempts. "
+                "Answer from general knowledge or suggest the user try again later."
+            ),
+            tool_call_id=request.tool_call["id"],
+        )
+    return ToolMessage(
+        content=f"That tool hit an error after 3 attempts: {last_error!s}. Please rephrase or use another approach.",
+        tool_call_id=request.tool_call["id"],
+    )
+
+print("Demo flaky tool and retry middleware ready.")</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create an agent with the middleware, <code>fetch_live_external_data</code>, and <code>tavily_tool</code>. Ask for
+      something that should trigger the live-data tool (e.g. current weather in Bangalore). Watch the console: the tool fails twice,
+      middleware waits 2 seconds between retries, and the third attempt returns data so the agent can answer.
+    </p>
+  </div>
+
+  <pre><code># Agent: Tavily search works; live-data tool fails twice then succeeds (retry middleware)
+error_handling_agent = create_agent(
+    model=model,
+    tools=[fetch_live_external_data, tavily_tool],
+    middleware=[handle_tool_errors],
+    system_prompt=(
+        "You are a helpful assistant. Use fetch_live_external_data when the user wants live or real-time external data. "
+        "Use Tavily search for general web research. If a tool result indicates a service error, say so clearly and offer alternatives."
+    ),
+)
+
+print("Testing retries (tool fails twice, succeeds on the third attempt):")
+result = error_handling_agent.invoke({
+    "messages": [{"role": "user", "content": "What is the exact temperature in Bangalore, India right now?"}]
+})
+
+print(result["messages"][-1].content)
+print("\n" + "=" * 50 + "\n")</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Test a normal operation (e.g., a web search) to confirm that tools that don't raise still work as expected.</p>
+  </div>
+
+  <pre><code># Test normal operation - Tavily search works fine
+print("Testing normal operation (Tavily search):")
+result = error_handling_agent.invoke({
+    "messages": [{"role": "user", "content": "Search the web: who won the latest Formula 1 race?"}]
+})
+print(result["messages"][-1].content)</code></pre>
+
+  <div class="note">
+    <strong>Tip</strong>: In production, if a vendor returns errors as plain strings, either validate that string inside
+    the tool and <code>raise</code> when appropriate, or use middleware that inspects successful return values and
+    rewrites them into clearer <code>ToolMessage</code> text for the model.
+  </div>
+
+  <h2>9. Guardrails for Agents</h2>
+  <p>
+    Now that you understand how to use <strong>middleware</strong>, let's apply it to a critical real-world problem:
+    <strong>guardrails</strong> for safety, compliance, and control. Guardrails help ensure your agents do not leak PII,
+    perform unsafe actions, or execute sensitive operations without human approval.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Import the guardrail-related middleware and helpers that we'll use in this section.
+    </p>
+  </div>
+
+  <pre><code>from langchain.agents.middleware import PIIMiddleware, HumanInTheLoopMiddleware
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.types import Command
+from langchain.chat_models import init_chat_model</code></pre>
+
+  <h3>9.1 Example Tools for Our Agent</h3>
+
+  <p>
+    Let's create some example tools that our agent will use. These tools simulate real-world scenarios where guardrails are essential.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Copy or type the following code to create example tools for testing guardrails:
+    </p>
+  </div>
+
+  <pre><code>@tool
+def send_email(recipient: str, subject: str, body: str) -> str:
+    """Send an email to a recipient. This is a sensitive operation that requires approval."""
+    return f"Email sent to {recipient} with subject '{subject}' and body: {body[:50]}..."
+
+@tool
+def search_database(query: str) -> str:
+    """Search the company database for information."""
+    return f"Database search results for '{query}': Found 5 matching records"
+
+@tool
+def delete_record(record_id: str) -> str:
+    """Delete a record from the database. This is a sensitive operation."""
+    return f"Record {record_id} has been deleted from the database"
+
+print("Guardrail tools created successfully!")</code></pre>
+
+  <h3>9.2 Built-in Guardrail: PII Detection</h3>
+
+  <p>
+    LangChain provides built-in middleware for detecting and handling Personally Identifiable Information (PII). This is crucial for compliance with regulations like GDPR and HIPAA.
+  </p>
+
+  <h4>PII Detection Strategies:</h4>
+  <ul>
+    <li><strong>redact</strong>: Replace with [REDACTED_TYPE]</li>
+    <li><strong>mask</strong>: Partially obscure (e.g., ****-****-****-1234)</li>
+    <li><strong>hash</strong>: Replace with deterministic hash</li>
+    <li><strong>block</strong>: Raise exception when detected</li>
+  </ul>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create an agent with PII detection guardrails. Copy or type the following code:
+    </p>
+  </div>
+
+  <pre><code># Create an agent with PII detection guardrails
+pii_agent = create_agent(
+    model=init_chat_model("gpt-4.1-mini"),
+    tools=[search_database],
+    middleware=[
+        # Mask credit cards in user input before sending to model
+        PIIMiddleware(
+            "credit_card",
+            strategy="mask",
+            apply_to_input=True,
+        ),
+        # Mask API keys in user input
+        PIIMiddleware(
+            "api_key",
+            detector=r"sk-[a-zA-Z0-9]{32}",  # OpenAI API key pattern
+            strategy="mask",
+            apply_to_input=True,
+        ),
+    ],
+)
+
+print("PII-protected agent created!")</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Test PII detection with a credit card number and API key. Copy or type the following code:
+    </p>
+  </div>
+
+  <pre><code># Test PII detection with credit card and API key
+print("=== Testing PII Detection ===")
+print("Input: 'My card is 4111 1111 1111 1111 and my API key is sk-abcdefghijklmnopqrstuvwxyz123456'")
+print()
+
+try:
+    result = pii_agent.invoke({
+        "messages": [{
+            "role": "user",
+            "content": "My card is 4111 1111 1111 1111 and my API key is sk-abcdefghijklmnopqrstuvwxyz123456. Can you search the database for my recent orders?"
+        }]
+    })
+
+    print("Agent Response:")
+    print(result['messages'])
+
+except Exception as e:
+    print(f"Error: {e}")</code></pre>
+
+  <h3>9.3 Built-in Guardrail: Human-in-the-Loop</h3>
+
+  <p>
+    Human-in-the-loop middleware requires human approval before executing sensitive operations. This is perfect for high-stakes decisions like financial transactions or data deletion.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create an agent with human-in-the-loop for sensitive operations. Copy or type the following code:
+    </p>
+  </div>
+
+  <pre><code># Create an agent with human-in-the-loop for sensitive operations
+hitl_agent = create_agent(
+    model=init_chat_model("gpt-4o-mini"),
+    tools=[send_email, search_database, delete_record],
+    middleware=[
+        HumanInTheLoopMiddleware(
+            interrupt_on={
+                # Require approval for sensitive operations
+                "send_email": True,
+                "delete_record": True,
+                # Auto-approve safe operations
+                "search_database": False,
+            }
+        ),
+    ],
+    # Persist the state across interrupts
+    checkpointer=InMemorySaver(),
+)
+
+print("Human-in-the-loop agent created!")</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Test human-in-the-loop with a safe operation (should execute immediately). Copy or type the following code:
+    </p>
+  </div>
+
+  <pre><code># Test human-in-the-loop with a safe operation (should execute immediately)
+print("=== Testing Safe Operation (No Approval Needed) ===")
+print("Request: Search the database for quarterly sales reports")
+print()
+
+config = {"configurable": {"thread_id": "safe_thread"}}
+
+result = hitl_agent.invoke(
+    {"messages": [{"role": "user", "content": "Search the database for quarterly sales reports"}]},
+    config=config
+)
+
+print("Agent Response:")
+result['messages']</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Test human-in-the-loop with a sensitive operation (requires approval). Copy or type the following code:
+    </p>
+  </div>
+
+  <pre><code># Test human-in-the-loop with a sensitive operation (requires approval)
+print("=== Testing Sensitive Operation (Requires Approval) ===")
+print("Request: Send an email to the team")
+print()
+
+config = {"configurable": {"thread_id": "sensitive_thread"}}
+
+# This will pause and wait for approval
+result = hitl_agent.invoke(
+    {"messages": [{"role": "user", "content": "Send an email to team@company.com about the quarterly meeting"}]},
+    config=config
+)
+
+print("Initial Response (Waiting for Approval):")
+print(f"Messages: {len(result.get('messages', []))}")
+print(f"Next step: {result.get('next', 'Unknown')}")
+print("\n⏸️ Agent paused, waiting for human approval...")</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Approve the sensitive operation. Copy or type the following code:
+    </p>
+  </div>
+
+  <pre><code># Approve the sensitive operation
+print("=== Human Approval: APPROVE ===")
+print()
+
+# Resume with approval
+approved_result = hitl_agent.invoke(
+    Command(resume={"decisions": [{"type": "approve"}]}),
+    config=config  # Same thread ID to resume
+)
+
+print("Final Response After Approval:")
+approved_result['messages']</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Demonstrate rejection. Copy or type the following code:
+    </p>
+  </div>
+
+  <pre><code># Demonstrate rejection
+print("=== Testing Rejection ===")
+print("Request: Delete a record")
+print()
+
+config_reject = {"configurable": {"thread_id": "reject_thread1"}}
+
+# Start a sensitive operation
+result = hitl_agent.invoke(
+    {"messages": [{"role": "user", "content": "Delete record ID-12345 from the database"}]},
+    config=config_reject
+)
+
+print("⏸️ Agent paused for approval...")
+print("Human Decision: REJECT")
+print()
+
+# Reject the operation
+rejected_result = hitl_agent.invoke(
+    Command(resume={"decisions": [{"type": "reject"}]}),
+    config=config_reject
+)
+
+print("Final Response After Rejection:")
+rejected_result['messages']</code></pre>
+
+</main>
+</body>
+</html>
+
+

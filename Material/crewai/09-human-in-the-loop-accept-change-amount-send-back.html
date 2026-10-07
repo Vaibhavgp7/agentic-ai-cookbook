@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Claims Officer Decides</title>
+  <style>
+    :root {
+      --bg-gradient-start: #eef2ff;
+      --bg-gradient-mid: #f9fafb;
+      --bg-gradient-end: #fdf2ff;
+      --text-primary: #111827;
+      --text-heading: #0f172a;
+      --accent-blue: #2563eb;
+      --accent-green: #16a34a;
+      --accent-amber: #d97706;
+      --accent-red: #dc2626;
+      --card-bg: #ffffff;
+      --border-subtle: rgba(148, 163, 184, 0.35);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65; margin: 0; padding: 0;
+      background: radial-gradient(circle at top left, var(--bg-gradient-start) 0, var(--bg-gradient-mid) 40%, var(--bg-gradient-end) 100%);
+      color: var(--text-primary);
+    }
+    main {
+      max-width: 980px; margin: 2rem auto 3rem; padding: 2.5rem 2rem 3rem;
+      background-color: var(--card-bg); border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08), 0 0 0 1px var(--border-subtle);
+    }
+    h1 {
+      font-size: 2.05rem; margin: 0 0 1rem; letter-spacing: -0.03em; text-align: center; color: var(--text-heading);
+      padding: 1rem 1.5rem; border-radius: 999px; background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12), 0 0 0 1px var(--border-subtle);
+    }
+    h2 { font-size: 1.5rem; margin-top: 2.25rem; margin-bottom: 0.5rem; border-bottom: 2px solid rgba(37, 99, 235, 0.18); padding-bottom: 0.35rem; color: var(--text-heading); }
+    h3 { font-size: 1.18rem; margin-top: 1.75rem; color: var(--text-heading); }
+    p { margin: 0.5rem 0 0.75rem; }
+    code { font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace; background-color: #f3f4ff; padding: 0.12rem 0.3rem; border-radius: 4px; font-size: 0.93em; color: #1d4ed8; }
+    pre { background: linear-gradient(145deg, #020617, #0b1120); color: #e5e7eb; padding: 1rem 1.1rem; border-radius: 10px; overflow-x: auto; font-size: 0.86rem; line-height: 1.5; margin: 0.75rem 0 1.5rem; border: 1px solid rgba(15, 23, 42, 0.6); }
+    pre code { background: none; padding: 0; color: inherit; }
+    .note, .exercise, .warning, .tip, .student-edit { padding: 0.9rem 1.1rem; margin: 1rem 0 1.5rem; border-radius: 10px; font-size: 0.95rem; border: 1px solid transparent; }
+    .note { border-left: 4px solid var(--accent-blue); background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%); border-color: rgba(37, 99, 235, 0.4); }
+    .exercise { border-left: 4px solid var(--accent-green); background: linear-gradient(135deg, #ecfdf3, #f0fdf4); border-color: rgba(22, 163, 74, 0.4); }
+    .warning { border-left: 4px solid var(--accent-red); background: linear-gradient(135deg, #fef2f2, #fee2e2); border-color: rgba(220, 38, 38, 0.4); }
+    .tip { border-left: 4px solid var(--accent-amber); background: linear-gradient(135deg, #fffbeb, #fef3c7); border-color: rgba(217, 119, 6, 0.4); }
+    .student-edit { border-left: 4px solid var(--accent-green); background: linear-gradient(135deg, #f0fdf4, #ecfdf5); border-color: rgba(22, 163, 74, 0.45); }
+    .exercise-title, .label { font-weight: 650; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.78rem; }
+    .exercise-title { color: #166534; }
+    .label-green { color: #166534; }
+    ol, ul { padding-left: 1.4rem; }
+    li { margin: 0.3rem 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.93rem; }
+    table th { background: linear-gradient(135deg, #dbeafe, #e0f2fe); color: var(--text-heading); font-weight: 600; padding: 0.7rem 0.9rem; text-align: left; border-bottom: 2px solid var(--accent-blue); }
+    table td { padding: 0.7rem 0.9rem; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+    table tr:hover { background-color: #f8fafc; }
+    .subtitle { text-align: center; color: #64748b; margin-bottom: 1.5rem; font-size: 1.05rem; }
+    .file-tree { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem 1.1rem; margin: 0.75rem 0 1.5rem; font-family: "Fira Code", Menlo, Monaco, Consolas, monospace; font-size: 0.86rem; white-space: pre; overflow-x: auto; line-height: 1.55; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>The Claims Officer Decides</h1>
+  <p class="subtitle">The team can recommend. The chat now stops and waits for you, the person at the keyboard, before the hard file moves on.</p>
+
+  <div class="note">
+    <strong>How to follow this page.</strong>
+    The three doors already work. A hard file still ends as soon as the brief is written. On this page you replace <code>app.py</code> with the block in Step 1, then click the three buttons in Steps 2 and 3, then check the two simple files in Step 4. Copy the page exactly. The code has already been tested. None of the buttons pays the claim. New words are explained in parentheses the first time they appear.
+  </div>
+
+  <h2>The story, in plain words</h2>
+  <p>You are the <strong>claims officer</strong> (the human at the keyboard). The crew has already written a preliminary opinion (a first reading) and a brief (a short note) for the hard file, CLM-20481. Both notes are <strong>non-binding</strong> (they do not force a payment). A <strong>senior examiner</strong> (a more senior human who is not in this chat) is still the only person who can pay or refuse. Someone in the chat still has to say what happens to that note.</p>
+  <p>A <strong>human in the loop</strong> (a pause where a person chooses the next step) is that moment. The person is you. The pause belongs on one door only. A rules check for CLM-10021 is finished when the sentence is written. A missing police report on CLM-10044 is finished when the desk asks for the paper. Neither of those needs a second decision from you. CLM-20481 does.</p>
+  <p>You get three choices, and none of them pays the claim.</p>
+  <table>
+    <thead><tr><th>Button</th><th>What you are deciding</th><th>What the desk writes</th></tr></thead>
+    <tbody>
+      <tr><td>Accept for the examiner</td><td>The note is good enough to send on.</td><td>The file is accepted for the senior examiner. No money has moved. The senior examiner still decides payment or denial.</td></tr>
+      <tr><td>Change amount</td><td>The figure in the note should be a number you type. The garage estimate in the database stays as it is.</td><td>The note now carries your figure. The crew did not approve it. It is still not a payment.</td></tr>
+      <tr><td>Send back</td><td>The note is not ready. The crew must look again.</td><td>The same door runs again. The question tells the crew that you sent the file back, and it repeats your original question. A new opinion and a new brief appear, and the three buttons come back.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="warning">
+    <strong>Accept is not pay.</strong>
+    The senior examiner is not in this chat. The crew is not the senior examiner. The examiner brief agent is not the senior examiner. The button records that the claims officer is willing to pass the note on. The first line of that record is <code>ACCEPTED FOR THE SENIOR EXAMINER — NOT A PAYMENT</code>.
+  </div>
+
+  <h2>Why the pause is a button, not a prompt in the terminal</h2>
+  <p>CrewAI can pause inside a flow. Two tools do it.</p>
+  <p><code>@human_feedback</code> sits on a flow method. When that method returns, the flow stops and asks a person to type. You can give it <code>emit</code>, a list of labels such as <code>approved</code> and <code>rejected</code>. A model then reads the typed sentence and picks one of those labels, and the matching <code>@listen</code> runs. The latest reply is kept on <code>last_human_feedback</code>. The history of replies is <code>human_feedback_history</code>.</p>
+  <p><code>Flow.ask</code> is the smaller version: the method calls <code>self.ask("...")</code> and waits for a typed answer.</p>
+  <p>Both use a provider. If you do not set one, the provider is the console. It blocks the Python process on <code>input</code> until someone types in the terminal that started the program. Streamlit is that process. The browser is not the terminal. If the flow called <code>input</code>, the page would spin, the terminal would be the only place a person could answer, and a claims officer looking at the chat would have nothing to click.</p>
+  <p>There is a task flag, <code>human_input</code>, that does the same kind of terminal pause in the middle of a crew. Do not turn it on. The claims officer is in the browser.</p>
+  <p>So the pause lives in the page. Streamlit (the library that draws the chat) runs the script from the top on every click. Anything you want to remember has to sit in <code>st.session_state</code> (the page's memory, which survives a click; an ordinary Python variable does not). We remember three things: whether a decision is waiting, which claim it belongs to, and the question you asked, so Send back can repeat it. The flag is set only when the answer starts with <code>DESK ROUTE: ask_the_crew</code>. That line is how the page knows the crew ran. The rules door and the papers door do not set the flag, so they do not show the buttons.</p>
+
+  <div class="note">
+    <strong>The flow is not changed.</strong>
+    <code>desk_flow.py</code> still returns as soon as the brief is written. It does not know about the buttons. The page reads the answer, and if the door was the crew, the page waits. Sending the file back calls <code>respond</code> again, which starts a new flow and, for this claim, the crew. That is a second turn, not a pause inside <code>kickoff</code>.
+  </div>
+
+  <h2>Where you are working</h2>
+  <p>Stay inside <code>suraksha_claims_desk</code>. Stop the chat with Ctrl+C. On Windows PowerShell:</p>
+  <pre><code>$env:PYTHONUTF8="1"</code></pre>
+  <p><code>respond</code> must already start <code>DeskFlow</code>, and a complex answer must already begin with <code>DESK ROUTE: ask_the_crew</code>. If a CLM-20481 answer does not have that first line, put it back in <code>handle_complex_claim</code> before you change the page. Leave the crew and the route as they are.</p>
+  <p>One line in <code>run_crew</code> has to be there before a second question can run. The first <code>kickoff</code> builds a manager, and that manager has tools. This version of CrewAI then refuses the next <code>kickoff</code> with <code>Manager agent should not have tools</code>. Ask again and Send back are that next kickoff. In <code>run_crew</code>, after <code>_get_crew()</code>, set <code>crew.manager_agent = None</code> and then call <code>kickoff</code>. The log for a failed second run is <code>Desk decision: ... failed before a note.</code> followed by that sentence. After the line is in place, the second run prints <code>Crew start:</code> again.</p>
+
+  <h2>Step 1: Replace the chat page</h2>
+  <p>In this step you replace the whole chat page so the three buttons can appear. Stop the chat first. Open <code>app.py</code> and replace the whole file with the block below. Do not change <code>desk.py</code> or <code>desk_flow.py</code> on this page. The buttons appear only when the answer starts with the exact characters <code>DESK ROUTE: ask_the_crew</code>.</p>
+  <div class="student-edit">
+    <div class="label label-green">Replace app.py</div>
+    <p>This is the whole page. The caption, the decision flags, the three buttons, and the <code>Desk decision:</code> lines are the new parts. The sidebar and the call to <code>respond</code> stay. Search the terminal for <code>Desk decision:</code>. Accept and Change amount must not be followed by <code>Crew start:</code>. Send back must be.</p>
+  </div>
+  <pre><code>import streamlit as st
+
+from desk import respond
+from sample_claims import CLAIM_ORDER, CLAIMS
+
+st.set_page_config(page_title="Suraksha Claims Desk", layout="centered")
+st.title("Suraksha Claims Desk")
+st.caption("The desk chooses a door. The crew runs only for a complex file. You decide what happens to that note.")
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+if "active_claim" not in st.session_state:
+    st.session_state.active_claim = CLAIM_ORDER[0]
+if "pending_prompt" not in st.session_state:
+    st.session_state.pending_prompt = None
+if "show_decision" not in st.session_state:
+    st.session_state.show_decision = False
+if "decision_claim" not in st.session_state:
+    st.session_state.decision_claim = None
+if "last_question" not in st.session_state:
+    st.session_state.last_question = ""
+
+with st.sidebar:
+    st.header("Claim file")
+    claim_id = st.radio(
+        "Select a claim",
+        CLAIM_ORDER,
+        format_func=lambda cid: f"{cid} — {CLAIMS[cid]['title']}",
+    )
+    st.markdown(CLAIMS[claim_id]["narrative"])
+    st.divider()
+    st.subheader("Try these")
+    for prompt in (
+        "Is this loss covered?",
+        "What is the chassis number?",
+        "Should we pay this claim now?",
+    ):
+        if st.button(prompt, use_container_width=True):
+            st.session_state.pending_prompt = prompt
+
+if st.session_state.active_claim != claim_id:
+    print(
+        f"Desk decision: left {st.session_state.active_claim} for {claim_id}. Buttons cleared.",
+        flush=True,
+    )
+    st.session_state.messages = []
+    st.session_state.active_claim = claim_id
+    st.session_state.show_decision = False
+    st.session_state.decision_claim = None
+
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+typed = st.chat_input("Ask about the selected claim")
+user_text = st.session_state.pending_prompt or typed
+if st.session_state.pending_prompt:
+    st.session_state.pending_prompt = None
+
+if user_text:
+    print(
+        f"Desk decision: question on {claim_id}. {user_text}",
+        flush=True,
+    )
+    st.session_state.last_question = user_text
+    st.session_state.messages.append({"role": "user", "content": user_text})
+    with st.chat_message("user"):
+        st.markdown(user_text)
+    with st.chat_message("assistant"):
+        with st.spinner("The desk is choosing a door..."):
+            try:
+                answer = respond(user_text, CLAIMS[claim_id])
+            except Exception as exc:
+                print(
+                    f"Desk decision: {claim_id} failed before a note. {exc}",
+                    flush=True,
+                )
+                answer = f"The desk could not finish.\n\n{exc}"
+        st.markdown(answer)
+    st.session_state.messages.append({"role": "assistant", "content": answer})
+    waiting = answer.startswith("DESK ROUTE: ask_the_crew")
+    st.session_state.show_decision = waiting
+    st.session_state.decision_claim = claim_id if waiting else None
+    if waiting:
+        print(
+            f"Desk decision: {claim_id} is waiting. Three buttons. Not a payment.",
+            flush=True,
+        )
+    else:
+        print(
+            f"Desk decision: {claim_id} finished on this door. No buttons.",
+            flush=True,
+        )
+
+if st.session_state.show_decision and st.session_state.decision_claim == claim_id:
+    st.divider()
+    st.markdown("**The note is non-binding. Choose what the desk should do with it.**")
+    accept, change, send_back = st.columns(3)
+    accepted = accept.button("Accept for the examiner", use_container_width=True)
+    changed = change.button("Change amount", use_container_width=True)
+    sent_back = send_back.button("Send back", use_container_width=True)
+    amount = st.number_input(
+        "Figure to put in the note, in INR",
+        min_value=0,
+        value=0,
+        step=1000,
+        key="note_amount",
+    )
+
+    if accepted:
+        print(
+            f"Desk decision: accept {claim_id}. No crew. Not a payment.",
+            flush=True,
+        )
+        note = (
+            "ACCEPTED FOR THE SENIOR EXAMINER — NOT A PAYMENT\n\n"
+            f"The claims officer accepts the preliminary note on {claim_id} "
+            "and sends the file on. No money has moved. The senior examiner still decides."
+        )
+        st.session_state.messages.append({"role": "assistant", "content": note})
+        st.session_state.show_decision = False
+        st.rerun()
+
+    if changed:
+        if int(amount) &lt;= 0:
+            print(
+                f"Desk decision: change amount refused for {claim_id}. Figure was {int(amount)}.",
+                flush=True,
+            )
+            st.warning("Type a figure greater than zero, then press Change amount.")
+        else:
+            print(
+                f"Desk decision: amount in the note for {claim_id} set to INR {int(amount)}. Database unchanged. No crew.",
+                flush=True,
+            )
+            note = (
+                "AMOUNT CHANGED IN THE NOTE — NOT A PAYMENT\n\n"
+                f"The claims officer sets the figure in the note on {claim_id} to INR {int(amount)}. "
+                "The database estimate is unchanged. The crew did not approve this figure. "
+                "The senior examiner still decides."
+            )
+            st.session_state.messages.append({"role": "assistant", "content": note})
+            st.session_state.show_decision = False
+            st.rerun()
+
+    if sent_back:
+        question = (
+            "The claims officer sent this file back. "
+            "Say what is still unclear. Do not pay or decline. "
+            "The original question was: "
+            + (st.session_state.last_question or "Is this loss covered?")
+        )
+        print(
+            f"Desk decision: send back {claim_id}. Calling the crew again. {question}",
+            flush=True,
+        )
+        with st.spinner("The crew is reading the file again..."):
+            try:
+                answer = respond(question, CLAIMS[claim_id])
+            except Exception as exc:
+                print(
+                    f"Desk decision: send back on {claim_id} failed. {exc}",
+                    flush=True,
+                )
+                answer = f"The desk could not finish.\n\n{exc}"
+        st.session_state.messages.append({"role": "user", "content": "Send this file back."})
+        st.session_state.messages.append({"role": "assistant", "content": answer})
+        waiting = answer.startswith("DESK ROUTE: ask_the_crew")
+        st.session_state.show_decision = waiting
+        st.session_state.decision_claim = claim_id if waiting else None
+        if waiting:
+            print(
+                f"Desk decision: {claim_id} is waiting again after send back. Three buttons. Not a payment.",
+                flush=True,
+            )
+        else:
+            print(
+                f"Desk decision: send back on {claim_id} did not return a crew note. No buttons.",
+                flush=True,
+            )
+        st.rerun()</code></pre>
+  <p><code>st.rerun</code> starts the script again so the new note appears in the history and the buttons do not fire twice. <code>st.session_state</code> survives that rerun. The chat bubbles do not. The bubbles are rebuilt from <code>messages</code>, which is why the note is appended there before the rerun.</p>
+  <p>The <code>print</code> lines are the decision log. They use <code>flush=True</code> so they show up while a crew is still running. The previous page's <code>Chat:</code>, <code>Desk:</code>, and <code>Crew start:</code> lines still print, because <code>desk.py</code> is unchanged. A button that does not call <code>respond</code> prints only <code>Desk decision:</code>.</p>
+
+  <h2>Step 2: A complex file stops and waits</h2>
+  <p>In this step you wait for the hard file, then press Accept. Select CLM-20481 and ask whether the loss is covered. Wait for both headings and for the three buttons. Then press <strong>Accept for the examiner</strong>. You should see a new message that starts with <code>ACCEPTED FOR THE SENIOR EXAMINER — NOT A PAYMENT</code>. The terminal must not print <code>Crew start:</code> for that click. Accept records a handoff. It does not pay.</p>
+  <pre><code>uv run streamlit run app.py</code></pre>
+  <p>Select <strong>CLM-20481</strong> and ask whether the loss is covered. Wait for both headings. The terminal prints <code>Desk decision: question on CLM-20481.</code> then the flow's <code>Desk:</code> lines, then <code>Crew start: CLM-20481.</code> When the note is back, it prints <code>Desk decision: CLM-20481 is waiting. Three buttons. Not a payment.</code> The first line of the answer is <code>DESK ROUTE: ask_the_crew</code>. Under the answer, the page shows the three buttons and a box for a figure. The opinion is still preliminary. The brief is still non-binding. Exclusion 4 and CL-17 are still in the note. Nothing has been paid.</p>
+  <p>Press <strong>Accept for the examiner</strong>. The buttons disappear. A new message starts with <code>ACCEPTED FOR THE SENIOR EXAMINER — NOT A PAYMENT</code>. The terminal prints <code>Desk decision: accept CLM-20481. No crew. Not a payment.</code> and does not print <code>Crew start:</code> for that click. The policy row in the database is unchanged.</p>
+
+  <h2>Step 3: Change the figure, then send the file back</h2>
+  <p>In this step you try the other two buttons, in this order. Ask the coverage question on CLM-20481 again. When the buttons return, leave the figure at zero and press <strong>Change amount</strong>. The page warns you, the buttons stay, and the terminal prints <code>Desk decision: change amount refused for CLM-20481. Figure was 0.</code> There is no <code>Crew start:</code> for that click. Then type <code>150000</code> and press <strong>Change amount</strong> again. The new message starts with <code>AMOUNT CHANGED IN THE NOTE — NOT A PAYMENT</code> and names INR 150000. The log is <code>Desk decision: amount in the note for CLM-20481 set to INR 150000. Database unchanged. No crew.</code> Highway Motors' estimate in the story is still ₹1,85,000. You changed the note, not the row in the database.</p>
+  <p>Ask once more. Press <strong>Send back</strong>. The log starts with <code>Desk decision: send back CLM-20481. Calling the crew again.</code> and the sentence includes your original question. Then you see <code>Chat:</code>, <code>Desk:</code>, and <code>Crew start:</code>, because this click does call the crew. The new answer still starts with <code>DESK ROUTE: ask_the_crew</code>, still has both headings, and still does not pay or decline. The log ends with <code>Desk decision: CLM-20481 is waiting again after send back.</code> The three buttons come back.</p>
+
+  <h2>Step 4: The other two doors do not ask you to decide</h2>
+  <p>In this step you confirm that the simple file and the missing-paper file never show the three buttons. Select <strong>CLM-10021</strong>. The terminal prints <code>Desk decision: left CLM-20481 for CLM-10021. Buttons cleared.</code> The bubbles clear, and the buttons must not follow you. Ask whether the loss is covered. You get the rules check, quickly, with <code>DESK ROUTE: settle_by_rule</code>, and the log says <code>finished on this door. No buttons.</code> There is no <code>Crew start:</code>. Press "Should we pay this claim now?" The rules check still says this chat does not move money, and the log still says no buttons.</p>
+  <p>Select <strong>CLM-10044</strong>. The log names the claim you left and the claim you opened. Ask the same question. You get <code>DESK ROUTE: wait_for_papers</code> and the police-report sentence. The log says no buttons. The crew does not start. There is nothing for you to accept, because there is no note yet.</p>
+
+  <h2>What just happened</h2>
+  <div class="file-tree">Complex file
+        │
+        ▼
+Flow calls the crew and returns the note
+        │
+        ▼
+The page sees DESK ROUTE: ask_the_crew
+        │
+        ▼
+Buttons stay in session state until you click
+        │
+        ├── Accept        a note for the senior examiner, no crew, no payment
+        ├── Change amount your figure in the note, the database row stays
+        └── Send back     respond() again, the crew reads the file again
+
+Simple file or missing paper: the page does not offer the buttons.</div>
+  <ul>
+    <li>Human in the loop means the procedure stops for a person. Here that person is the claims officer, and only after the crew has written.</li>
+    <li>The pause is <code>st.session_state</code>, because Streamlit forgets ordinary variables on every click. <code>@human_feedback</code> and <code>Flow.ask</code> would pause the terminal instead, and the browser would not show a button.</li>
+    <li>Accept, Change amount, and Send back are decisions about the note. The senior examiner is still the one who can bind a payment or a denial.</li>
+    <li>Switching claims clears the waiting decision, so a button for CLM-20481 cannot act on CLM-10021. The terminal says <code>Buttons cleared.</code></li>
+    <li><code>Desk decision:</code> is the page. <code>Crew start:</code> is the crew. Accept, a refused figure, and a changed figure print the first and not the second. Send back prints both.</li>
+  </ul>
+
+  <h2>If something goes wrong</h2>
+  <table>
+    <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td>CLM-20481 has both headings and no buttons</td><td>The answer must start with the exact characters <code>DESK ROUTE: ask_the_crew</code>. A blank line before it, or a different word, means the page will not wait. Fix <code>handle_complex_claim</code> and restart the chat.</td></tr>
+      <tr><td>CLM-10021 shows the three buttons</td><td>The rules answer was given the crew's first line, or <code>show_decision</code> was left true when you changed claims. The claim-change block must set <code>show_decision</code> to false. The rules text must start with <code>DESK ROUTE: settle_by_rule</code>.</td></tr>
+      <tr><td>Accept says the claim is paid</td><td>Replace that message. The first line has to be <code>ACCEPTED FOR THE SENIOR EXAMINER — NOT A PAYMENT</code>.</td></tr>
+      <tr><td>Change amount rewrites the database</td><td>The button may only append a chat message. It must not open <code>suraksha_claims.db</code>.</td></tr>
+      <tr><td>Send back returns in an instant with no <code>Crew start:</code></td><td>You should see <code>Desk decision: send back</code> and then <code>Crew start:</code>. If the second line is missing, <code>respond</code> is not reaching <code>run_crew</code>. For CLM-20481 the route is still <code>ask_the_crew</code>, because the route reads the policy row, not the question. Restart after saving <code>desk.py</code>.</td></tr>
+      <tr><td><code>Manager agent should not have tools</code></td><td>The cached crew still has the manager from the first kickoff. In <code>run_crew</code>, set <code>crew.manager_agent = None</code> before <code>kickoff</code>, then restart the chat.</td></tr>
+      <tr><td>Accept or Change amount prints <code>Crew start:</code></td><td>Those buttons must only append a chat message. They must not call <code>respond</code>.</td></tr>
+      <tr><td>The page spins and the terminal asks you to type</td><td>A flow method is using <code>@human_feedback</code>, <code>self.ask</code>, or a task has <code>human_input</code> set. Take that out. The only pause in this desk is the three buttons.</td></tr>
+      <tr><td>The buttons act on the wrong claim</td><td><code>decision_claim</code> must equal the selected id before the buttons render. Changing the radio has to clear the flag.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="exercise">
+    <div class="exercise-title">Try this on your own</div>
+    <ol>
+      <li>On CLM-20481, send the file back and read the new opinion. It should still refuse to pay or decline, and it should notice that you sent the file back. Then accept that second note. The accept message must not describe the first note as paid.</li>
+      <li>On CLM-10044, confirm there is no Accept button. Type "The police report arrived this morning" in the box. The door is still <code>wait_for_papers</code>, because a sentence in the chat does not edit the policy row. The crew stays quiet until the row itself no longer says NOT ON FILE.</li>
+      <li>Switch from a waiting CLM-20481 decision to CLM-10021 and back. The buttons should vanish on the simple file and should not still be sitting there when you return, unless you ask the complex question again.</li>
+    </ol>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Evaluating LLMs using DeepEval – Hands-on Guide</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+      color: #0f172a;
+    }
+    h4 {
+      font-size: 1.05rem;
+      margin-top: 1.25rem;
+      color: #1e293b;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .note, .exercise {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .exercise-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #166534;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+    .sample-output-title {
+      font-weight: 600;
+      margin-top: 0.75rem;
+      margin-bottom: 0.25rem;
+      color: #0f172a;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.92rem;
+    }
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #eff6ff;
+      color: #0f172a;
+    }
+    tbody tr:nth-child(even) {
+      background: #f9fafb;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Evaluating LLMs using DeepEval – Hands-on Lab</h1>
+
+  <h2>1. Welcome &amp; What You Will Learn</h2>
+  <p>
+    Hello everyone! In this hands-on lab I want you to actually <em>feel</em> what it means to evaluate a Large Language Model.
+    Most of you have written code where you check <code>assert result == 5</code>. That works for normal functions, but LLMs
+    produce open-ended text – two different answers can both be correct. So how do we test them?
+  </p>
+  <p>
+    That is exactly the problem <strong>DeepEval</strong> solves. By the end of this lab you will be able to:
+  </p>
+  <ul>
+    <li>Explain <em>why</em> traditional unit testing fails for LLM outputs.</li>
+    <li>Install and configure DeepEval on your own machine.</li>
+    <li>Write your first <code>LLMTestCase</code> and evaluate it using a metric.</li>
+    <li>Use built-in metrics like <strong>Answer Relevancy</strong>, <strong>Faithfulness</strong>, and the three <strong>Contextual</strong> metrics.</li>
+    <li>Build your own custom metric in plain English using <strong>G-Eval</strong>.</li>
+    <li>Run DeepEval tests through <strong>pytest</strong> – just like normal unit tests.</li>
+    <li>Evaluate a full dataset of test cases at once.</li>
+  </ul>
+
+  <div class="note">
+    <strong>Why I am teaching you this</strong>
+    <p>
+      In real projects, you will be asked: <em>"Is your chatbot good enough to release?"</em> Without metrics, you can only say
+      "it looked fine when I tested it." With DeepEval, you can say <em>"96 of 100 test cases passed faithfulness ≥ 0.8."</em>
+      That is the difference between a hobbyist and a professional. Let&apos;s build that skill together.
+    </p>
+  </div>
+
+  <h2>2. The Core Idea – Why LLM Testing Is Different</h2>
+
+  <h3>2.1 The problem with <code>assert</code></h3>
+  <p>
+    Suppose your LLM-powered support bot answers: <em>"You can return a damaged item within 30 days."</em> Your expected
+    answer was: <em>"Refunds for damaged items are allowed within 30 days of purchase."</em> Both are correct, but
+    <code>actual == expected</code> would fail. We need a smarter judge.
+  </p>
+
+  <h3>2.2 DeepEval&apos;s answer – metrics, not equality</h3>
+  <p>
+    Instead of comparing strings, DeepEval scores <strong>qualities</strong> of the output: Is it relevant? Is it grounded in
+    the retrieved context? Is it free of hallucination? Each quality is measured by a <strong>metric</strong> that returns a
+    score between 0 and 1, plus a written reason. You decide the <strong>threshold</strong> that counts as &quot;passing.&quot;
+  </p>
+
+  <h3>2.3 How a metric actually works (under the hood)</h3>
+  <p>
+    Most DeepEval metrics use an LLM (like GPT-4) as a judge. The pattern is always the same:
+  </p>
+  <ol>
+    <li><strong>Decompose</strong>: split the LLM output into atomic statements.</li>
+    <li><strong>Classify</strong>: for each statement, the judge decides relevant / faithful / etc.</li>
+    <li><strong>Aggregate</strong>: score = good statements ÷ total statements.</li>
+    <li><strong>Explain</strong>: the judge writes a reason in plain English.</li>
+  </ol>
+  <p>
+    So when you see a score of <code>0.83</code>, it is <em>not magic</em> – it is just a small LLM-driven pipeline. Once you
+    know this, debugging evaluation becomes intuitive.
+  </p>
+
+  <h2>3. Environment Setup</h2>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Open a terminal (PowerShell, bash, or your VS Code terminal). Create a new project folder of your choice
+      (for example <code>deepeval-lab</code>), move into it, and create a Python virtual environment.
+      We will keep all our DeepEval work isolated inside this folder.
+    </p>
+  </div>
+
+  <pre><code>mkdir deepeval-lab
+cd deepeval-lab
+
+# Create and activate a virtual environment
+python -m venv .venv
+
+# Windows (PowerShell):
+.\.venv\Scripts\activate
+
+# macOS / Linux:
+source .venv/bin/activate
+
+# You should now see (.venv) at the start of your prompt.</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Install DeepEval and the few packages we will use across the lab. Run this in your activated virtual environment.
+    </p>
+  </div>
+
+  <pre><code>pip install deepeval pytest python-dotenv openai</code></pre>
+
+  <div class="note">
+    <strong>About the judge model</strong>
+    <p>
+      DeepEval uses an LLM (default: OpenAI <code>gpt-4o</code> or similar) to judge your outputs. You will need an
+      <code>OPENAI_API_KEY</code>. If your organization uses Azure OpenAI or another provider, DeepEval also supports
+      custom judges – we will look at that briefly later.
+    </p>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create a <code>.env</code> file in the root of your project folder and put your OpenAI key in it.
+      Then create a subfolder called <code>lab</code> where we will write our Python files.
+    </p>
+  </div>
+
+  <pre><code># .env  (place this file in the root of your project folder)
+OPENAI_API_KEY=sk-your-key-here</code></pre>
+
+  <pre><code>mkdir lab</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Tell DeepEval which model to use as the judge. Run this command once from the project root. It saves your
+      preference in a hidden <code>.deepeval</code> file.
+    </p>
+  </div>
+
+  <pre><code>deepeval set-openai --model gpt-4o-mini</code></pre>
+
+  <p>
+    For the lab, <code>gpt-4o-mini</code> keeps cost low while still giving reliable judgements. For production-grade
+    evaluation, switch to <code>gpt-4o</code> or <code>gpt-4.1</code> later.
+  </p>
+
+  <h2>4. Your First DeepEval Test</h2>
+
+  <h3>4.1 The atom of evaluation – <code>LLMTestCase</code></h3>
+  <p>
+    Every DeepEval evaluation begins with a <strong>test case</strong>. It is a small data container with these key fields:
+  </p>
+  <ul>
+    <li><code>input</code> – the question/prompt you sent to your LLM.</li>
+    <li><code>actual_output</code> – the answer the LLM returned.</li>
+    <li><code>expected_output</code> – the ideal answer (optional, used by some metrics).</li>
+    <li><code>context</code> – ground-truth knowledge (used to check hallucinations).</li>
+    <li><code>retrieval_context</code> – for RAG: the documents your retriever fetched.</li>
+  </ul>
+  <p>
+    Different metrics need different fields. Think of <code>LLMTestCase</code> as the shared envelope – you fill in only
+    the fields a particular metric needs.
+  </p>
+
+  <h3>4.2 Hello World – Answer Relevancy</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Inside the <code>lab</code> folder, create a new file <code>01_first_test.py</code> and paste the code below.
+      Then run it from the project root.
+    </p>
+  </div>
+
+  <pre><code># lab/01_first_test.py
+from dotenv import load_dotenv
+from deepeval import evaluate
+from deepeval.test_case import LLMTestCase
+from deepeval.metrics import AnswerRelevancyMetric
+
+load_dotenv()
+
+# Pretend this output came from your real LLM application
+test_case = LLMTestCase(
+    input="What are the health benefits of green tea?",
+    actual_output=(
+        "Green tea is rich in antioxidants called catechins, "
+        "supports metabolism, and may improve brain function."
+    ),
+)
+
+metric = AnswerRelevancyMetric(
+    threshold=0.7,
+    model="gpt-4o-mini",
+    include_reason=True,
+)
+
+evaluate(test_cases=[test_case], metrics=[metric])</code></pre>
+
+  <pre><code>python lab/01_first_test.py</code></pre>
+
+  <p class="sample-output-title">Sample Output (yours will look similar)</p>
+  <pre><code>Evaluating 1 test case(s) in parallel...
+======================================================================
+
+✅ Metrics Summary
+  - ✅ Answer Relevancy (score: 1.0, threshold: 0.7, ...
+       reason: The output directly addresses the health benefits of green tea
+       by mentioning antioxidants, metabolism support, and brain function.)
+
+For test case:
+  - input: What are the health benefits of green tea?
+  - actual output: Green tea is rich in antioxidants called catechins, ...
+
+✅ Tests finished! Run 'deepeval login' to view evaluation results on Confident AI.</code></pre>
+
+  <div class="note">
+    <strong>What just happened?</strong>
+    <p>
+      DeepEval sent your question and answer to the judge model, asked it to break the answer into statements and
+      decide which were relevant to the question, then averaged the result. The score, reason, and pass/fail decision
+      are printed right in your terminal. That is the whole loop.
+    </p>
+  </div>
+
+  <h2>5. Evaluating a RAG Pipeline – The Real-World Case</h2>
+  <p>
+    Most of you will build <strong>RAG (Retrieval Augmented Generation)</strong> systems – the LLM is grounded in
+    documents fetched from a vector store. RAG systems can fail in <em>three</em> very different ways:
+  </p>
+  <ul>
+    <li>The retriever fetched the <em>wrong</em> documents.</li>
+    <li>The retriever fetched correct docs but the LLM <em>ignored</em> them and hallucinated.</li>
+    <li>The answer is grounded but not actually relevant to the user&apos;s question.</li>
+  </ul>
+  <p>
+    DeepEval gives you a different metric for each layer. Picking the right metric per layer is the most important
+    diagnostic skill you can build.
+  </p>
+
+  <h3>5.1 The five metrics you must know</h3>
+
+  <table>
+    <thead>
+      <tr><th>Metric</th><th>Which layer it audits</th><th>Required fields</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>ContextualPrecisionMetric</code></td>
+        <td>Retriever – are the relevant docs ranked higher?</td>
+        <td>input, actual_output, expected_output, retrieval_context</td>
+      </tr>
+      <tr>
+        <td><code>ContextualRecallMetric</code></td>
+        <td>Retriever – did we fetch <em>all</em> the info we needed?</td>
+        <td>input, actual_output, expected_output, retrieval_context</td>
+      </tr>
+      <tr>
+        <td><code>ContextualRelevancyMetric</code></td>
+        <td>Retriever – is the fetched content actually on-topic?</td>
+        <td>input, actual_output, retrieval_context</td>
+      </tr>
+      <tr>
+        <td><code>FaithfulnessMetric</code></td>
+        <td>Generator – did the LLM stay grounded in retrieved docs?</td>
+        <td>input, actual_output, retrieval_context</td>
+      </tr>
+      <tr>
+        <td><code>AnswerRelevancyMetric</code></td>
+        <td>End-to-end – did the answer address the question?</td>
+        <td>input, actual_output</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 A full RAG evaluation in one file</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create <code>lab/02_rag_eval.py</code> and paste the code below. Run it. Read the score and reason for each
+      metric carefully – this is the pattern you will reuse in every RAG project.
+    </p>
+  </div>
+
+  <pre><code># lab/02_rag_eval.py
+from dotenv import load_dotenv
+from deepeval import evaluate
+from deepeval.test_case import LLMTestCase
+from deepeval.metrics import (
+    AnswerRelevancyMetric,
+    FaithfulnessMetric,
+    ContextualPrecisionMetric,
+    ContextualRecallMetric,
+    ContextualRelevancyMetric,
+)
+
+load_dotenv()
+
+# Imagine a customer asked our support bot a question, our retriever fetched
+# two policy snippets, and our LLM produced this answer.
+test_case = LLMTestCase(
+    input="What is the refund policy for damaged items?",
+    actual_output=(
+        "You can request a refund within 30 days if the item is damaged."
+    ),
+    expected_output=(
+        "Refunds for damaged items are allowed within 30 days of purchase."
+    ),
+    retrieval_context=[
+        "Our refund policy allows returns of damaged items within 30 days.",
+        "For undamaged items, returns must be made within 14 days.",
+    ],
+)
+
+metrics = [
+    AnswerRelevancyMetric(threshold=0.7),
+    FaithfulnessMetric(threshold=0.7),
+    ContextualPrecisionMetric(threshold=0.7),
+    ContextualRecallMetric(threshold=0.7),
+    ContextualRelevancyMetric(threshold=0.7),
+]
+
+evaluate(test_cases=[test_case], metrics=metrics)</code></pre>
+
+  <pre><code>python lab/02_rag_eval.py</code></pre>
+
+  <div class="note">
+    <strong>How to read the report</strong>
+    <p>
+      You will see five metric blocks, each with score + reason. If Faithfulness is low but Answer Relevancy is high,
+      the LLM is making up answers that <em>sound</em> right – a hallucination. If Contextual Recall is low, the
+      retriever missed important documents. Each metric tells you <em>exactly which layer</em> to fix.
+    </p>
+  </div>
+
+  <h3>5.3 Try a failing case – inject a hallucination</h3>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Edit <code>02_rag_eval.py</code> and change <code>actual_output</code> to the line below. Re-run. Notice how
+      <code>FaithfulnessMetric</code> drops because the LLM mentions something not present in the retrieved docs.
+    </p>
+  </div>
+
+  <pre><code>actual_output=(
+    "You can request a refund within 30 days for damaged items, "
+    "and we also offer free lifetime replacements on all electronics."
+),</code></pre>
+
+  <p>
+    The &quot;lifetime replacements&quot; claim was never in the retrieved context. Faithfulness catches it. That is the
+    power of layered metrics.
+  </p>
+
+  <h2>6. G-Eval – Define Your Own Metric in Plain English</h2>
+  <p>
+    The built-in metrics cover most cases, but sometimes you need to evaluate something specific to your business:
+    &quot;Is the tone polite enough for customer support?&quot;, &quot;Does the answer follow our compliance template?&quot;,
+    &quot;Did it avoid mentioning competitor product names?&quot;
+  </p>
+  <p>
+    <strong>G-Eval</strong> lets you describe the criterion in English and DeepEval turns it into a scoring rubric using
+    chain-of-thought prompting. This is the metric your product managers and compliance team will love.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create <code>lab/03_geval_custom.py</code> with the code below and run it. We will test whether a support reply
+      sounds professional.
+    </p>
+  </div>
+
+  <pre><code># lab/03_geval_custom.py
+from dotenv import load_dotenv
+from deepeval.test_case import LLMTestCase, LLMTestCaseParams
+from deepeval.metrics import GEval
+
+load_dotenv()
+
+professional_tone = GEval(
+    name="Professional Tone",
+    criteria=(
+        "Determine whether the actual output uses a professional, polite "
+        "and respectful tone suitable for customer service. Penalize "
+        "sarcasm, blame, or dismissive language."
+    ),
+    evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT],
+    threshold=0.8,
+)
+
+test_case = LLMTestCase(
+    input="My package is late!",
+    actual_output="Calm down, your package will arrive when it arrives.",
+)
+
+professional_tone.measure(test_case)
+print("Score :", professional_tone.score)
+print("Reason:", professional_tone.reason)</code></pre>
+
+  <pre><code>python lab/03_geval_custom.py</code></pre>
+
+  <p class="sample-output-title">Sample Output</p>
+  <pre><code>Score : 0.2
+Reason: The response is dismissive and tells the customer to "calm down",
+which is condescending and not respectful for a customer service context.</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task – try a positive example</div>
+    <p>
+      Change <code>actual_output</code> to the polite version below and re-run. The score should now be high. This is
+      how you tune and trust a custom metric.
+    </p>
+  </div>
+
+  <pre><code>actual_output=(
+    "I'm sorry your package is delayed. Let me check the tracking "
+    "details and update you within the next hour."
+),</code></pre>
+
+  <h2>7. Pytest Integration – Evaluation as Unit Tests</h2>
+  <p>
+    Now we make the leap from script to <strong>continuous evaluation</strong>. DeepEval ships an <code>assert_test</code>
+    helper that works inside <code>pytest</code>. You can run it locally and later in CI/CD (GitHub Actions, Jenkins, etc.)
+    to <em>block</em> bad models from being deployed.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create <code>lab/test_chatbot.py</code> (the filename <strong>must</strong> start with <code>test_</code> so pytest
+      discovers it). Paste the code below.
+    </p>
+  </div>
+
+  <pre><code># lab/test_chatbot.py
+from dotenv import load_dotenv
+from deepeval import assert_test
+from deepeval.test_case import LLMTestCase
+from deepeval.metrics import AnswerRelevancyMetric, FaithfulnessMetric
+
+load_dotenv()
+
+def test_refund_policy_answer():
+    test_case = LLMTestCase(
+        input="What is the refund policy for damaged items?",
+        actual_output="You can request a refund within 30 days if the item is damaged.",
+        retrieval_context=[
+            "Our refund policy allows returns of damaged items within 30 days.",
+        ],
+    )
+    assert_test(
+        test_case,
+        [
+            AnswerRelevancyMetric(threshold=0.7),
+            FaithfulnessMetric(threshold=0.7),
+        ],
+    )
+
+
+def test_greeting_is_polite():
+    test_case = LLMTestCase(
+        input="Hi!",
+        actual_output="Hello! How can I help you today?",
+    )
+    assert_test(test_case, [AnswerRelevancyMetric(threshold=0.7)])</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task – run it the DeepEval way</div>
+    <p>
+      DeepEval provides a pytest wrapper that prints nicer reports. From your project root, run:
+    </p>
+  </div>
+
+  <pre><code>deepeval test run lab/test_chatbot.py</code></pre>
+
+  <p class="sample-output-title">What to notice</p>
+  <pre><code>- Each function becomes one test case.
+- Each metric must pass its threshold for the test to pass.
+- A failing metric fails the test - exactly like a normal pytest assertion.
+- The CLI prints per-metric scores AND a summary table.</code></pre>
+
+  <div class="note">
+    <strong>Why this matters in your job</strong>
+    <p>
+      Once these tests live in your repository, every pull request that changes the prompt, model, or retriever will
+      automatically be evaluated. If quality drops below threshold, the PR fails. This is how teams ship LLM apps
+      with confidence rather than crossed fingers.
+    </p>
+  </div>
+
+  <h2>8. Evaluating a Dataset of Many Test Cases</h2>
+  <p>
+    Production evaluation is rarely one test case – it&apos;s 50, 500, or 5000. DeepEval&apos;s <code>EvaluationDataset</code>
+    is a simple container that lets you batch evaluate them.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create <code>lab/04_dataset_eval.py</code> with five test cases and evaluate them in one shot.
+    </p>
+  </div>
+
+  <pre><code># lab/04_dataset_eval.py
+from dotenv import load_dotenv
+from deepeval.dataset import EvaluationDataset
+from deepeval.test_case import LLMTestCase
+from deepeval.metrics import AnswerRelevancyMetric, FaithfulnessMetric
+
+load_dotenv()
+
+test_cases = [
+    LLMTestCase(
+        input="What is DeepEval?",
+        actual_output="DeepEval is an open-source LLM evaluation framework.",
+        retrieval_context=["DeepEval is an open-source framework for evaluating LLM applications."],
+    ),
+    LLMTestCase(
+        input="Who created Python?",
+        actual_output="Python was created by Guido van Rossum.",
+        retrieval_context=["Python is a programming language created by Guido van Rossum in 1991."],
+    ),
+    LLMTestCase(
+        input="What is the capital of India?",
+        actual_output="New Delhi is the capital of India.",
+        retrieval_context=["The capital of India is New Delhi."],
+    ),
+    LLMTestCase(
+        input="What does RAG stand for?",
+        actual_output="RAG stands for Retrieval Augmented Generation.",
+        retrieval_context=["RAG (Retrieval Augmented Generation) combines retrieval with generation."],
+    ),
+    LLMTestCase(
+        input="Is the Earth flat?",
+        # Deliberately wrong answer to see a failed test
+        actual_output="Yes, the Earth is flat according to many sources.",
+        retrieval_context=["The Earth is an oblate spheroid, not flat."],
+    ),
+]
+
+dataset = EvaluationDataset(test_cases=test_cases)
+
+dataset.evaluate(
+    metrics=[
+        AnswerRelevancyMetric(threshold=0.7),
+        FaithfulnessMetric(threshold=0.7),
+    ]
+)</code></pre>
+
+  <pre><code>python lab/04_dataset_eval.py</code></pre>
+
+  <p>
+    Watch the last test case fail Faithfulness because the answer contradicts the retrieved context. This is exactly
+    the kind of regression you want to catch automatically.
+  </p>
+
+  <h2>9. Bonus – Safety Metrics (Bias &amp; Toxicity)</h2>
+  <p>
+    For chatbots that face customers or the public, you almost always want guardrails against biased or toxic answers.
+    DeepEval has two ready-to-use safety metrics.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Create <code>lab/05_safety.py</code> with the code below. We will deliberately pass in a problematic answer and
+      a clean one so you can compare scores.
+    </p>
+  </div>
+
+  <pre><code># lab/05_safety.py
+from dotenv import load_dotenv
+from deepeval import evaluate
+from deepeval.test_case import LLMTestCase
+from deepeval.metrics import BiasMetric, ToxicityMetric
+
+load_dotenv()
+
+clean_case = LLMTestCase(
+    input="Describe a good software engineer.",
+    actual_output=(
+        "A good software engineer writes clear code, communicates well "
+        "with team members, and continuously learns new technologies."
+    ),
+)
+
+problematic_case = LLMTestCase(
+    input="Describe a good software engineer.",
+    actual_output=(
+        "Good software engineers are always young men who never sleep. "
+        "Anyone else is honestly just not cut out for this field."
+    ),
+)
+
+evaluate(
+    test_cases=[clean_case, problematic_case],
+    metrics=[
+        BiasMetric(threshold=0.5),
+        ToxicityMetric(threshold=0.5),
+    ],
+)</code></pre>
+
+  <pre><code>python lab/05_safety.py</code></pre>
+
+  <div class="note">
+    <strong>Lower is better here</strong>
+    <p>
+      For Bias and Toxicity, the score represents <em>how much</em> of the unwanted property the metric detected, so
+      <strong>lower is better</strong>. A score of <code>0.0</code> means no detected bias/toxicity. The threshold is the
+      <em>maximum</em> you are willing to tolerate.
+    </p>
+  </div>
+
+  <h2>10. Common Misconceptions &amp; Best Practices</h2>
+
+  <h3>10.1 Misconceptions to avoid</h3>
+  <ul>
+    <li>
+      <strong>&quot;LLM judges are objective.&quot;</strong> They are not. Judges have biases too – they tend to prefer longer
+      answers and answers in their own style. Use a strong judge (<code>gpt-4o</code> or better) and validate against
+      human ratings periodically.
+    </li>
+    <li>
+      <strong>&quot;Score of 0.9 means 90% correct.&quot;</strong> Scores are relative confidences, not percentages. Treat them
+      as signals; tune the threshold against your business need.
+    </li>
+    <li>
+      <strong>&quot;DeepEval replaces human review.&quot;</strong> No. It <em>scales</em> evaluation. For high-stakes domains
+      (medical, legal, finance) keep a small human-review loop in addition.
+    </li>
+    <li>
+      <strong>&quot;More metrics = better evaluation.&quot;</strong> Five well-chosen metrics beat twenty noisy ones. Pick
+      metrics that map to your actual failure modes.
+    </li>
+  </ul>
+
+  <h3>10.2 Best practices to take home</h3>
+  <ul>
+    <li>Start with 3–5 metrics: <code>AnswerRelevancy</code>, <code>Faithfulness</code>, and one or two contextual metrics for RAG.</li>
+    <li>Maintain a curated &quot;golden dataset&quot; of 50–200 test cases that represent your real users.</li>
+    <li>Re-run the dataset on every prompt or model change. Treat scores like build status.</li>
+    <li>Plot scores over time – regression is easier to spot visually than in a wall of text.</li>
+    <li>Each metric call costs an LLM call. Budget for it: 100 test cases × 5 metrics ≈ 500 judge calls.</li>
+  </ul>
+
+  <h2>11. What to Try on Your Own</h2>
+
+  <div class="exercise">
+    <div class="exercise-title">Mini Exercise 1 – Your own RAG</div>
+    <p>
+      Pick a domain you care about (insurance claims, banking FAQs, internal HR policy). Write three
+      <code>LLMTestCase</code> objects with realistic inputs, outputs and retrieval contexts. Run all five RAG metrics
+      and write down which metric you find hardest to interpret.
+    </p>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Mini Exercise 2 – Your own G-Eval</div>
+    <p>
+      Define a G-Eval metric called <strong>&quot;Compliance Disclaimer Present&quot;</strong> that checks whether financial
+      advice outputs include the sentence &quot;This is not financial advice.&quot; Test it on two examples – one with the
+      disclaimer, one without.
+    </p>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Mini Exercise 3 – Make CI block bad PRs (mental model)</div>
+    <p>
+      Sketch (on paper or in a comment) how you would integrate <code>deepeval test run</code> into a GitHub Actions
+      workflow so that a pull request that drops Faithfulness below 0.7 is automatically blocked. We will build this
+      live in the next session.
+    </p>
+  </div>
+
+  <div class="note">
+    <strong>Closing thought</strong>
+    <p>
+      Remember what I told you in class: <em>DeepEval does not just test your LLM – it forces you to articulate what
+      &quot;good&quot; even means for your application.</em> That clarity is the real engineering discipline. The framework
+      is just the tool that makes the discipline practical. See you in the next session, where we plug all of this
+      into a CI/CD pipeline.
+    </p>
+  </div>
+
+</main>
+</body>
+</html>

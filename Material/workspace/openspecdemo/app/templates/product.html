@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if product %}{{ product.name }}{% else %}Product not found{% endif %} · ShopLite</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <p class="brand"><a href="/">ShopLite</a></p>
+  </header>
+  <main class="detail">
+    {% if product %}
+    <h1>{{ product.name }}</h1>
+    <p class="price">{{ product.price }}</p>
+    <p class="description">{{ product.description }}</p>
+    {% else %}
+    <p class="missing">Product not found.</p>
+    {% endif %}
+  </main>
+</body>
+</html>

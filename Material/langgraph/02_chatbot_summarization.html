@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chatbot with Message Summarization – LangGraph Hands-on Guide</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+      color: #0f172a;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .note, .exercise {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .exercise-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #166534;
+    }
+    .concept {
+      border-left: 4px solid #9333ea;
+      background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+      border-color: rgba(147, 51, 234, 0.4);
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+    }
+    .concept-title {
+      font-weight: 650;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #7e22ce;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Chatbot with Message Summarization – LangGraph Hands-on Guide</h1>
+
+  <div class="note">
+    <strong>Notebook</strong>
+    <p>Create a new Jupyter notebook (for example, <code>03_chatbot_summarization.ipynb</code>) and use it for the exercises in this guide.</p>
+  </div>
+
+  <h2>Introduction: Understanding Message Summarization</h2>
+  <p>
+    In this hands-on lab, you will learn how to use Large Language Models (LLMs) to produce a running summary of conversations. 
+    This technique allows you to retain a compressed representation of the full conversation history, rather than just removing 
+    old messages with trimming or filtering.
+  </p>
+  <p>
+    <strong>Why is this important?</strong> Traditional chatbots face a critical challenge: as conversations grow longer, 
+    the context window fills up, leading to:
+  </p>
+  <ul>
+    <li><strong>High token costs:</strong> Sending entire conversation history to the LLM becomes expensive</li>
+    <li><strong>Increased latency:</strong> Processing large message histories takes more time</li>
+    <li><strong>Context window limits:</strong> Most LLMs have token limits (e.g., 128K tokens)</li>
+  </ul>
+  <p>
+    <strong>Solution:</strong> Instead of keeping all messages, we periodically summarize the conversation and keep only 
+    the summary plus the most recent messages. This gives us the best of both worlds: context retention and efficiency.
+  </p>
+  <p>
+    We'll incorporate this summarization into a simple chatbot and equip it with memory using LangGraph's checkpointer 
+    system, supporting long-running conversations without incurring high token costs or latency.
+  </p>
+
+  <h2>1. Installation and Setup</h2>
+  <p>
+    First, we need to install the required packages. You'll need <code>langchain_core</code> for core LangChain functionality, 
+    <code>langgraph</code> for building stateful graphs, and <code>langchain_openai</code> for OpenAI integration.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>In your terminal (not inside the notebook), install the required packages by running the command below.</p>
+  </div>
+
+  <pre><code>pip install langchain_core langgraph langchain_openai python-dotenv</code></pre>
+
+  <h3>1.1 Load Environment Variables and Initialize Model</h3>
+  <p>
+    We'll use <code>python-dotenv</code> to load your API keys (for example, <code>OPENAI_API_KEY</code>) from a 
+    <code>.env</code> file in your project folder. Then we'll initialize the OpenAI chat model.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the code below, and then execute the cell.</p>
+  </div>
+
+  <pre><code>from langchain_openai import ChatOpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
+model = ChatOpenAI(model="gpt-4o-mini")</code></pre>
+
+  <div class="note">
+    <strong>Note:</strong> Make sure you have a <code>.env</code> file in your project directory with your <code>OPENAI_API_KEY</code>. 
+    If you're using Azure OpenAI, you can modify the initialization accordingly.
+  </div>
+
+  <h2>2. Defining Custom State with Summary</h2>
+  <p>
+    In LangGraph, state is used to pass data between nodes. We'll use <code>MessagesState</code>, which automatically 
+    handles a list of messages. However, we also want to store a summary of the conversation, so we'll extend 
+    <code>MessagesState</code> to include a custom <code>summary</code> field.
+  </p>
+
+  <div class="concept">
+    <div class="concept-title">Understanding MessagesState</div>
+    <p>
+      <code>MessagesState</code> is a built-in state class in LangGraph that automatically manages a list of messages. 
+      It handles message appending, filtering, and state updates. By extending it, we can add custom fields while 
+      keeping all the message-handling functionality.
+    </p>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to define our custom state class.</p>
+  </div>
+
+  <pre><code>from langgraph.graph import MessagesState
+
+class State(MessagesState):
+    summary: str</code></pre>
+
+  <p>
+    This <code>State</code> class now has:
+  </p>
+  <ul>
+    <li><code>messages</code>: A list of messages (automatically handled by <code>MessagesState</code>)</li>
+    <li><code>summary</code>: A string field to store the conversation summary</li>
+  </ul>
+
+  <h2>3. Creating the Model Calling Node</h2>
+  <p>
+    We'll define a node that calls our LLM. This node will check if a summary exists in the state, and if it does, 
+    it will incorporate the summary into the system message. This way, the model has context about previous conversations 
+    even though we've removed old messages.
+  </p>
+
+  <div class="concept">
+    <div class="concept-title">How Summarization Preserves Context</div>
+    <p>
+      When we have a summary, we prepend it as a system message. This tells the LLM: "Here's what we talked about before, 
+      and here are the recent messages." The model can then respond appropriately, maintaining conversation continuity 
+      without needing all the original messages.
+    </p>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to define the model calling function.</p>
+  </div>
+
+  <pre><code>from langchain_core.messages import SystemMessage, HumanMessage, RemoveMessage
+
+# Define the logic to call the model
+def call_model(state: State):
+    # Get summary if it exists
+    summary = state.get("summary", "")
+    
+    # If there is summary, then we add it
+    if summary:
+        # Add summary to system message
+        system_message = f"Summary of conversation earlier: {summary}"
+        
+        # Append summary to any newer messages
+        messages = [SystemMessage(content=system_message)] + state["messages"]
+    else:
+        messages = state["messages"]
+    
+    response = model.invoke(messages)
+    return {"messages": response}</code></pre>
+
+  <div class="note">
+    <strong>Understanding the Code:</strong>
+    <ul>
+      <li><code>state.get("summary", "")</code> safely retrieves the summary, defaulting to an empty string if it doesn't exist</li>
+      <li>If a summary exists, we create a <code>SystemMessage</code> with the summary and prepend it to the current messages</li>
+      <li>The model receives: [SystemMessage with summary] + [recent messages]</li>
+      <li>We return the model's response wrapped in a dictionary with the "messages" key</li>
+    </ul>
+  </div>
+
+  <h2>4. Creating the Summarization Node</h2>
+  <p>
+    This is the core of our summarization strategy. The summarization node will:
+  </p>
+  <ol>
+    <li>Check if an existing summary exists</li>
+    <li>Create a prompt asking the LLM to either create a new summary or extend the existing one</li>
+    <li>Invoke the model to generate/update the summary</li>
+    <li>Use <code>RemoveMessage</code> to delete old messages, keeping only the most recent ones</li>
+  </ol>
+
+  <div class="concept">
+    <div class="concept-title">RemoveMessage Explained</div>
+    <p>
+      <code>RemoveMessage</code> is a special message type in LangChain that tells the state reducer to remove 
+      messages with matching IDs. This is cleaner than manually filtering the message list and ensures proper 
+      state management in LangGraph.
+    </p>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to define the summarization function.</p>
+  </div>
+
+  <pre><code>def summarize_conversation(state: State):
+    # First, we get any existing summary
+    summary = state.get("summary", "")
+    
+    # Create our summarization prompt
+    if summary:
+        # A summary already exists
+        summary_message = (
+            f"This is summary of the conversation to date: {summary}\n\n"
+            "Extend the summary by taking into account the new messages above:"
+        )
+    else:
+        summary_message = "Create a summary of the conversation above:"
+    
+    # Add prompt to our history
+    messages = state["messages"] + [HumanMessage(content=summary_message)]
+    response = model.invoke(messages)
+    
+    # Delete all but the 2 most recent messages
+    delete_messages = [RemoveMessage(id=m.id) for m in state["messages"][:-2]]
+    return {"summary": response.content, "messages": delete_messages}</code></pre>
+
+  <div class="note">
+    <strong>Key Points:</strong>
+    <ul>
+      <li>If a summary exists, we ask the model to <strong>extend</strong> it with new information</li>
+      <li>If no summary exists, we ask the model to <strong>create</strong> a new summary</li>
+      <li><code>state["messages"][:-2]</code> gets all messages except the last 2 (we keep the 2 most recent)</li>
+      <li>We return both the new summary and the list of <code>RemoveMessage</code> objects to clean up old messages</li>
+    </ul>
+  </div>
+
+  <h2>5. Creating Conditional Edges</h2>
+  <p>
+    We need a way to decide when to summarize the conversation. We'll create a conditional edge function that checks 
+    the number of messages. If there are too many messages (e.g., 6 or more), we'll route to the summarization node. 
+    Otherwise, we'll end the graph execution.
+  </p>
+
+  <div class="concept">
+    <div class="concept-title">Conditional Edges in LangGraph</div>
+    <p>
+      Conditional edges allow you to route to different nodes based on the current state. The function returns a 
+      string that matches one of the keys in a routing dictionary. This enables dynamic, state-dependent graph execution.
+    </p>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to define the conditional routing function.</p>
+  </div>
+
+  <pre><code>from langgraph.graph import END
+
+# Determine whether to end or summarize the conversation
+def should_continue(state: State):
+    """Return the next node to execute."""
+    messages = state['messages']
+    
+    # If there are more than six messages, then we summarize the conversation
+    if len(messages) >= 6:
+        return "summarize_conversation"
+    
+    # Otherwise we can just end
+    return "end"</code></pre>
+
+  <div class="note">
+    <strong>Note:</strong> The threshold of 6 messages is arbitrary. In production, you might want to:
+    <ul>
+      <li>Use token count instead of message count</li>
+      <li>Make it configurable</li>
+      <li>Consider message length, not just count</li>
+    </ul>
+    For this tutorial, 6 messages is a good threshold to demonstrate the concept.
+  </div>
+
+  <h2>6. Adding Memory with Checkpointing</h2>
+  <p>
+    Remember that state is transient to a single graph execution by default. This limits our ability to have multi-turn 
+    conversations with interruptions (like closing and reopening the application).
+  </p>
+  <p>
+    LangGraph can use a <strong>checkpointer</strong> to automatically save the graph state after each step. This built-in 
+    persistence layer gives us memory, allowing LangGraph to pick up from the last state update.
+  </p>
+  <p>
+    One of the easiest checkpointers to work with is <code>MemorySaver</code>, an in-memory key-value store for graph state. 
+    All we need to do is compile the graph with a checkpointer, and our graph has memory!
+  </p>
+
+  <div class="concept">
+    <div class="concept-title">Checkpointing in LangGraph</div>
+    <p>
+      <strong>Checkpointing</strong> is the process of saving graph state at each step. This enables:
+    </p>
+    <ul>
+      <li><strong>Multi-turn conversations:</strong> State persists between graph invocations</li>
+      <li><strong>Resumable execution:</strong> You can pause and resume graph execution</li>
+      <li><strong>State inspection:</strong> You can query the current state at any time</li>
+      <li><strong>Thread management:</strong> Different conversations can have different thread IDs</li>
+    </ul>
+    <p>
+      <code>MemorySaver</code> is an in-memory checkpointer (data is lost when the process ends). For production, 
+      you'd use persistent checkpointers like <code>SqliteSaver</code> or custom implementations.
+    </p>
+  </div>
+
+  <h2>7. Building and Compiling the Graph</h2>
+  <p>
+    Now we'll put it all together: create the graph, add nodes, define edges, and compile it with a checkpointer.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to build and compile the graph.</p>
+  </div>
+
+  <pre><code>from IPython.display import Image, display
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import StateGraph, START, END
+
+# Define a new graph
+workflow = StateGraph(State)
+
+# Add nodes
+workflow.add_node("conversation", call_model)
+workflow.add_node("summarize_conversation", summarize_conversation)
+
+# Set the entrypoint as conversation
+workflow.add_edge(START, "conversation")
+
+# Add conditional edge from conversation node
+workflow.add_conditional_edges("conversation", should_continue, {
+    "summarize_conversation": "summarize_conversation",
+    "end": END
+})
+
+# After summarization, end the graph
+workflow.add_edge("summarize_conversation", END)
+
+# Compile with checkpointer for memory
+memory = MemorySaver()
+graph = workflow.compile(checkpointer=memory)
+
+# Visualize the graph
+display(Image(graph.get_graph().draw_mermaid_png()))</code></pre>
+
+  <div class="note">
+    <strong>Graph Structure:</strong>
+    <ul>
+      <li><strong>START</strong> → <code>conversation</code> node (entry point)</li>
+      <li><code>conversation</code> node → conditional edge → either <code>summarize_conversation</code> or <code>END</code></li>
+      <li><code>summarize_conversation</code> node → <code>END</code></li>
+    </ul>
+    The graph will automatically save state after each node execution thanks to the checkpointer.
+  </div>
+
+  <h2>8. Testing the Chatbot with Memory</h2>
+  <p>
+    Now let's test our chatbot! We'll create a conversation thread using a thread ID, which allows us to maintain 
+    conversation state across multiple invocations.
+  </p>
+
+  <div class="concept">
+    <div class="concept-title">Thread IDs and Configuration</div>
+    <p>
+      A <strong>thread ID</strong> is a unique identifier for a conversation session. When you use the same thread ID 
+      in the config, LangGraph retrieves the saved state from the checkpointer, allowing the conversation to continue 
+      seamlessly. Different thread IDs represent different, independent conversations.
+    </p>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to start a conversation.</p>
+  </div>
+
+  <pre><code># Create a thread (conversation session)
+config = {"configurable": {"thread_id": "1"}}
+
+# Start conversation
+input_message = HumanMessage(content="hi! I'm Siva")
+output = graph.invoke({"messages": [input_message]}, config)
+for m in output['messages'][-1:]:
+    m.pretty_print()
+
+input_message = HumanMessage(content="what's my name?")
+output = graph.invoke({"messages": [input_message]}, config)
+for m in output['messages'][-1:]:
+    m.pretty_print()
+
+input_message = HumanMessage(content="i Love python !")
+output = graph.invoke({"messages": [input_message]}, config)
+for m in output['messages'][-1:]:
+    m.pretty_print()</code></pre>
+
+  <p>
+    You should see the model responding to each message. Notice that when you ask "what's my name?", the model remembers 
+    because the state is persisted via the checkpointer!
+  </p>
+
+  <h3>8.1 Checking the Summary State</h3>
+  <p>
+    At this point, we haven't triggered summarization yet because we have fewer than 6 messages. Let's check the current 
+    state to see what's stored.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to inspect the current state.</p>
+  </div>
+
+  <pre><code>graph.get_state(config).values.get("summary", "")</code></pre>
+
+  <p>
+    You should see an empty string because summarization hasn't been triggered yet. The summary will be created once 
+    we reach 6 messages.
+  </p>
+
+  <h3>8.2 Continuing the Conversation</h3>
+  <p>
+    The power of checkpointing is that we can continue the conversation using the same thread ID, and the graph will 
+    automatically load the previous state. Let's add more messages to trigger summarization.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to continue the conversation.</p>
+  </div>
+
+  <pre><code>input_message = HumanMessage(content="tell me about elon musk")
+output = graph.invoke({"messages": [input_message]}, config)
+for m in output['messages'][-1:]:
+    m.pretty_print()</code></pre>
+
+  <h3>8.3 Inspecting the Summary After Triggering</h3>
+  <p>
+    Once you've sent enough messages (6 or more), the summarization node will be triggered. Let's check if a summary 
+    has been created.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong> in your notebook, paste or type the following code, and execute the cell to check the summary.</p>
+  </div>
+
+  <pre><code>graph.get_state(config).values.get("summary", "")</code></pre>
+
+  <p>
+    If summarization has been triggered, you should now see a summary of the conversation. Notice that:
+  </p>
+  <ul>
+    <li>The summary contains key information from earlier messages</li>
+    <li>Old messages have been removed (except the 2 most recent)</li>
+    <li>Future messages will include this summary in the system message</li>
+  </ul>
+
+  <h2>9. Understanding the Flow</h2>
+  <p>
+    Let's trace through what happens during execution:
+  </p>
+  <ol>
+    <li><strong>User sends a message:</strong> The graph is invoked with a new message and a thread ID</li>
+    <li><strong>State is loaded:</strong> The checkpointer retrieves the previous state (messages + summary if it exists)</li>
+    <li><strong>Conversation node executes:</strong> 
+      <ul>
+        <li>If summary exists, it's added as a system message</li>
+        <li>The model is called with the summary + recent messages</li>
+        <li>The model's response is added to the state</li>
+      </ul>
+    </li>
+    <li><strong>Conditional routing:</strong> 
+      <ul>
+        <li>If messages >= 6: route to <code>summarize_conversation</code></li>
+        <li>Otherwise: end the graph</li>
+      </ul>
+    </li>
+    <li><strong>Summarization (if triggered):</strong>
+      <ul>
+        <li>LLM creates/extends the summary</li>
+        <li>Old messages (except last 2) are marked for removal</li>
+        <li>Summary is saved to state</li>
+      </ul>
+    </li>
+    <li><strong>State is saved:</strong> The checkpointer saves the updated state</li>
+  </ol>
+
+  <div class="concept">
+    <div class="concept-title">Benefits of This Approach</div>
+    <p>
+      <strong>Token Efficiency:</strong> Instead of sending all messages, we send a summary + recent messages. 
+      This dramatically reduces token usage for long conversations.
+    </p>
+    <p>
+      <strong>Context Preservation:</strong> The summary captures important information, so context isn't lost 
+      even when old messages are removed.
+    </p>
+    <p>
+      <strong>Scalability:</strong> Conversations can run indefinitely without hitting token limits, as long as 
+      the summary stays within reasonable bounds.
+    </p>
+    <p>
+      <strong>Memory Persistence:</strong> With checkpointing, conversations survive application restarts 
+      (when using persistent checkpointers).
+    </p>
+  </div>
+
+  <h2>10. Using the Summarization Graph as a Subgraph</h2>
+  <p>
+    The summarization graph from section 7 is a complete LangGraph: it calls the model, and when the
+    message list grows long enough it writes a summary and drops older messages. A compiled graph can
+    be placed inside a larger graph as one node. That node is a <strong>subgraph</strong>.
+  </p>
+  <p>
+    In the LangGraph Basics guide (<code>01_langgraph_basics.html</code>, section 7) the parent graph
+    looks like this: <code>START</code> → <code>agent</code> → either <code>tools</code> or
+    <code>END</code>, and <code>tools</code> loops back to <code>agent</code>. That <code>agent</code>
+    node is the model call (<code>function_1</code>). This section keeps the same edges, names that
+    node <code>model_node</code>, and puts the summarization graph there.
+  </p>
+
+  <div class="concept">
+    <div class="concept-title">What a subgraph changes</div>
+    <ul>
+      <li>The parent still decides whether to call <code>TavilySearch</code> or finish.</li>
+      <li>Each visit to <code>model_node</code> now runs the whole summarization graph: <code>conversation</code>, then <code>summarize_conversation</code> when there are 6 or more messages.</li>
+      <li>Both graphs use the same <code>State</code> (<code>messages</code> and <code>summary</code>), so those fields pass into the subgraph and the subgraph's updates come back to the parent.</li>
+      <li>Add the <em>compiled</em> graph with <code>add_node</code>. A plain function that calls <code>invoke</code> would run the same logic, but <code>xray</code> can expand only a real subgraph.</li>
+    </ul>
+  </div>
+
+  <pre><code>Parent graph (basics section 7, model node replaced)
+
+START
+  → model_node                    ← summarization subgraph
+       → conversation
+       → summarize_conversation   ← only when messages &gt;= 6
+  → tools                         ← when the model requested TavilySearch
+  → model_node
+  → END</code></pre>
+
+  <h3>10.1 Bind TavilySearch for the model node</h3>
+  <p>
+    The basics model node uses a tool-bound chat model. The summary step must stay on the plain
+    <code>model</code> from section 1, so the summary comes back as text. Only the conversation step
+    inside the subgraph gets the tool-bound model.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>In your terminal, install the search package if it is not already installed from the basics guide.</p>
+  </div>
+
+  <pre><code>pip install langchain-tavily</code></pre>
+
+  <div class="note">
+    <strong>API key:</strong> Add <code>TAVILY_API_KEY</code> to your <code>.env</code> file (the same key used in the basics guide). <code>load_dotenv()</code> from section 1 already loads it.
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste the code below, and execute it.</p>
+  </div>
+
+  <pre><code>from langchain_tavily import TavilySearch
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import SystemMessage
+
+tools = [TavilySearch(max_results=3)]
+
+# Tool-bound model for the conversation step only.
+# summarize_conversation keeps using the plain `model` from section 1.
+model_with_tools = ChatOpenAI(model="gpt-4o-mini", temperature=0).bind_tools(tools)
+
+def call_model_with_tools(state: State):
+    summary = state.get("summary", "")
+
+    if summary:
+        system_message = f"Summary of conversation earlier: {summary}"
+        messages = [SystemMessage(content=system_message)] + state["messages"]
+    else:
+        messages = state["messages"]
+
+    response = model_with_tools.invoke(messages)
+    return {"messages": response}</code></pre>
+
+  <h3>10.2 Compile the summarization graph as a subgraph</h3>
+  <p>
+    Rebuild the same graph from section 7, with <code>call_model_with_tools</code> in place of
+    <code>call_model</code>. Compile it <strong>without</strong> a checkpointer. The parent graph
+    in the next step owns persistence, so one <code>thread_id</code> covers the tool loop and the summary.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste the code below, and execute it.</p>
+  </div>
+
+  <pre><code>from langgraph.graph import StateGraph, START, END
+
+summarization_builder = StateGraph(State)
+summarization_builder.add_node("conversation", call_model_with_tools)
+summarization_builder.add_node("summarize_conversation", summarize_conversation)
+
+summarization_builder.add_edge(START, "conversation")
+summarization_builder.add_conditional_edges("conversation", should_continue, {
+    "summarize_conversation": "summarize_conversation",
+    "end": END
+})
+summarization_builder.add_edge("summarize_conversation", END)
+
+# No checkpointer: this compiled graph is a node inside the parent.
+summarization_subgraph = summarization_builder.compile()</code></pre>
+
+  <div class="note">
+    <strong>Same graph, ready to embed:</strong> Nodes, edges, and <code>State</code> match section 7.
+    <code>conversation</code> can now request <code>TavilySearch</code>, which is what the basics model node did.
+    Leave the section 7 <code>graph</code> as the standalone chatbot.
+  </div>
+
+  <h3>10.3 Replace the model node in the basics agent graph</h3>
+  <p>
+    This is the section 7 graph from the basics guide. The node that was called <code>agent</code>
+    (<code>function_1</code>, a single <code>model.invoke</code>) is registered here as
+    <code>model_node</code>, and it runs <code>summarization_subgraph</code>.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste the code below, and execute it.</p>
+  </div>
+
+  <pre><code>from langgraph.prebuilt import ToolNode
+from langgraph.checkpoint.memory import MemorySaver
+
+def where_to_go(state: State):
+    last_message = state["messages"][-1]
+    if last_message.tool_calls:
+        return "continue"
+    else:
+        return "end"
+
+parent_builder = StateGraph(State)
+
+# Basics guide: workflow.add_node("agent", function_1)
+# function_1 was the model call. Here that node is named model_node.
+parent_builder.add_node("model_node", summarization_subgraph)
+parent_builder.add_node("tools", ToolNode(tools=tools))
+
+parent_builder.add_conditional_edges("model_node", where_to_go, {
+    "continue": "tools",
+    "end": END
+})
+parent_builder.add_edge("tools", "model_node")
+parent_builder.set_entry_point("model_node")
+
+parent_memory = MemorySaver()
+parent_app = parent_builder.compile(checkpointer=parent_memory)
+parent_app</code></pre>
+
+  <div class="note">
+    <strong>How a turn runs:</strong>
+    <ol>
+      <li>The parent enters <code>model_node</code> and runs the subgraph to its own <code>END</code>.</li>
+      <li>Inside the subgraph, <code>conversation</code> calls the tool-bound model. The summary, when one exists, is included as a system message.</li>
+      <li>If the message list has 6 or more messages, <code>summarize_conversation</code> updates <code>summary</code> and removes older messages.</li>
+      <li>Control returns to the parent. <code>where_to_go</code> reads the latest message. Tool calls go to <code>tools</code>, then back into the subgraph. Otherwise the parent ends.</li>
+    </ol>
+  </div>
+
+  <h3>10.4 Display the subgraph with xray</h3>
+  <p>
+    Draw three pictures. The first is the summarization subgraph on its own. The second is the parent
+    with the subgraph collapsed into <code>model_node</code>. The third passes <code>xray=1</code>
+    so LangGraph expands that node and draws <code>conversation</code> and
+    <code>summarize_conversation</code> inside it.
+  </p>
+  <p>
+    <code>xray</code> is the depth to expand. <code>1</code> opens one level of nesting, which is this
+    subgraph. <code>xray=True</code> expands every nested level; with a single subgraph the picture is the same.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste the code below, and execute it. You should see three diagrams.</p>
+  </div>
+
+  <pre><code>from IPython.display import Image, display
+
+# Summarization subgraph by itself
+display(Image(summarization_subgraph.get_graph().draw_mermaid_png()))
+
+# Parent graph: model_node is a single node
+display(Image(parent_app.get_graph().draw_mermaid_png()))
+
+# Parent graph with the subgraph expanded
+display(Image(parent_app.get_graph(xray=1).draw_mermaid_png()))
+
+# If PNG rendering fails, print Mermaid text and paste it into https://mermaid.live
+# print(parent_app.get_graph(xray=1).draw_mermaid())</code></pre>
+
+  <div class="note">
+    <strong>What to look for:</strong>
+    <ul>
+      <li>Subgraph diagram: <code>conversation</code> → <code>summarize_conversation</code> or <code>END</code>.</li>
+      <li>Parent without xray: <code>model_node</code> and <code>tools</code> only. The summary logic is hidden inside <code>model_node</code>.</li>
+      <li>Parent with <code>xray=1</code>: the same parent edges, plus <code>conversation</code> and <code>summarize_conversation</code> drawn inside <code>model_node</code>.</li>
+    </ul>
+  </div>
+
+  <h3>10.5 Run the parent graph</h3>
+  <p>
+    Invoke <code>parent_app</code>, not the standalone <code>graph</code>. The first question needs a
+    web search, so the parent should route <code>model_node</code> → <code>tools</code> → <code>model_node</code>.
+    Later turns share the same thread, including <code>summary</code> once the subgraph's threshold is reached.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Create a <strong>new cell</strong>, paste the code below, and execute it.</p>
+  </div>
+
+  <pre><code>config = {"configurable": {"thread_id": "subgraph-1"}}
+
+input_message = HumanMessage(content="What are the latest developments in LangGraph?")
+output = parent_app.invoke({"messages": [input_message]}, config)
+for m in output["messages"][-1:]:
+    m.pretty_print()
+
+input_message = HumanMessage(content="hi! I'm Siva")
+output = parent_app.invoke({"messages": [input_message]}, config)
+for m in output["messages"][-1:]:
+    m.pretty_print()
+
+input_message = HumanMessage(content="what's my name?")
+output = parent_app.invoke({"messages": [input_message]}, config)
+for m in output["messages"][-1:]:
+    m.pretty_print()
+
+input_message = HumanMessage(content="I love Python!")
+output = parent_app.invoke({"messages": [input_message]}, config)
+for m in output["messages"][-1:]:
+    m.pretty_print()
+
+parent_app.get_state(config).values.get("summary", "")</code></pre>
+
+  <div class="note">
+    <strong>What to look for:</strong>
+    <ul>
+      <li>The LangGraph question produces a search tool call, then an answer. That path exists only on the parent; the subgraph does not know about <code>tools</code>.</li>
+      <li>"what's my name?" still works, because <code>messages</code> (and later <code>summary</code>) are checkpointed on <code>parent_app</code> under thread <code>subgraph-1</code>.</li>
+      <li>The summary string stays empty until a turn reaches 6 messages inside the subgraph. Tool messages count. Send another message on the same <code>config</code> if the last cell still prints an empty string, then read <code>parent_app.get_state(config).values</code> again.</li>
+    </ul>
+  </div>
+
+  <div class="concept">
+    <div class="concept-title">Why the model node is a subgraph here</div>
+    <p>
+      The basics agent called the model once and kept every message. Swapping that node for the
+      summarization subgraph leaves the tool loop where it was, and gives the model a running summary
+      plus the latest messages. <code>get_graph(xray=1)</code> is how you show that the <code>model_node</code>
+      box is itself a graph.
+    </p>
+  </div>
+
+</main>
+</body>
+</html>
+

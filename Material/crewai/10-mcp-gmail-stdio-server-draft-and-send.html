@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Let the Mail Clerk Use Gmail</title>
+  <style>
+    :root {
+      --bg-gradient-start: #eef2ff;
+      --bg-gradient-mid: #f9fafb;
+      --bg-gradient-end: #fdf2ff;
+      --text-primary: #111827;
+      --text-heading: #0f172a;
+      --accent-blue: #2563eb;
+      --accent-green: #16a34a;
+      --accent-amber: #d97706;
+      --accent-red: #dc2626;
+      --card-bg: #ffffff;
+      --border-subtle: rgba(148, 163, 184, 0.35);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65; margin: 0; padding: 0;
+      background: radial-gradient(circle at top left, var(--bg-gradient-start) 0, var(--bg-gradient-mid) 40%, var(--bg-gradient-end) 100%);
+      color: var(--text-primary);
+    }
+    main {
+      max-width: 980px; margin: 2rem auto 3rem; padding: 2.5rem 2rem 3rem;
+      background-color: var(--card-bg); border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08), 0 0 0 1px var(--border-subtle);
+    }
+    h1 {
+      font-size: 2.05rem; margin: 0 0 1rem; letter-spacing: -0.03em; text-align: center; color: var(--text-heading);
+      padding: 1rem 1.5rem; border-radius: 999px; background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12), 0 0 0 1px var(--border-subtle);
+    }
+    h2 { font-size: 1.5rem; margin-top: 2.25rem; margin-bottom: 0.5rem; border-bottom: 2px solid rgba(37, 99, 235, 0.18); padding-bottom: 0.35rem; color: var(--text-heading); }
+    h3 { font-size: 1.18rem; margin-top: 1.75rem; color: var(--text-heading); }
+    p { margin: 0.5rem 0 0.75rem; }
+    a { color: var(--accent-blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace; background-color: #f3f4ff; padding: 0.12rem 0.3rem; border-radius: 4px; font-size: 0.93em; color: #1d4ed8; }
+    pre { background: linear-gradient(145deg, #020617, #0b1120); color: #e5e7eb; padding: 1rem 1.1rem; border-radius: 10px; overflow-x: auto; font-size: 0.86rem; line-height: 1.5; margin: 0.75rem 0 1.5rem; border: 1px solid rgba(15, 23, 42, 0.6); }
+    pre code { background: none; padding: 0; color: inherit; }
+    .note, .exercise, .warning, .tip, .student-edit { padding: 0.9rem 1.1rem; margin: 1rem 0 1.5rem; border-radius: 10px; font-size: 0.95rem; border: 1px solid transparent; }
+    .note { border-left: 4px solid var(--accent-blue); background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%); border-color: rgba(37, 99, 235, 0.4); }
+    .exercise { border-left: 4px solid var(--accent-green); background: linear-gradient(135deg, #ecfdf3, #f0fdf4); border-color: rgba(22, 163, 74, 0.4); }
+    .warning { border-left: 4px solid var(--accent-red); background: linear-gradient(135deg, #fef2f2, #fee2e2); border-color: rgba(220, 38, 38, 0.4); }
+    .tip { border-left: 4px solid var(--accent-amber); background: linear-gradient(135deg, #fffbeb, #fef3c7); border-color: rgba(217, 119, 6, 0.4); }
+    .student-edit { border-left: 4px solid var(--accent-green); background: linear-gradient(135deg, #f0fdf4, #ecfdf5); border-color: rgba(22, 163, 74, 0.45); }
+    .exercise-title, .label { font-weight: 650; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.78rem; }
+    .exercise-title { color: #166534; }
+    .label-amber { color: #92400e; }
+    .label-green { color: #166534; }
+    ol, ul { padding-left: 1.4rem; }
+    li { margin: 0.3rem 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.93rem; }
+    table th { background: linear-gradient(135deg, #dbeafe, #e0f2fe); color: var(--text-heading); font-weight: 600; padding: 0.7rem 0.9rem; text-align: left; border-bottom: 2px solid var(--accent-blue); }
+    table td { padding: 0.7rem 0.9rem; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+    table tr:hover { background-color: #f8fafc; }
+    .subtitle { text-align: center; color: #64748b; margin-bottom: 1.5rem; font-size: 1.05rem; }
+    .file-tree { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem 1.1rem; margin: 0.75rem 0 1.5rem; font-family: "Fira Code", Menlo, Monaco, Consolas, monospace; font-size: 0.86rem; white-space: pre; overflow-x: auto; line-height: 1.55; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Let the Mail Clerk Use Gmail</h1>
+  <p class="subtitle">A separate worker. It does not join the claims team. It drafts one note in your Gmail, then sends one practice message to you.</p>
+
+  <div class="note">
+    <strong>How to follow this page.</strong>
+    This page does not change the claims chat. Do not add the mail clerk to <code>crew.jsonc</code>, and do not call it from <code>respond</code>. A question about cover must not send mail. Do Step 1, then the Google sign-in in Step 2, then copy the files in Step 4 exactly. Before you run Step 5, set <code>my_email</code> to your own Gmail address. The code has already been tested. New words are explained in parentheses the first time they appear.
+  </div>
+
+  <h2>The story, in plain words</h2>
+  <p>The claims desk can already write a note that says the police report on CLM-10044 is missing. Nobody has mailed that note. On this page you add a <strong>mail clerk</strong> (a separate AI worker whose only job is email). It drafts one message about that missing report, and then it sends one short lab message to you, so you can see the send in your own inbox. It does not pay or decline any claim. It is not part of the claims crew.</p>
+  <p>You have already given the coverage officer tools that you wrote: Policy Record and Earlier Claims. Those tools live in the same Python project. The agent calls them, and your function reads SQLite (the claims database file).</p>
+  <p><strong>MCP</strong> (a way for the agent to use tools that live in another program) is how the mail clerk reaches Gmail. That other program is an <strong>MCP server</strong> (a program that starts, announces the tools it offers, and waits). CrewAI is the client (the side that asks). When the model chooses a tool, CrewAI sends the arguments to the server and brings the result back. You do not write the Gmail function. The server already has it.</p>
+  <p>This server runs on your machine and speaks through standard input and output (the text a program reads and the text it prints). That style is called <strong>stdio</strong>. CrewAI starts it with a command and a list of arguments, the same way a terminal would. The command here is <code>npx</code> (a Node.js command that runs a package). The package is <code>@gongrzhe/server-gmail-autoauth-mcp</code>. The <code>-y</code> flag lets Python start the package without asking you to confirm the download.</p>
+  <p>A remote MCP server is different. You would put an <code>https://</code> address in the agent's <code>mcps</code> list, as a plain string. Google hosts one at <code>https://gmailmcp.googleapis.com/mcp/v1</code> for projects in the Workspace Developer Preview. That hosted server can create a draft. This page uses the local <code>npx</code> server, because the same sign-in can create a draft and send a message.</p>
+
+  <div class="note">
+    <strong>The name the model sees is long.</strong>
+    CrewAI builds the tool name from the command, the arguments, and the server's own tool name. In the terminal you will see a long name that ends with <code>draft_email</code>, <code>send_email</code>, or <code>search_emails</code>. The last part is the real tool. The task text below tells the agent to use the tool by that ending.
+  </div>
+
+  <div class="warning">
+    <strong>This agent can send real email from your Gmail account.</strong>
+    Set <code>my_email</code> in <code>mail_crew.jsonc</code> to your own address. Leave <code>delete_email</code> off the agent. The mail clerk is a separate run. Do not add it to <code>crew.jsonc</code>, and do not call it from <code>respond</code>. A question about cover must not send mail.
+  </div>
+
+  <h2>Where you are working</h2>
+  <p>Stay inside <code>suraksha_claims_desk</code>. Stop the claims chat with Ctrl+C if it is open. On Windows PowerShell, set this once in that terminal:</p>
+  <pre><code>$env:PYTHONUTF8="1"</code></pre>
+  <p>Leave the claims crew, the flow, and <code>app.py</code> as they are. This page adds three files: <code>agents/mail_clerk.jsonc</code>, <code>mail_crew.jsonc</code>, and a short <code>mail_note.py</code> that only loads that crew. Do not put the mail clerk in <code>crew.jsonc</code>.</p>
+
+  <h2>Step 1: Node.js</h2>
+  <p>In this step you install Node.js (the program that can start the Gmail server). The Gmail server is an npm package (a published JavaScript program). You need Node.js 18 or newer. When this step works, both commands below print a version number.</p>
+  <ol>
+    <li>Open nodejs.org and install the Windows LTS build. Leave "Add to PATH" selected.</li>
+    <li>Close the terminal and open a new one, so it sees the new PATH.</li>
+    <li>Check:</li>
+  </ol>
+  <pre><code>node --version
+npx --version</code></pre>
+  <p>Both commands should print a version. If <code>npx</code> is not found, the installer did not update PATH. Open a new terminal after the install.</p>
+
+  <h2>Step 2: Let Google sign the server in as you</h2>
+  <p>In this step you let the server act as your Gmail account. You sign in once in the browser. After that, a token (a saved permission) sits on disk and later runs reuse it. Follow the small lists below in order. Do not skip the test-user step. While the app is in testing, Google blocks every address you did not add. <strong>OAuth</strong> (the sign-in that lets this app use Gmail without you typing your password into Python) is what this step sets up.</p>
+  <p>If you already completed a Gmail MCP sign-in on this PC, you already have <code>%USERPROFILE%\.gmail-mcp\gcp-oauth.keys.json</code> and <code>%USERPROFILE%\.gmail-mcp\credentials.json</code>. Skip to Step 3.</p>
+
+  <h3>Google Cloud project</h3>
+  <ol>
+    <li>Open <a href="https://console.cloud.google.com" target="_blank" rel="noopener">console.cloud.google.com</a>.</li>
+    <li>Create a project. A name such as <code>suraksha-gmail-lab</code> is enough. Select that project.</li>
+    <li>APIs and Services, Library. Search <strong>Gmail API</strong>. Enable it.</li>
+    <li>APIs and Services, OAuth consent screen. Get started. App name <code>Gmail Agent</code>. User support email: yours. User type External. Finish the contact step and create the screen.</li>
+    <li>Data Access, or Scopes on an older console. Add or remove scopes. Under manually add scopes, add these two, then update and save:
+      <ul>
+        <li><code>https://www.googleapis.com/auth/gmail.modify</code></li>
+        <li><code>https://www.googleapis.com/auth/gmail.settings.basic</code></li>
+      </ul>
+      The first scope is what lets the server read, draft, and send. The second is what the package asks for on the first sign-in.
+    </li>
+    <li>APIs and Services, Credentials. Create credentials, OAuth client ID. Application type Desktop app. Name it <code>Gmail Agent Desktop</code>. Download the JSON and save it as <code>credentials.json</code>.</li>
+    <li>OAuth consent screen, Audience. Add users. Add the Gmail address you will sign in with. While the app is in testing, only those addresses can approve the prompt.</li>
+  </ol>
+
+  <h3>Put the client file where this server looks</h3>
+  <p>This package reads <code>gcp-oauth.keys.json</code> from a folder named <code>.gmail-mcp</code> under your user profile. From the folder that contains <code>credentials.json</code>:</p>
+  <pre><code>New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.gmail-mcp"
+Copy-Item .\credentials.json "$env:USERPROFILE\.gmail-mcp\gcp-oauth.keys.json"</code></pre>
+
+  <div class="warning">
+    <strong>Keep those files secret.</strong>
+    <code>credentials.json</code>, <code>gcp-oauth.keys.json</code>, and the token written in the next command are passwords for your Google project. Do not commit them. Do not paste them into the chat.
+  </div>
+
+  <h3>Sign in once</h3>
+  <pre><code>npx -y @gongrzhe/server-gmail-autoauth-mcp auth</code></pre>
+  <p>A browser opens. Sign in with the test-user address and allow access. The server writes the token to <code>%USERPROFILE%\.gmail-mcp\credentials.json</code>. You do this once. Later runs refresh the token when it expires. This command also downloads the package, so the crew's first start is less likely to time out.</p>
+
+  <h2>Step 3: What the mail clerk is allowed to call</h2>
+  <p>The package offers many tools. This lab keeps three.</p>
+  <table>
+    <thead><tr><th>Server tool</th><th>What it does</th><th>Arguments you care about</th></tr></thead>
+    <tbody>
+      <tr><td><code>draft_email</code></td><td>Creates a draft. Nothing is sent.</td><td><code>to</code> is a list of addresses, plus <code>subject</code> and <code>body</code>.</td></tr>
+      <tr><td><code>send_email</code></td><td>Sends immediately.</td><td>The same <code>to</code>, <code>subject</code>, and <code>body</code>.</td></tr>
+      <tr><td><code>search_emails</code></td><td>Searches with Gmail query words.</td><td>A query such as <code>from:me newer_than:1d</code>.</td></tr>
+    </tbody>
+  </table>
+  <p><code>delete_email</code> is a tool on the same server. It is absent from the allow list, so the agent never receives it.</p>
+  <p>On the agent, the field is <code>mcps</code>. One item is one server. A local server is an object with <code>command</code> and <code>args</code>. When the agent file is loaded, that object becomes <code>MCPServerStdio</code>. CrewAI starts that process when the agent is about to work, asks for the tool list, wraps each allowed tool, and closes the process when the call is finished. The next tool call starts a fresh process, so two calls do not share one connection.</p>
+  <p>The allow list sits in the same object, under <code>tool_filter</code>. Set <code>type</code> to <code>static</code> and list <code>allowed_tool_names</code>. The loader turns that object into the same filter a Python file would build with <code>create_static_tool_filter</code>. A JSON file cannot hold an arbitrary Python function. It can hold this static list. The claims crew in <code>crew.jsonc</code> stays as it is. The mail clerk has its own crew file.</p>
+
+  <h2>Step 4: Write the mail clerk in configuration</h2>
+  <p>In this step you add three files and you do not touch the claims crew. Before you save <code>mail_crew.jsonc</code>, replace <code>you@gmail.com</code> with your own Gmail address. The tasks mail only that address.</p>
+  <div class="student-edit">
+    <div class="label label-green">Create agents/mail_clerk.jsonc</div>
+    <p>Save this next to the other agent files. <code>mcps</code> is the Gmail server. The loader reads <code>command</code> and <code>args</code> as a stdio server, then builds the allow list from <code>tool_filter</code>.</p>
+  </div>
+  <pre><code>{
+  "role": "Mail clerk at Suraksha General Insurance",
+  "goal": "Use Gmail only for the message written in the task, and only to the address written in the task.",
+  "backstory": "You prepare mail for a claims officer at Suraksha in India. You never say a claim is paid, approved, or declined. You never delete mail. You never write to an address that is absent from the task.",
+  "llm": "openai/gpt-4o-mini",
+  "mcps": [
+    {
+      "command": "npx",
+      "args": ["-y", "@gongrzhe/server-gmail-autoauth-mcp"],
+      "tool_filter": {
+        "type": "static",
+        "allowed_tool_names": ["draft_email", "send_email", "search_emails"]
+      }
+    }
+  ],
+  "settings": {
+    "verbose": true,
+    "allow_delegation": false,
+    "max_iter": 8
+  }
+}</code></pre>
+  <div class="student-edit">
+    <div class="label label-green">Create mail_crew.jsonc</div>
+    <p>Save this next to <code>crew.jsonc</code>. It is a second crew, not a change to the claims crew. Change <code>my_email</code> to your own Gmail address before you run it. <code>{my_email}</code> in a task is filled from <code>inputs</code> at kickoff. Two tasks run in order. The first may only draft. The second may only send, and only to that same address.</p>
+  </div>
+  <pre><code>{
+  "name": "Suraksha Mail Clerk",
+  "agents": ["mail_clerk"],
+  "tasks": [
+    {
+      "name": "draft_the_note",
+      "agent": "mail_clerk",
+      "description": "Create one Gmail draft. Do not send it.\nTo: {my_email}\nSubject: CLM-10044 police report still missing\nBody: The Necklace Road file CLM-10044 is waiting. The police report is not on file. This note does not pay or decline the claim.\nCall the tool whose name ends with draft_email. to must be a list containing only that address.\nDo not call a tool whose name ends with send_email.",
+      "expected_output": "One short paragraph. Say the draft was created and was not sent. Repeat the subject."
+    },
+    {
+      "name": "send_the_lab_check",
+      "agent": "mail_clerk",
+      "description": "Send one email now.\nTo: {my_email}\nSubject: Suraksha lab mail check\nBody: This message was sent by the Suraksha mail clerk through the Gmail MCP server. It is a lab message. It does not pay or decline any claim.\nCall the tool whose name ends with send_email. to must be a list containing only that address.\nDo not delete anything.",
+      "expected_output": "One short paragraph. Say the message was sent. Repeat the subject."
+    }
+  ],
+  "process": "sequential",
+  "verbose": true,
+  "inputs": {
+    "my_email": "you@gmail.com"
+  }
+}</code></pre>
+  <div class="student-edit">
+    <div class="label label-green">Create mail_note.py</div>
+    <p>Save this next to <code>desk.py</code>. It does not build an agent. <code>load_crew</code> reads <code>mail_crew.jsonc</code>, finds <code>agents/mail_clerk.jsonc</code>, and returns the crew plus the inputs.</p>
+  </div>
+  <pre><code>from pathlib import Path
+
+from dotenv import load_dotenv
+from crewai.project import load_crew
+
+load_dotenv()
+
+HERE = Path(__file__).resolve().parent
+
+
+if __name__ == "__main__":
+    print(
+        "Mail clerk: loading mail_crew.jsonc. The claims crew is not used.",
+        flush=True,
+    )
+    crew, defaults = load_crew(HERE / "mail_crew.jsonc")
+    print(
+        f"Mail clerk: draft and send only to {defaults['my_email']}.",
+        flush=True,
+    )
+    result = crew.kickoff(inputs=defaults)
+    print(result.raw)</code></pre>
+  <p>The first time Python says the MCP library is missing, add it inside the project and run again:</p>
+  <pre><code>uv add mcp</code></pre>
+  <p>CrewAI already expects that library. The line is only for a project where the import fails.</p>
+
+  <h2>Step 5: Run it and open Gmail</h2>
+  <p>In this step you run the mail clerk once, then open Gmail. Stay inside <code>suraksha_claims_desk</code>. The first task should create a draft and must not send it. The second task should send one message to you. When it works, Gmail Drafts contains the CLM-10044 note, and your inbox contains the lab check.</p>
+  <pre><code>uv run python mail_note.py</code></pre>
+  <p>The terminal starts with <code>Mail clerk: loading mail_crew.jsonc. The claims crew is not used.</code> and then names the address from <code>inputs</code>. The first task should call the tool that ends with <code>draft_email</code>. The printed answer should say the draft was created and was not sent. The subject is <code>CLM-10044 police report still missing</code>. The body says the police report is not on file, and it does not pay or decline the claim.</p>
+  <p>The second task should call the tool that ends with <code>send_email</code>. The subject is <code>Suraksha lab mail check</code>. The last thing printed is that second answer, because a sequential crew returns the last task.</p>
+  <p>Open Gmail. Drafts should contain the CLM-10044 note. Sent, and your inbox, should contain the lab check, because you mailed yourself. If the draft is missing, the first task called the send tool or called nothing. Read the terminal for the tool name that actually ran.</p>
+
+  <div class="tip">
+    <div class="label label-amber">If Windows cannot start npx</div>
+    <p>Some Windows setups only have <code>npx.cmd</code>, and starting <code>npx</code> from Python fails. In <code>agents/mail_clerk.jsonc</code>, change <code>"command": "npx"</code> to <code>"command": "npx.cmd"</code> and run the file again. Use the same command that works in your terminal for the auth step.</p>
+  </div>
+
+  <h2>What just happened</h2>
+  <div class="file-tree">mail_note.py calls load_crew("mail_crew.jsonc")
+        │
+        ▼
+agents/mail_clerk.jsonc supplies mcps
+        │
+        ▼
+CrewAI starts: npx -y @gongrzhe/server-gmail-autoauth-mcp
+        │
+        ▼
+The server lists its tools. The static filter keeps three.
+        │
+        ▼
+Task 1 calls the tool that ends with draft_email
+        │
+        ▼
+Task 2 calls the tool that ends with send_email
+        │
+        ▼
+Gmail shows a draft and a message to you</div>
+  <ul>
+    <li>MCP means the tool runs in another program. Stdio means CrewAI starts that program and talks on its input and output.</li>
+    <li><code>mcps</code> on the agent file is the list of servers. A local server is an object with <code>command</code> and <code>args</code>. The loader turns that object into <code>MCPServerStdio</code>. A remote server is an <code>https://</code> string.</li>
+    <li><code>tool_filter</code> with <code>"type": "static"</code> and <code>allowed_tool_names</code> is the allow list. The names are <code>draft_email</code>, <code>send_email</code>, and <code>search_emails</code>. The model sees those names with a long prefix. The task tells it to match the ending.</li>
+    <li>The claims desk is untouched. This crew is <code>mail_crew.jsonc</code>. <code>mail_note.py</code> only loads it.</li>
+  </ul>
+
+  <h2>If something goes wrong</h2>
+  <table>
+    <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td><code>npx</code> is not recognized</td><td>Install Node.js 18 or newer, close the terminal, open a new one, and run <code>npx --version</code> before the Python file.</td></tr>
+      <tr><td>Not a valid Win32 application, or the process exits at once</td><td>Set <code>command</code> to <code>npx.cmd</code>.</td></tr>
+      <tr><td>MCP library not available</td><td>From <code>suraksha_claims_desk</code>, run <code>uv add mcp</code>, then run <code>mail_note.py</code> again.</td></tr>
+      <tr><td>OAuth, credentials, or token error</td><td>Confirm both files exist: <code>%USERPROFILE%\.gmail-mcp\gcp-oauth.keys.json</code> and <code>%USERPROFILE%\.gmail-mcp\credentials.json</code>. Run the <code>auth</code> command again and sign in as the test user.</td></tr>
+      <tr><td>Access blocked, or the app is in testing</td><td>On the OAuth consent screen, Audience, add the Gmail address you are using. The scopes must include <code>gmail.modify</code>.</td></tr>
+      <tr><td>The run fails while connecting, the first time</td><td>Run <code>npx -y @gongrzhe/server-gmail-autoauth-mcp auth</code> once so the package is downloaded, then run <code>uv run python mail_note.py</code> again. Discovery waits about 15 seconds.</td></tr>
+      <tr><td>The draft was sent, or both tasks sent mail</td><td>The first task text must say to call the tool that ends with <code>draft_email</code> and must forbid the tool that ends with <code>send_email</code>.</td></tr>
+      <tr><td>Mail arrived at someone else's address</td><td>Stop. <code>my_email</code> in <code>mail_crew.jsonc</code> must be your own address. The task must name that address and no other.</td></tr>
+      <tr><td>The claims chat starts sending mail</td><td><code>mail_clerk</code> was added to <code>crew.jsonc</code> or to <code>respond</code>. Take it out. The mail clerk belongs in <code>mail_crew.jsonc</code>, loaded only by <code>mail_note.py</code>.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="exercise">
+    <div class="exercise-title">Try this on your own</div>
+    <ol>
+      <li>Add a third task that searches with the tool ending in <code>search_emails</code>. The query is <code>subject:"Suraksha lab mail check" newer_than:1d</code>. The answer should repeat the subject and the date. It should not send another message.</li>
+      <li>Ask for a draft whose body says the claim is paid. The backstory forbids that sentence. The draft you then see in Gmail should still refuse to say paid.</li>
+      <li>Change <code>my_email</code> in <code>mail_crew.jsonc</code> to another address only when that inbox is yours. Run the file again and confirm both the draft and the sent message use that address.</li>
+    </ol>
+  </div>
+</main>
+</body>
+</html>

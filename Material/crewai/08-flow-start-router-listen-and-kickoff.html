@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Desk Chooses a Door</title>
+  <style>
+    :root {
+      --bg-gradient-start: #eef2ff;
+      --bg-gradient-mid: #f9fafb;
+      --bg-gradient-end: #fdf2ff;
+      --text-primary: #111827;
+      --text-heading: #0f172a;
+      --accent-blue: #2563eb;
+      --accent-green: #16a34a;
+      --accent-amber: #d97706;
+      --accent-red: #dc2626;
+      --card-bg: #ffffff;
+      --border-subtle: rgba(148, 163, 184, 0.35);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65; margin: 0; padding: 0;
+      background: radial-gradient(circle at top left, var(--bg-gradient-start) 0, var(--bg-gradient-mid) 40%, var(--bg-gradient-end) 100%);
+      color: var(--text-primary);
+    }
+    main {
+      max-width: 980px; margin: 2rem auto 3rem; padding: 2.5rem 2rem 3rem;
+      background-color: var(--card-bg); border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08), 0 0 0 1px var(--border-subtle);
+    }
+    h1 {
+      font-size: 2.05rem; margin: 0 0 1rem; letter-spacing: -0.03em; text-align: center; color: var(--text-heading);
+      padding: 1rem 1.5rem; border-radius: 999px; background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12), 0 0 0 1px var(--border-subtle);
+    }
+    h2 { font-size: 1.5rem; margin-top: 2.25rem; margin-bottom: 0.5rem; border-bottom: 2px solid rgba(37, 99, 235, 0.18); padding-bottom: 0.35rem; color: var(--text-heading); }
+    h3 { font-size: 1.18rem; margin-top: 1.75rem; color: var(--text-heading); }
+    p { margin: 0.5rem 0 0.75rem; }
+    code { font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace; background-color: #f3f4ff; padding: 0.12rem 0.3rem; border-radius: 4px; font-size: 0.93em; color: #1d4ed8; }
+    pre { background: linear-gradient(145deg, #020617, #0b1120); color: #e5e7eb; padding: 1rem 1.1rem; border-radius: 10px; overflow-x: auto; font-size: 0.86rem; line-height: 1.5; margin: 0.75rem 0 1.5rem; border: 1px solid rgba(15, 23, 42, 0.6); }
+    pre code { background: none; padding: 0; color: inherit; }
+    .note, .exercise, .warning, .tip, .student-edit { padding: 0.9rem 1.1rem; margin: 1rem 0 1.5rem; border-radius: 10px; font-size: 0.95rem; border: 1px solid transparent; }
+    .note { border-left: 4px solid var(--accent-blue); background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%); border-color: rgba(37, 99, 235, 0.4); }
+    .exercise { border-left: 4px solid var(--accent-green); background: linear-gradient(135deg, #ecfdf3, #f0fdf4); border-color: rgba(22, 163, 74, 0.4); }
+    .warning { border-left: 4px solid var(--accent-red); background: linear-gradient(135deg, #fef2f2, #fee2e2); border-color: rgba(220, 38, 38, 0.4); }
+    .tip { border-left: 4px solid var(--accent-amber); background: linear-gradient(135deg, #fffbeb, #fef3c7); border-color: rgba(217, 119, 6, 0.4); }
+    .student-edit { border-left: 4px solid var(--accent-green); background: linear-gradient(135deg, #f0fdf4, #ecfdf5); border-color: rgba(22, 163, 74, 0.45); }
+    .exercise-title, .label { font-weight: 650; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.78rem; }
+    .exercise-title { color: #166534; }
+    .label-amber { color: #92400e; }
+    .label-green { color: #166534; }
+    ol, ul { padding-left: 1.4rem; }
+    li { margin: 0.3rem 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.93rem; }
+    table th { background: linear-gradient(135deg, #dbeafe, #e0f2fe); color: var(--text-heading); font-weight: 600; padding: 0.7rem 0.9rem; text-align: left; border-bottom: 2px solid var(--accent-blue); }
+    table td { padding: 0.7rem 0.9rem; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+    table tr:hover { background-color: #f8fafc; }
+    .subtitle { text-align: center; color: #64748b; margin-bottom: 1.5rem; font-size: 1.05rem; }
+    .file-tree { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem 1.1rem; margin: 0.75rem 0 1.5rem; font-family: "Fira Code", Menlo, Monaco, Consolas, monospace; font-size: 0.86rem; white-space: pre; overflow-x: auto; line-height: 1.55; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>The Desk Chooses a Door</h1>
+  <p class="subtitle">The same chat. Ordinary Python reads the policy row first. The AI team runs only when the file is hard.</p>
+
+  <div class="note">
+    <strong>How to follow this page.</strong>
+    You already have <code>claim_route.py</code>, and it already prints the three labels. Do Step 1, then Step 2, then run the script in Step 3 before you open the chat. Copy both code blocks exactly. The code has already been tested. If CLM-10021 or CLM-10044 starts the crew, stop and use the table at the end. New words are explained in parentheses the first time they appear.
+  </div>
+
+  <h2>The story, in plain words</h2>
+  <p>You are still the <strong>claims officer</strong> (the human at the keyboard). Three files need three different treatments. CLM-10021 is a small complete parking scrape: a checklist can describe it, and nobody should wait for an AI opinion. CLM-10044 is a small scrape with a missing police report: the desk should ask for the paper and stop. CLM-20481 is the hard file: the customer and the police disagree, the licence expired 12 days earlier, and the garage bill is far over ₹25,000. That file still needs the <strong>crew</strong> (the coverage officer and the brief writer).</p>
+  <p>You already have <code>claim_route.py</code>. That file can print <code>settle_by_rule</code> (checklist), <code>wait_for_papers</code> (stop and ask for the missing paper), or <code>ask_the_crew</code> (wake the AI team). The chat does not call it yet. Every question still starts the crew.</p>
+  <p>This page connects them. The chat will call a <strong>flow</strong> (a Python class whose methods run in an order you declare). It is not a third agent, and it is not written in <code>crew.jsonc</code>. You write the flow yourself, because the procedure includes doors that never call a model. A <strong>door</strong> here is one of those three paths. The words you type do not choose the door. The policy row does.</p>
+
+  <h2>The four methods</h2>
+  <p>Read this table before you paste the code, so the names are familiar. A flow starts when you call <code>kickoff</code> (the command that begins the procedure). You can pass a dictionary (a set of named values). Every key that matches a field on the flow's <strong>state</strong> (the small form the methods share) is copied onto that state before the first method runs. Our state holds the claim id, the question, the door, and the answer. A <strong>decorator</strong> (the <code>@</code> line above a function) tells CrewAI when that function is allowed to run.</p>
+  <table>
+    <thead><tr><th>Decorator</th><th>Method in this desk</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>@start()</code></td><td><code>read_the_file</code></td><td>Runs first. Calls <code>route_claim</code> and stores the label on <code>self.state.route</code>. Returns that label.</td></tr>
+      <tr><td><code>@router(read_the_file, emit=[...])</code></td><td><code>choose_door</code></td><td>Runs because <code>read_the_file</code> finished. Receives the label, because the method takes one argument besides <code>self</code>. Returns the same label. Returning the label is what emits it. <code>emit</code> lists the three labels for the picture.</td></tr>
+      <tr><td><code>@listen("settle_by_rule")</code></td><td><code>handle_rules</code></td><td>Runs only when the router returns that exact string. Writes the rules sentence. Does not call the crew.</td></tr>
+      <tr><td><code>@listen("wait_for_papers")</code></td><td><code>handle_missing_papers</code></td><td>Same idea for a missing paper.</td></tr>
+      <tr><td><code>@listen("ask_the_crew")</code></td><td><code>handle_complex_claim</code></td><td>Calls <code>run_crew</code>. That is the old body of <code>respond</code>.</td></tr>
+    </tbody>
+  </table>
+  <p>Only one listener runs. <code>kickoff</code> returns whatever that listener returns. The other two are skipped, not run and then ignored.</p>
+  <p><code>emit</code> on the router lists the three labels in advance. The picture you will draw of the flow uses that list. If you forget <code>emit</code>, the methods still work as long as they return those strings, but the picture may not show the branches.</p>
+
+  <div class="warning">
+    <strong>The method name and the label are different strings.</strong>
+    <code>handle_complex_claim</code> listens for <code>ask_the_crew</code>. It is not named <code>ask_the_crew</code>. When a method finishes, its name is also an event. If the name and the label match, the method hears itself and starts again. CrewAI then raises a recursion error and tells you the label matched the method's own name.
+  </div>
+
+  <div class="note">
+    <strong>Two functions, on purpose.</strong>
+    <code>run_crew</code> loads the crew and returns the opinion plus the brief. <code>respond</code> is what the chat calls. <code>respond</code> starts the flow. The complex door calls <code>run_crew</code>. If the complex door called <code>respond</code>, the flow would start another flow. Import both inside the functions, not at the top of both files. If each file imports the other at the top, Python cannot finish loading either one.
+  </div>
+
+  <h2>Where you are working</h2>
+  <p>Stay inside <code>suraksha_claims_desk</code>. Stop the chat with Ctrl+C if it is running. On Windows PowerShell:</p>
+  <pre><code>$env:PYTHONUTF8="1"</code></pre>
+  <p>Leave the crew as you last saved it. A sequential crew and a hierarchical crew both work behind <code>run_crew</code>, because the flow does not care how the team is organised. It only cares whether to call the team. Leave memory and the claims manual as they are. Do not change <code>app.py</code>. The page still calls <code>respond</code>.</p>
+  <p>If <code>claim_route.py</code> is missing, create it before this page and confirm the three labels: CLM-10021 <code>settle_by_rule</code>, CLM-10044 <code>wait_for_papers</code>, CLM-20481 <code>ask_the_crew</code>. The flow trusts that function.</p>
+
+  <h2>Step 1: Split the crew runner from the chat</h2>
+  <p>In this step you give the crew its own function, and you make the chat start the flow instead of always starting the crew. Open <code>desk.py</code>. Rename the current <code>respond</code> body to <code>run_crew</code>. Add a new <code>respond</code> under it, as in the block below. Leave <code>_get_crew</code> and <code>claim_to_inputs</code> alone. Do not change <code>app.py</code>. The page still calls <code>respond</code>.</p>
+  <div class="student-edit">
+    <div class="label label-green">Change the marked function in desk.py</div>
+    <p>Rename the current <code>respond</code> body to <code>run_crew</code>. Add a new <code>respond</code> under it. Leave <code>_get_crew</code> and <code>claim_to_inputs</code> alone. The tool attachment you already have stays where it is. Leave the marker comments where they are. The two <code>print</code> lines are the log. <code>Chat:</code> means the page started a flow. <code>Crew start:</code> means a model is about to run. A rules file and a missing paper must never print <code>Crew start:</code>.</p>
+  </div>
+  <pre><code>def run_crew(user_message: str, claim: dict) -&gt; str:
+    """Run the crew. The flow calls this only for a complex file."""
+    print(
+        f"Crew start: {claim['claim_id']}. Question: {user_message}",
+        flush=True,
+    )
+    crew, defaults = _get_crew()
+    # The first kickoff builds a manager that has tools.
+    # A second kickoff refuses to run until that manager is cleared.
+    crew.manager_agent = None
+    inputs = {**defaults, **claim_to_inputs(claim, user_message)}
+    result = crew.kickoff(inputs=inputs)
+    labels = {
+        "coverage_opinion": "Coverage opinion",
+        "examiner_brief": "Examiner brief",
+    }
+    parts = []
+    for task_output in result.tasks_output:
+        heading = labels.get(task_output.name, task_output.name or "Task")
+        parts.append(f"## {heading}\n\n{task_output.raw}")
+    return "\n\n".join(parts)
+
+
+def respond(user_message: str, claim: dict) -&gt; str:
+    """The chat calls this. The flow chooses the door before any agent starts."""
+    from desk_flow import DeskFlow
+
+    print(
+        f"Chat: {claim['claim_id']}. Starting a flow. The crew has not started.",
+        flush=True,
+    )
+    answer = DeskFlow().kickoff(
+        inputs={
+            "claim_id": claim["claim_id"],
+            "officer_question": user_message,
+        }
+    )
+    if not isinstance(answer, str):
+        return str(answer)
+    return answer</code></pre>
+
+  <h2>Step 2: Write the flow</h2>
+  <p>In this step you write the four methods. Create <code>desk_flow.py</code> next to <code>desk.py</code> and paste the whole file exactly. The first line of every answer is <code>DESK ROUTE:</code> and the label. That line is how you can see which door opened. One listener runs. The other two do not.</p>
+  <div class="student-edit">
+    <div class="label label-green">Create desk_flow.py</div>
+    <p>Save this next to <code>desk.py</code>. The first line of every answer is <code>DESK ROUTE:</code> and the label. That line is how you, and the chat, can see which door opened. The <code>Desk:</code> lines are the terminal log. Search for them when the Flow boxes are noisy. One listener prints. The other two do not.</p>
+  </div>
+  <pre><code>from pydantic import BaseModel
+
+from crewai.flow.flow import Flow, listen, router, start
+
+from claim_route import policy_row, route_claim
+
+
+class DeskState(BaseModel):
+    claim_id: str = ""
+    officer_question: str = ""
+    route: str = ""
+    answer: str = ""
+
+
+class DeskFlow(Flow[DeskState]):
+    @start()
+    def read_the_file(self) -&gt; str:
+        label = route_claim(self.state.claim_id)
+        self.state.route = label
+        print(
+            f"Desk: {self.state.claim_id} read the file. Label is {label}.",
+            flush=True,
+        )
+        return label
+
+    @router(
+        read_the_file,
+        emit=["settle_by_rule", "wait_for_papers", "ask_the_crew"],
+    )
+    def choose_door(self, decision: str) -&gt; str:
+        if decision not in ("settle_by_rule", "wait_for_papers", "ask_the_crew"):
+            print(
+                f"Desk: {decision!r} is not a door. Opening ask_the_crew.",
+                flush=True,
+            )
+            self.state.route = "ask_the_crew"
+            return "ask_the_crew"
+        print(f"Desk: choose_door returns {decision}.", flush=True)
+        return decision
+
+    @listen("settle_by_rule")
+    def handle_rules(self) -&gt; str:
+        print(
+            f"Desk: {self.state.claim_id} settle_by_rule. The crew was not called.",
+            flush=True,
+        )
+        row = policy_row(self.state.claim_id)
+        estimate = int(row["estimate_inr"])
+        limit = int(row["simple_pay_limit_inr"])
+        self.state.answer = (
+            f"DESK ROUTE: settle_by_rule\n\n"
+            f"RULES CHECK — NOT A CREW OPINION\n\n"
+            f"Claim {self.state.claim_id} is a complete own-damage file. "
+            f"The estimate is INR {estimate}, which is within the simple-pay limit of INR {limit}. "
+            f"The policy row does not mark it REVIEW, and the papers do not say NOT ON FILE. "
+            f"A rules settlement can be prepared. This chat does not move money. The crew was not called."
+        )
+        return self.state.answer
+
+    @listen("wait_for_papers")
+    def handle_missing_papers(self) -&gt; str:
+        print(
+            f"Desk: {self.state.claim_id} wait_for_papers. The crew was not called.",
+            flush=True,
+        )
+        row = policy_row(self.state.claim_id)
+        self.state.answer = (
+            f"DESK ROUTE: wait_for_papers\n\n"
+            f"WAITING FOR PAPERS\n\n"
+            f"Claim {self.state.claim_id} is not ready for an opinion. "
+            f"The policy row says: {row['papers_on_file']} "
+            f"The crew will not read this file until that paper is here. "
+            f"Do not treat the estimate as payable."
+        )
+        return self.state.answer
+
+    @listen("ask_the_crew")
+    def handle_complex_claim(self) -&gt; str:
+        print(
+            f"Desk: {self.state.claim_id} ask_the_crew. Calling the crew.",
+            flush=True,
+        )
+        from sample_claims import CLAIMS
+        from desk import run_crew
+
+        claim = CLAIMS[self.state.claim_id]
+        body = run_crew(self.state.officer_question, claim)
+        self.state.answer = f"DESK ROUTE: ask_the_crew\n\n{body}"
+        return self.state.answer
+
+
+if __name__ == "__main__":
+    flow = DeskFlow()
+    print(flow.plot("suraksha_desk_flow.html", show=False))
+    runs = (
+        ("CLM-10021", "Is this loss covered?"),
+        ("CLM-10044", "Is this loss covered?"),
+        ("CLM-20481", "Is this loss covered?"),
+        ("CLM-10021", "Should we pay this claim now?"),
+        ("CLM-10044", "What is the chassis number?"),
+    )
+    for claim_id, question in runs:
+        print("\n" + "=" * 20, claim_id, "|", question)
+        answer = DeskFlow().kickoff(
+            inputs={
+                "claim_id": claim_id,
+                "officer_question": question,
+            }
+        )
+        print(answer)</code></pre>
+
+  <h2>Step 3: Draw the doors, then run all three claims</h2>
+  <p>In this step you run all three claims from the terminal, before the chat. Stay inside <code>suraksha_claims_desk</code>. CLM-10021 and CLM-10044 should return at once, with no line that says <code>Crew start:</code>. CLM-20481 is the slow one, and it is the only run that prints <code>Crew start:</code>. If a simple file starts the crew, stop and fix the flow before you open the browser.</p>
+  <pre><code>uv run python desk_flow.py</code></pre>
+  <p>The first thing it prints is a full path ending in <code>suraksha_desk_flow.html</code>. CrewAI writes that picture into a temporary folder. It does not appear next to <code>desk_flow.py</code>. Open the printed path in a browser. You should see a box for <code>read_the_file</code>, then a box for <code>choose_door</code>, then three boxes named <code>handle_rules</code>, <code>handle_missing_papers</code>, and <code>handle_complex_claim</code>. The lines into those three boxes are labeled <code>settle_by_rule</code>, <code>wait_for_papers</code>, and <code>ask_the_crew</code>. The boxes keep the method names. The lines carry the labels. <code>show=False</code> only writes the file. It does not open a window for you.</p>
+  <p>Then the script runs five questions. A new <code>DeskFlow()</code> is created each time so one run cannot leave its state inside the next. The first three ask "Is this loss covered?" The fourth asks CLM-10021 whether to pay now. The fifth asks CLM-10044 for the chassis number. Those last two stay on the same door as the first question for that claim, because the route reads the policy row, not the question.</p>
+  <p>CrewAI also prints Flow boxes. Search for lines that start with <code>Desk:</code> or <code>Crew start:</code>. Those are yours. The boxes are the flow. They are not a crew.</p>
+  <ul>
+    <li>CLM-10021, both questions, returns at once. The log is <code>Desk: CLM-10021 read the file. Label is settle_by_rule.</code> then <code>Desk: choose_door returns settle_by_rule.</code> then <code>Desk: CLM-10021 settle_by_rule. The crew was not called.</code> The answer starts with <code>DESK ROUTE: settle_by_rule</code> and says this chat does not move money. There is no <code>Crew start:</code> line, no crew execution, and no coverage opinion. The pay question does not change any of that.</li>
+    <li>CLM-10044, both questions, returns at once. The log ends with <code>Desk: CLM-10044 wait_for_papers. The crew was not called.</code> The answer starts with <code>DESK ROUTE: wait_for_papers</code> and quotes the policy row, including "NOT ON FILE". The chassis question does not invent a chassis number. There is no <code>Crew start:</code> line.</li>
+    <li>CLM-20481 is the slow one. The log is <code>Desk: CLM-20481 read the file. Label is ask_the_crew.</code> then <code>Desk: choose_door returns ask_the_crew.</code> then <code>Desk: CLM-20481 ask_the_crew. Calling the crew.</code> then <code>Crew start: CLM-20481. Question: Is this loss covered?</code> The answer starts with <code>DESK ROUTE: ask_the_crew</code>. Under it you still have Coverage opinion and Examiner brief. The opinion starts with <code>PRELIMINARY COVERAGE OPINION — NON-BINDING</code>. The brief starts with <code>EXAMINER BRIEF — NON-BINDING</code>. Exclusion 4 and CL-17 are still quoted from Policy Record. The 12-day lapse stays a referral. Neither part marks the claim paid or declined. Records opened names the lookups the crew used. This is the only run that prints <code>Crew start:</code>.</li>
+  </ul>
+  <p>The flow may print a "View traces" link on every door, including the two fast ones, because <code>kickoff</code> ran. That link is the flow. A crew execution is the slow block that names the coverage officer and the examiner brief. You see that block only for CLM-20481. A line that says tracing is disabled is also fine.</p>
+
+  <h2>Step 4: Ask from the chat</h2>
+  <p>In this step you ask the same three claims in the browser. Restart the chat if it was already open. The page still calls <code>respond</code>, and <code>respond</code> now starts a new flow for every question. Only CLM-20481 should make you wait, and only that answer has both headings.</p>
+  <pre><code>uv run streamlit run app.py</code></pre>
+  <p>The page still calls <code>respond</code>, and <code>respond</code> now starts a new flow for every question. The terminal prints <code>Chat:</code> and the claim id before any <code>Desk:</code> line. Select each claim and ask whether the loss is covered. You should see the same <code>Desk:</code> lines as in the script. Only CLM-20481 prints <code>Crew start:</code>, only that answer makes you wait, and only that answer has both headings.</p>
+  <p>On CLM-10021, also press "Should we pay this claim now?" The rules door does not read the question. It reads the policy row. The log is still <code>settle_by_rule. The crew was not called.</code> The answer is still the rules check, and it still says this chat does not move money. The question cannot talk the desk into calling the crew for a simple file, and it cannot talk the rules check into paying.</p>
+  <div class="warning">
+    <strong>Restart the chat after you save <code>desk.py</code>.</strong> Streamlit keeps the imported module. A chat that was already open is still the old <code>respond</code>, the one that always calls the crew.
+  </div>
+
+  <h2>What just happened</h2>
+  <div class="file-tree">Chat calls respond
+        │
+        ▼
+DeskFlow.kickoff copies claim_id and officer_question onto the state
+        │
+        ▼
+read_the_file stores the label from route_claim
+        │
+        ▼
+choose_door returns that label
+        │
+        ├── handle_rules            no crew
+        ├── handle_missing_papers   no crew
+        └── handle_complex_claim    run_crew, then both headings</div>
+  <ul>
+    <li><code>@start</code> is the entry. <code>@router</code> runs when that method finishes and emits one label. <code>@listen</code> runs only for its label.</li>
+    <li>State is the small form the methods share. <code>kickoff(inputs=...)</code> fills fields of the same name. The listener reads <code>self.state</code>. It does not need the label as an argument, because the label already selected which method runs.</li>
+    <li>The crew is unchanged. The flow is the new outer procedure. Simple files and missing papers never reach <code>kickoff</code> on the crew.</li>
+    <li>The first line <code>DESK ROUTE:</code> is part of the answer so you can see the door in the chat. The <code>Desk:</code> lines are the same fact in the terminal. <code>Crew start:</code> is the only line that means the crew ran.</li>
+  </ul>
+
+  <div class="tip">
+    <div class="label label-amber">What this flow does not do</div>
+    <p>It does not pause for a person. A complex answer still ends when the brief is written. It does not pay. It does not replace Policy Record. If the crew has memory or a claims manual, those still belong to the crew and are used only on the complex door, because that is the only door that starts the crew.</p>
+  </div>
+
+  <h2>If something goes wrong</h2>
+  <table>
+    <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td><code>ImportError</code> between <code>desk</code> and <code>desk_flow</code></td><td>The imports must stay inside <code>respond</code> and inside <code>handle_complex_claim</code>. Do not import <code>DeskFlow</code> at the top of <code>desk.py</code>, and do not import <code>run_crew</code> at the top of <code>desk_flow.py</code>.</td></tr>
+      <tr><td>A recursion error naming <code>ask_the_crew</code> or another label</td><td>A method was given the same name as its label. Rename the method. The label strings stay on <code>@listen</code>.</td></tr>
+      <tr><td>All three claims start the crew, or CLM-10021 or CLM-10044 prints <code>Crew start:</code></td><td><code>respond</code> is still the old function, or the chat was not restarted. <code>handle_rules</code> and <code>handle_missing_papers</code> must not call <code>run_crew</code>. Only the line <code>Calling the crew.</code> may be followed by <code>Crew start:</code>.</td></tr>
+      <tr><td>CLM-20481 returns the rules sentence</td><td><code>route_claim</code> is wrong, or <code>choose_door</code> is not returning the label from <code>read_the_file</code>. Run <code>uv run python claim_route.py</code> first.</td></tr>
+      <tr><td>CLM-10044's answer does not mention the police report</td><td><code>handle_missing_papers</code> should quote <code>row["papers_on_file"]</code>. The row says the police report is not on file.</td></tr>
+      <tr><td>The picture has no branches</td><td>Add <code>emit</code> on <code>@router</code> with the three labels, then run <code>uv run python desk_flow.py</code> again and open the new HTML file. The three boxes are still named <code>handle_rules</code>, <code>handle_missing_papers</code>, and <code>handle_complex_claim</code>. The lines into them are the labels.</td></tr>
+      <tr><td>No <code>suraksha_desk_flow.html</code> next to <code>desk.py</code></td><td>That is expected. Open the full path the script printed. It is under your temporary folder.</td></tr>
+      <tr><td><code>Invalid inputs for structured state</code></td><td>The dictionary passed to <code>kickoff</code> has a key that is not a field on <code>DeskState</code>, or a value of the wrong type. Pass <code>claim_id</code> and <code>officer_question</code> only.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="exercise">
+    <div class="exercise-title">Try this on your own</div>
+    <ol>
+      <li>On CLM-10044, ask for the chassis number. The door is still <code>wait_for_papers</code>, because the route does not read the question. The answer must not invent a chassis number, and the crew must not start.</li>
+      <li>On CLM-20481, ask the same chassis question. This door does call the crew. The opinion should say the chassis number is not on file. The first line is still <code>DESK ROUTE: ask_the_crew</code>.</li>
+      <li>Open the printed picture and point to the line labeled <code>ask_the_crew</code>. That line ends at <code>handle_complex_claim</code>, and it is the only branch allowed to mention the coverage officer. The other two lines are finished before any agent exists.</li>
+    </ol>
+  </div>
+</main>
+</body>
+</html>

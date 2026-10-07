@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hierarchical Routing Pattern Lab: A UPI Incident That May Be a Fault, Fraud, or Both</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6; margin: 0; padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 980px; margin: 2rem auto 3rem; padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff; border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.05rem; margin: 0 0 1.25rem; letter-spacing: -0.03em; text-align: center;
+      color: #0f172a; padding: 1rem 1.5rem; border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.55rem; margin-top: 2.25rem; margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18); padding-bottom: 0.35rem; color: #0f172a;
+    }
+    h3 { font-size: 1.2rem; margin-top: 1.6rem; color: #0f172a; }
+    p { margin: 0.45rem 0 0.7rem; }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff; padding: 0.12rem 0.3rem; border-radius: 4px;
+      font-size: 0.92em; color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb; padding: 1rem 1.1rem; border-radius: 10px; overflow-x: auto;
+      font-size: 0.86rem; margin: 0.7rem 0 1.3rem; border: 1px solid rgba(15, 23, 42, 0.6); line-height: 1.45;
+    }
+    pre code { background: none; padding: 0; color: inherit; }
+    .diagram pre, pre.mermaid {
+      background: #ffffff; color: #111827; border: none; margin: 0;
+      padding: 0.35rem 0.2rem 0.1rem; box-shadow: none;
+    }
+    .note, .exercise, .instructor, .predict, .case {
+      padding: 0.9rem 1.1rem; margin: 1rem 0 1.4rem; border-radius: 10px;
+      font-size: 0.95rem; border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .instructor {
+      border-left: 4px solid #d97706;
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: rgba(217, 119, 6, 0.35);
+    }
+    .predict {
+      border-left: 4px solid #9333ea;
+      background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+      border-color: rgba(147, 51, 234, 0.35);
+    }
+    .case {
+      border-left: 4px solid #b45309;
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: rgba(180, 83, 9, 0.35);
+    }
+    .exercise-title, .instructor-title, .predict-title, .case-title {
+      font-weight: 650; margin-bottom: 0.25rem; text-transform: uppercase;
+      letter-spacing: 0.06em; font-size: 0.8rem;
+    }
+    .exercise-title { color: #166534; }
+    .instructor-title { color: #92400e; }
+    .predict-title { color: #6b21a8; }
+    .case-title { color: #92400e; }
+    .glossary dt { font-weight: 650; margin-top: 0.75rem; }
+    .glossary dd { margin: 0.15rem 0 0.3rem 0; }
+    ol, ul { padding-left: 1.35rem; }
+    li { margin: 0.28rem 0; }
+    table { border-collapse: collapse; width: 100%; margin: 0.7rem 0 1.2rem; font-size: 0.92rem; }
+    th, td { border: 1px solid #e5e7eb; padding: 0.45rem 0.6rem; text-align: left; vertical-align: top; }
+    th { background: #eff6ff; }
+    .diagram {
+      background: #fafafa; border: 1px solid #e5e7eb; border-radius: 12px;
+      padding: 0.4rem 0.6rem 0.2rem; margin: 0.5rem 0 0.4rem; overflow-x: auto;
+    }
+    .caption { font-size: 0.85rem; color: #475569; margin: 0 0 1rem; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Hierarchical Routing Pattern Lab: A UPI Incident That May Be a Fault, Fraud, or Both</h1>
+
+  <div class="note">
+    <strong>How to use this guide</strong>
+    <ol>
+      <li>Open this page beside a Jupyter notebook named <code>09e-hierarchical-routing.ipynb</code> in the <code>03-langgraph</code> folder.</li>
+      <li>Use the <code>.env</code> already in that folder.</li>
+      <li>Whenever you see <strong>Your Task</strong>, paste the code into a <strong>new notebook cell</strong> and run it.</li>
+      <li>Every lead prints a <code>-&gt;</code> line. Follow which level made each choice.</li>
+    </ol>
+    <p>Pattern 5 of 5. Overview: <code>09-more-multi-agent-patterns.html</code>. This lab builds on the supervisor lab (<code>07-supervisor-pattern.html</code>). It adds a second level of leads.</p>
+  </div>
+
+  <h2>1. Why this lab exists</h2>
+  <p>
+    The supervisor lab had one center and four workers. That works when one prompt can hold every worker’s job. Once the team grows to two departments, each with its own specialists, one router has to know everything about payments and everything about fraud. It also tends to call a fraud specialist before anyone has checked whether the payment message was even sent.
+  </p>
+  <p>
+    Hierarchical routing splits the choice. The top lead chooses a <strong>department</strong>. The department lead chooses its own <strong>specialist</strong>. Specialists report back to their own lead, and only the lead talks to the top.
+  </p>
+
+  <h3>What you will build</h3>
+  <ol>
+    <li><code>incident_lead</code>: chooses <code>payments_lead</code>, <code>fraud_lead</code>, <code>care_desk</code>, or <code>FINISH</code>.</li>
+    <li><code>payments_lead</code>: chooses <code>upi_rail</code>, <code>settlement</code>, or <code>RETURN</code>.</li>
+    <li><code>fraud_lead</code>: chooses <code>mule_analyst</code>, <code>victim_analyst</code>, or <code>RETURN</code>.</li>
+    <li>Five specialist nodes that read only their own data and always report to their own lead.</li>
+  </ol>
+  <p>This is still one <code>StateGraph</code>. You do not need a nested subgraph to get two levels.</p>
+
+  <h2>2. The business story</h2>
+  <div class="case">
+    <div class="case-title">The incident note at 10:05</div>
+    <p>“Since 09:40, money has left customers’ accounts on UPI, several shops say they did not receive it, and a group of new accounts each received the same amount within one minute.”</p>
+  </div>
+  <ul>
+    <li><code>incident_lead</code> reads the note and chooses a department. It does not check the UPI system or the accounts itself.</li>
+    <li><code>payments_lead</code> chooses a specialist: <code>upi_rail</code> (the path the payment message takes) or <code>settlement</code> (the later step that moves the money to the shop’s bank). The specialist reports to the payments lead. The lead may call the other specialist, or go back to the incident lead.</li>
+    <li><code>fraud_lead</code> does the same with <code>mule_analyst</code> (looks for accounts used to pass stolen money along) and <code>victim_analyst</code> (looks for the customers who lost money).</li>
+    <li><code>care_desk</code> sits directly under the incident lead. It drafts what customer support should tell people who call, then goes back to the incident lead.</li>
+    <li>When a department comes back, <code>incident_lead</code> reads the new finding and decides whether another department is still needed. It finishes only when the note says what broke, who was hit, and what support should say.</li>
+  </ul>
+
+  <h3>Words you need</h3>
+  <div class="note glossary">
+    <dl>
+      <dt>UPI rail</dt>
+      <dd>The path a UPI payment message takes between the customer’s bank, NPCI, and the shop’s bank.</dd>
+      <dt>Settlement</dt>
+      <dd>The later step where banks actually move the money to the shop’s bank in a batch file.</dd>
+      <dt>Deemed success</dt>
+      <dd>The customer’s account was debited, but the shop’s bank did not confirm the credit in time. The payment is pending until it is credited or reversed.</dd>
+      <dt>Mule account</dt>
+      <dd>An account opened so stolen money can pass through it.</dd>
+      <dt>RETURN</dt>
+      <dd>What a department lead chooses when its team is done. It maps to the node <code>incident_lead</code>.</dd>
+      <dt>hop_count</dt>
+      <dd>How many times the top lead has chosen a department. A small maximum stops it bouncing forever.</dd>
+    </dl>
+  </div>
+
+  <h2>3. Why an agent has to do this</h2>
+  <ul>
+    <li>The opening note fits two stories at once: money is stuck on the way to shops, and stolen money is being split across new accounts. Choosing which team should look first means reading the note and judging.</li>
+    <li>Inside payments, “shops were not paid” might be a fault in the message path or in the settlement file. The payments lead uses the specialist’s finding, then decides the team is done.</li>
+    <li>One router for every specialist would need every specialist’s instructions in one prompt. It would also tend to call the mule analyst before anyone has checked whether the “payment successful” message was sent at all.</li>
+  </ul>
+
+  <h2>4. The graph</h2>
+  <div class="diagram">
+    <pre class="mermaid">
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	incident_lead(incident_lead)
+	payments_lead(payments_lead)
+	fraud_lead(fraud_lead)
+	care_desk(care_desk)
+	upi_rail(upi_rail)
+	settlement(settlement)
+	mule_analyst(mule_analyst)
+	victim_analyst(victim_analyst)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> incident_lead;
+	incident_lead -.-> payments_lead;
+	incident_lead -.-> fraud_lead;
+	incident_lead -.-> care_desk;
+	incident_lead -.-> __end__;
+	payments_lead -.-> upi_rail;
+	payments_lead -.-> settlement;
+	payments_lead -.-> incident_lead;
+	upi_rail --> payments_lead;
+	settlement --> payments_lead;
+	fraud_lead -.-> mule_analyst;
+	fraud_lead -.-> victim_analyst;
+	fraud_lead -.-> incident_lead;
+	mule_analyst --> fraud_lead;
+	victim_analyst --> fraud_lead;
+	care_desk --> incident_lead;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+    </pre>
+  </div>
+  <p class="caption">Dotted arrows are choices made by a lead. Solid arrows are specialists reporting back to their own lead. A specialist never calls another department.</p>
+  <ul>
+    <li><code>incident_lead</code> sets <code>next</code> to a department lead, to <code>care_desk</code>, or to <code>FINISH</code>.</li>
+    <li>A department lead sets <code>next</code> to one of its specialists, or to <code>RETURN</code>.</li>
+    <li>A specialist’s arrow is fixed. <code>upi_rail</code> always returns to <code>payments_lead</code>. It cannot jump to fraud.</li>
+    <li>Two levels means separate <code>Literal</code> lists. Each contains only that lead’s own destinations.</li>
+  </ul>
+
+  <div class="predict">
+    <div class="predict-title">Predict before you code</div>
+    <p>Which department should the incident lead open first, and why? After payments returns, which department is next? Write the full path before you run. The expected path has 15 node visits after the start.</p>
+  </div>
+
+  <h2>5. Setup</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Terminal, from <code>03-langgraph</code>, if needed:</p>
+  </div>
+  <pre><code>pip install langgraph langchain langchain-openai python-dotenv</code></pre>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>import os
+import operator
+from typing import Literal
+from typing_extensions import TypedDict, Annotated
+from pydantic import BaseModel, Field
+from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langgraph.graph import StateGraph, START, END
+
+load_dotenv()
+model_name = os.getenv("MODEL_NAME", "gpt-4.1-mini")
+llm = ChatOpenAI(model=model_name, temperature=0)
+print("Model:", model_name)</code></pre>
+
+  <h2>6. The incident note and each specialist’s data</h2>
+  <p>
+    Each specialist can read only its own record. This is the same scoping idea as the supervisor lab’s tools: the mule analyst has no way to look at the UPI switch log, so it must rely on what payments already wrote into the shared notes.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. Read each record and decide which story it supports.</p>
+  </div>
+  <pre><code>INCIDENT = (
+    "INCIDENT 10:05. Since 09:40, money has left customers' accounts on UPI, "
+    "several shops say they did not receive it, and a group of new accounts "
+    "each received the same amount within one minute."
+)
+
+DATA = {
+    "upi_rail": """UPI switch log 09:40-10:05
+- Debit legs from Horizon customers: success.
+- Credit confirmations from three merchant banks: time out after 30 seconds.
+- 4,812 payments are 'deemed success': customer debited, shop not yet confirmed.
+- No failures on person-to-person payments. Only merchant payments are affected.
+- Root cause from switch team: certificate expired on the merchant-bank connector at 09:39.""",
+
+    "settlement": """Settlement cycle 10:00
+- The 10:00 file has no merchant credits after 09:40 for the three affected merchant banks.
+- Next cycle 11:00. Pending payments either credit the shop in that cycle or reverse to the customer within 48 hours, under NPCI rules.
+- No money has left the bank's pool. The customer debit is held, not lost.""",
+
+    "mule_analyst": """New-account monitor 09:50-09:52
+- 37 accounts opened in the last 9 days.
+- Each received ₹49,999 between 09:51 and 09:52, each from a different sender.
+- Within 4 minutes, 31 of them forwarded ₹49,500 to the same wallet.
+- These are person-to-person UPI payments, not merchant payments.""",
+
+    "victim_analyst": """Sender review for the 37 credits
+- 37 senders, all existing customers. 29 called the helpline between 09:55 and 10:03.
+- Each says a caller claiming to be 'bank KYC team' asked them to approve a UPI collect request.
+- None of these payments are in the 'deemed success' list. They completed normally.
+- Recovery: 6 of 37 credits are still in the mule accounts and can be frozen now.""",
+
+    "care_desk": """Support facts
+- Shop-payment customers: money is held, not lost. Credit to shop or reversal within 48 hours.
+- Collect-request victims: different problem. Treat as fraud, file a complaint, never approve a collect request from a caller.""",
+}
+
+print(INCIDENT)
+print("Specialists with data:", list(DATA))</code></pre>
+
+  <h2>7. State</h2>
+  <p>
+    <code>messages</code> uses <code>operator.add</code>, so every finding stays visible to every lead.
+    <code>next</code> is replaced on each hop. <code>hop_count</code> counts how many times the top lead has opened a department.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>class State(TypedDict):
+    messages: Annotated[list, operator.add]
+    next: str
+    hop_count: int
+    final_note: str
+
+MAX_HOPS = 4
+
+print("State ready. Top lead may open at most", MAX_HOPS, "departments.")</code></pre>
+
+  <h2>8. Three routing schemas, one per lead</h2>
+  <p>
+    The top lead’s <code>Literal</code> does not contain <code>upi_rail</code>. It cannot skip a department lead.
+    The payments lead’s <code>Literal</code> does not contain <code>mule_analyst</code>. It cannot reach into fraud.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>class IncidentRoute(BaseModel):
+    reason: str = Field(description="One sentence: what is known, what is still missing, and why this is next.")
+    next: Literal["payments_lead", "fraud_lead", "care_desk", "FINISH"]
+    final_note: str = Field(
+        default="",
+        description="Only when next is FINISH: 4-6 sentences saying what broke, who was hit, and what support should say.",
+    )
+
+class PaymentsRoute(BaseModel):
+    reason: str
+    next: Literal["upi_rail", "settlement", "RETURN"]
+
+class FraudRoute(BaseModel):
+    reason: str
+    next: Literal["mule_analyst", "victim_analyst", "RETURN"]
+
+print("Route schemas ready.")</code></pre>
+
+  <h2>9. The three lead prompts</h2>
+  <p>Each lead knows only its own team. The incident lead does not know what a certificate on a connector is. It only knows which department to ask.</p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>INCIDENT_LEAD_PROMPT = """You lead the incident room at Horizon Bank. You do not check systems yourself.
+You choose a department, read what it reports, and decide what is still missing.
+
+Departments:
+- payments_lead: whether the UPI message path or the settlement file explains unpaid shops.
+- fraud_lead: whether new accounts receiving the same amount are mules, and who the victims are.
+- care_desk: drafts what support should tell callers. Only useful after the facts are known.
+- FINISH: only when the notes say what broke, who was hit, and what support should say.
+
+Order of work:
+1. If nobody has checked whether the payment message reached the shops' banks, choose payments_lead first.
+   Shops not being paid can be a system fault. Do not assume fraud before that is checked.
+2. If payments has reported and nobody has checked the new accounts, choose fraud_lead.
+3. If both departments reported and care_desk has not, choose care_desk.
+4. If care_desk has reported, choose FINISH and write final_note.
+Never open the same department twice unless a later finding contradicts it.
+"""
+
+PAYMENTS_LEAD_PROMPT = """You lead the payments team. Your specialists:
+- upi_rail: the switch log. Did the payment message reach the shop's bank?
+- settlement: the settlement file. Will shops be paid, or customers reversed?
+- RETURN: give control back to the incident lead.
+
+Choose upi_rail first. After upi_rail reports, choose settlement if shops' money status is unclear.
+Choose RETURN when both have reported, or when the incident lead's question is answered.
+You cannot see accounts or fraud data. Do not guess about mules.
+"""
+
+FRAUD_LEAD_PROMPT = """You lead the fraud team. Your specialists:
+- mule_analyst: new accounts that received the same amount.
+- victim_analyst: the customers who sent that money.
+- RETURN: give control back to the incident lead.
+
+Choose mule_analyst first. After it reports, choose victim_analyst to find who lost money.
+Choose RETURN when both have reported.
+Use payments' earlier notes to tell whether the fraud is the same event as the shop outage.
+"""
+
+def lead_chain(prompt, schema):
+    return ChatPromptTemplate.from_messages([
+        ("system", prompt),
+        MessagesPlaceholder("messages"),
+    ]) | llm.with_structured_output(schema)
+
+incident_chain = lead_chain(INCIDENT_LEAD_PROMPT, IncidentRoute)
+payments_chain = lead_chain(PAYMENTS_LEAD_PROMPT, PaymentsRoute)
+fraud_chain = lead_chain(FRAUD_LEAD_PROMPT, FraudRoute)
+print("Lead chains ready.")</code></pre>
+
+  <h2>10. The lead nodes</h2>
+  <p>
+    The top lead increments <code>hop_count</code> when it opens a department. If <code>hop_count</code> has reached <code>MAX_HOPS</code>, Python forces <code>FINISH</code>, no matter what the model said.
+    Department leads have a smaller guard: once both their specialists have reported, Python forces <code>RETURN</code>.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>DEPARTMENTS = {"payments_lead", "fraud_lead", "care_desk"}
+
+def reported(state, name):
+    return any(getattr(m, "name", None) == name for m in state["messages"])
+
+def incident_lead(state):
+    decision = incident_chain.invoke({"messages": state["messages"]})
+    nxt = decision.next
+    if nxt in DEPARTMENTS and state["hop_count"] &gt;= MAX_HOPS:
+        print(f"\n[incident_lead] hop limit {MAX_HOPS} reached -> forcing FINISH")
+        nxt = "FINISH"
+    print(f"\n[incident_lead] -> {nxt}   ({decision.reason})")
+    update = {"next": nxt}
+    if nxt in DEPARTMENTS:
+        update["hop_count"] = state["hop_count"] + 1
+    if nxt == "FINISH":
+        update["final_note"] = decision.final_note or decision.reason
+    return update
+
+def make_department_lead(name, chain, team):
+    def node(state):
+        decision = chain.invoke({"messages": state["messages"]})
+        nxt = decision.next
+        if nxt != "RETURN" and all(reported(state, s) for s in team):
+            nxt = "RETURN"
+        print(f"   [{name}] -> {nxt}   ({decision.reason})")
+        return {"next": nxt}
+    return node
+
+payments_lead = make_department_lead("payments_lead", payments_chain, ["upi_rail", "settlement"])
+fraud_lead = make_department_lead("fraud_lead", fraud_chain, ["mule_analyst", "victim_analyst"])
+print("Lead nodes ready.")</code></pre>
+
+  <h2>11. The specialist nodes</h2>
+  <p>
+    Specialists only add a finding. They do <strong>not</strong> set <code>next</code>. Their exit is a fixed edge to their own lead.
+    One helper builds all five, each with its own record.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>specialist_prompt = ChatPromptTemplate.from_messages([
+    ("system", """You are the {name} specialist. Use only YOUR RECORD and earlier notes.
+Write 2 or 3 sentences: what your record shows, and what it means for the incident.
+If your record says something is NOT related to another team's finding, say so plainly.
+Do not choose who acts next."""),
+    MessagesPlaceholder("messages"),
+    ("human", "YOUR RECORD:\n{record}"),
+])
+specialist_chain = specialist_prompt | llm
+
+def make_specialist(name, indent="      "):
+    def node(state):
+        reply = specialist_chain.invoke({
+            "name": name,
+            "record": DATA[name],
+            "messages": state["messages"],
+        })
+        text = reply.content
+        print(f"{indent}[{name}] {text}")
+        return {"messages": [HumanMessage(content=f"{name}: {text}", name=name)]}
+    return node
+
+upi_rail = make_specialist("upi_rail")
+settlement = make_specialist("settlement")
+mule_analyst = make_specialist("mule_analyst")
+victim_analyst = make_specialist("victim_analyst")
+care_desk = make_specialist("care_desk", indent="   ")
+print("Specialists ready.")</code></pre>
+
+  <h2>12. Wire the graph</h2>
+  <p>
+    Three conditional maps, one per lead. <code>RETURN</code> maps to <code>"incident_lead"</code>. Five fixed edges: four specialists to their department lead, and <code>care_desk</code> to the top.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>g = StateGraph(State)
+for name, fn in [
+    ("incident_lead", incident_lead),
+    ("payments_lead", payments_lead),
+    ("fraud_lead", fraud_lead),
+    ("care_desk", care_desk),
+    ("upi_rail", upi_rail),
+    ("settlement", settlement),
+    ("mule_analyst", mule_analyst),
+    ("victim_analyst", victim_analyst),
+]:
+    g.add_node(name, fn)
+
+g.add_edge(START, "incident_lead")
+
+g.add_conditional_edges("incident_lead", lambda s: s["next"], {
+    "payments_lead": "payments_lead",
+    "fraud_lead": "fraud_lead",
+    "care_desk": "care_desk",
+    "FINISH": END,
+})
+g.add_conditional_edges("payments_lead", lambda s: s["next"], {
+    "upi_rail": "upi_rail",
+    "settlement": "settlement",
+    "RETURN": "incident_lead",
+})
+g.add_conditional_edges("fraud_lead", lambda s: s["next"], {
+    "mule_analyst": "mule_analyst",
+    "victim_analyst": "victim_analyst",
+    "RETURN": "incident_lead",
+})
+
+g.add_edge("upi_rail", "payments_lead")
+g.add_edge("settlement", "payments_lead")
+g.add_edge("mule_analyst", "fraud_lead")
+g.add_edge("victim_analyst", "fraud_lead")
+g.add_edge("care_desk", "incident_lead")
+
+graph = g.compile()
+print("Graph compiled.")</code></pre>
+
+  <h2>13. Draw the graph</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. Check that no arrow goes from a payments specialist to a fraud node, or the other way.</p>
+  </div>
+  <pre><code>from IPython.display import Image
+Image(graph.get_graph().draw_mermaid_png())</code></pre>
+
+  <h2>14. Run the incident</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. The indentation in the printout shows the level: no indent for the top lead, three spaces for a department lead, six for a specialist.</p>
+  </div>
+  <pre><code>def run_incident():
+    result = graph.invoke(
+        {"messages": [HumanMessage(content=INCIDENT, name="incident_note")], "next": "", "hop_count": 0, "final_note": ""},
+        config={"recursion_limit": 40},
+    )
+    path = [m.name for m in result["messages"] if m.name and m.name != "incident_note"]
+    print("\n" + "=" * 70)
+    print("SPECIALISTS WHO REPORTED:", " -> ".join(path))
+    print("DEPARTMENTS OPENED:", result["hop_count"])
+    print("\nFINAL NOTE:\n")
+    print(result["final_note"])
+    return result
+
+result = run_incident()</code></pre>
+
+  <h3>What you should see</h3>
+  <table>
+    <thead><tr><th>#</th><th>Level</th><th>Node</th><th>Choice or finding</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Top</td><td>incident_lead</td><td>→ payments_lead. Check the message path before assuming fraud.</td></tr>
+      <tr><td>2</td><td>Dept</td><td>payments_lead</td><td>→ upi_rail</td></tr>
+      <tr><td>3</td><td>Spec</td><td>upi_rail</td><td>Merchant credit confirmations time out. 4,812 deemed success. Certificate expired at 09:39.</td></tr>
+      <tr><td>4</td><td>Dept</td><td>payments_lead</td><td>→ settlement</td></tr>
+      <tr><td>5</td><td>Spec</td><td>settlement</td><td>Money is held, not lost. Credit or reversal within 48 hours.</td></tr>
+      <tr><td>6</td><td>Dept</td><td>payments_lead</td><td>→ RETURN</td></tr>
+      <tr><td>7</td><td>Top</td><td>incident_lead</td><td>→ fraud_lead. The new accounts are not explained yet.</td></tr>
+      <tr><td>8</td><td>Dept</td><td>fraud_lead</td><td>→ mule_analyst</td></tr>
+      <tr><td>9</td><td>Spec</td><td>mule_analyst</td><td>37 accounts, ₹49,999 each, forwarded to one wallet. Person-to-person, not merchant.</td></tr>
+      <tr><td>10</td><td>Dept</td><td>fraud_lead</td><td>→ victim_analyst</td></tr>
+      <tr><td>11</td><td>Spec</td><td>victim_analyst</td><td>Collect-request scam calls. Not in the deemed-success list. 6 credits can still be frozen.</td></tr>
+      <tr><td>12</td><td>Dept</td><td>fraud_lead</td><td>→ RETURN</td></tr>
+      <tr><td>13</td><td>Top</td><td>incident_lead</td><td>→ care_desk</td></tr>
+      <tr><td>14</td><td>Spec</td><td>care_desk</td><td>Two scripts: shop customers (held, not lost) and scam victims (fraud complaint).</td></tr>
+      <tr><td>15</td><td>Top</td><td>incident_lead</td><td>→ FINISH, with the final note.</td></tr>
+    </tbody>
+  </table>
+  <p><code>SPECIALISTS WHO REPORTED</code> should be:</p>
+  <pre><code>upi_rail -> settlement -> mule_analyst -> victim_analyst -> care_desk</code></pre>
+  <p>
+    <code>DEPARTMENTS OPENED</code> should be <strong>3</strong>. The final note should say there were <strong>two separate events</strong>: a certificate fault that held shop payments, and a collect-request scam that fed mule accounts. Support needs a different message for each group.
+  </p>
+
+  <h3>If the run looks wrong</h3>
+  <ul>
+    <li><strong>The first department is fraud.</strong> The incident lead jumped to the scary words. Re-read its first reason, and check the “order of work” in its prompt.</li>
+    <li><strong>A specialist line is followed by another department’s node.</strong> That cannot happen with the fixed edges. If you see it, a specialist edge points at the wrong lead.</li>
+    <li><strong><code>hop limit reached</code> prints.</strong> The top lead opened the same department twice. The guard stopped it. The final note may then be thin. Read which department repeated.</li>
+    <li><strong>The final note blames one event for everything.</strong> The victim analyst’s line “None of these payments are in the deemed-success list” is the evidence that they are separate. The incident lead must read the fraud team’s finding together with payments’.</li>
+  </ul>
+
+  <h2>15. How this compares with the supervisor lab</h2>
+  <table>
+    <thead><tr><th></th><th>Supervisor (lab 07)</th><th>Hierarchical (this lab)</th></tr></thead>
+    <tbody>
+      <tr><td>Levels of choice</td><td>One</td><td>Two: top lead, then department lead</td></tr>
+      <tr><td>What the top router knows</td><td>Every worker’s job</td><td>Only which department to ask</td></tr>
+      <tr><td>Where a worker’s arrow goes</td><td>Back to the one supervisor</td><td>Back to its own department lead</td></tr>
+      <tr><td>How control returns to the top</td><td>Every hop</td><td>When a department lead chooses <code>RETURN</code></td></tr>
+      <tr><td>Routing functions</td><td>One</td><td>One per lead</td></tr>
+    </tbody>
+  </table>
+
+  <h2>16. Key takeaways</h2>
+  <ul>
+    <li><strong>Each lead chooses within its own team.</strong> Its <code>Literal</code> is its team list.</li>
+    <li><strong><code>RETURN</code> is just a mapping.</strong> It is a string the department lead returns, mapped to the node <code>incident_lead</code>.</li>
+    <li><strong>Specialists do not route.</strong> Fixed edges keep each one inside its department.</li>
+    <li><strong>One <code>StateGraph</code> is enough.</strong> Nested subgraphs are a later way to package the same idea.</li>
+    <li><strong>Guards belong in Python.</strong> <code>hop_count</code> at the top and “both specialists reported” in each department stop a confused model from bouncing.</li>
+  </ul>
+
+  <div class="instructor">
+    <div class="instructor-title">Try this on your own</div>
+    <ol>
+      <li>Change the incident note to mention only the 37 new accounts, and remove the sentence about shops. Predict the first department. Does the incident lead still open payments at all?</li>
+      <li>Set <code>MAX_HOPS = 2</code> and run the original note. Which department never gets opened? What does the final note leave out?</li>
+      <li>Move <code>care_desk</code> under a new <code>customer_lead</code> with two specialists: <code>branch_script</code> and <code>app_banner</code>. Add the new lead to the top lead’s <code>Literal</code> and edge map, and keep the specialists’ fixed edges inside that department.</li>
+    </ol>
+  </div>
+</main>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: "base",
+    securityLevel: "loose",
+    flowchart: { curve: "linear", htmlLabels: true, padding: 14, nodeSpacing: 40, rankSpacing: 45 },
+    themeVariables: {
+      fontFamily: "system-ui, Segoe UI, sans-serif",
+      fontSize: "15px",
+      primaryColor: "#f2f0ff",
+      primaryTextColor: "#111827",
+      primaryBorderColor: "#a78bfa",
+      lineColor: "#64748b",
+    },
+  });
+</script>
+</body>
+</html>

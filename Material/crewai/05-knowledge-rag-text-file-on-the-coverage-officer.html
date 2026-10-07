@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search the Claims Manual</title>
+  <style>
+    :root {
+      --bg-gradient-start: #eef2ff;
+      --bg-gradient-mid: #f9fafb;
+      --bg-gradient-end: #fdf2ff;
+      --text-primary: #111827;
+      --text-heading: #0f172a;
+      --accent-blue: #2563eb;
+      --accent-green: #16a34a;
+      --accent-amber: #d97706;
+      --accent-red: #dc2626;
+      --card-bg: #ffffff;
+      --border-subtle: rgba(148, 163, 184, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, var(--bg-gradient-start) 0, var(--bg-gradient-mid) 40%, var(--bg-gradient-end) 100%);
+      color: var(--text-primary);
+    }
+
+    main {
+      max-width: 980px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08), 0 0 0 1px var(--border-subtle);
+    }
+
+    h1 {
+      font-size: 2.05rem;
+      margin: 0 0 1rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: var(--text-heading);
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12), 0 0 0 1px var(--border-subtle);
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: var(--text-heading);
+    }
+
+    h3 { font-size: 1.18rem; margin-top: 1.75rem; color: var(--text-heading); }
+
+    p { margin: 0.5rem 0 0.75rem; }
+
+    a { color: var(--accent-blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.93em;
+      color: #1d4ed8;
+    }
+
+    pre {
+      background: linear-gradient(145deg, #020617, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.86rem;
+      line-height: 1.5;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+
+    pre code { background: none; padding: 0; color: inherit; }
+
+    .note, .exercise, .warning, .tip, .student-edit {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+
+    .note {
+      border-left: 4px solid var(--accent-blue);
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+    }
+
+    .exercise {
+      border-left: 4px solid var(--accent-green);
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+
+    .warning {
+      border-left: 4px solid var(--accent-red);
+      background: linear-gradient(135deg, #fef2f2, #fee2e2);
+      border-color: rgba(220, 38, 38, 0.4);
+    }
+
+    .tip {
+      border-left: 4px solid var(--accent-amber);
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: rgba(217, 119, 6, 0.4);
+    }
+
+    .student-edit {
+      border-left: 4px solid var(--accent-green);
+      background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+      border-color: rgba(22, 163, 74, 0.45);
+    }
+
+    .exercise-title, .label {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.78rem;
+    }
+
+    .exercise-title { color: #166534; }
+    .label-amber { color: #92400e; }
+    .label-green { color: #166534; }
+
+    ol, ul { padding-left: 1.4rem; }
+    li { margin: 0.3rem 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.93rem;
+    }
+
+    table th {
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      color: var(--text-heading);
+      font-weight: 600;
+      padding: 0.7rem 0.9rem;
+      text-align: left;
+      border-bottom: 2px solid var(--accent-blue);
+    }
+
+    table td {
+      padding: 0.7rem 0.9rem;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+
+    table tr:hover { background-color: #f8fafc; }
+
+    .subtitle {
+      text-align: center;
+      color: #64748b;
+      margin-bottom: 1.5rem;
+      font-size: 1.05rem;
+    }
+
+    .file-tree {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      margin: 0.75rem 0 1.5rem;
+      font-family: "Fira Code", Menlo, Monaco, Consolas, monospace;
+      font-size: 0.86rem;
+      white-space: pre;
+      overflow-x: auto;
+      line-height: 1.55;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Search the Claims Manual</h1>
+  <p class="subtitle">The same Suraksha chat. The two workers still run in order. This time the coverage officer can search a written office manual that is not in the database.</p>
+
+  <div class="note">
+    <strong>How to follow this page.</strong>
+    You already have two agents, the database lookups, and the chat. Do Step 1 through Step 6 first, and check the two claims. Then, if that worked, add the PDF. The last section, about storing the files once inside the app, is optional. Do it only after the manual search already works. Copy every code block exactly. The code has already been tested. New words are explained in parentheses the first time they appear.
+  </div>
+
+  <h2>The story, in plain words</h2>
+  <p>You are still the <strong>claims officer</strong> (the human at the keyboard). The <strong>coverage officer agent</strong> opens Policy Record and Earlier Claims and writes the <strong>coverage opinion</strong> (a first reading of whether the contract seems to cover the accident). The <strong>examiner brief agent</strong> then writes the <strong>brief</strong> (the short note for the senior examiner). The chat shows both. Neither note pays anyone.</p>
+  <p>The database holds one <strong>policy row</strong> (the one line for that claim) and a few older notes about Highway Motors. It does not hold the office manual. The manual is a longer text the office wrote in advance: how to read a garage estimate that is far above a typical <strong>surveyor</strong> figure (the independent repair figure, not the garage's own bill), and when photographs are required. You do not paste that whole file into the task. The coverage officer searches it, and only the passage that fits the question is placed in front of that agent.</p>
+  <p>CrewAI calls the file a <strong>knowledge</strong> source (a document prepared before the question, searched for the closest passage). The search is often called RAG (retrieve a passage, then answer). On this desk, say "search the claims manual." The brief writer does not search the manual. If the opinion quotes it, the brief may repeat that quote. Knowledge is not a tool, so Records opened does not name the manual.</p>
+
+  <div class="note">
+    <strong>The manual is not the database, and it is not a tool.</strong>
+    Policy Record and Earlier Claims still read <code>suraksha_claims.db</code>. Records opened still names those lookups. The manual is read once, split into passages, and stored so a later question can search it. It is not a tool. If the crew already saves facts from earlier questions, leave that as it is. A saved fact is something said in the chat. The manual is a document you prepared before the question.
+  </div>
+
+  <div class="warning">
+    <strong>The manual must not pay or decline.</strong>
+    Exclusion 4 and circular CL-17 still come from Policy Record. The manual adds a name for a large gap between the garage estimate and a typical surveyor figure. It does not replace the policy row, and it does not mark the claim paid or declined.
+  </div>
+
+  <h2>Where you are working</h2>
+  <p>Stay inside <code>suraksha_claims_desk</code>. If the chat is running, stop it with Ctrl+C. On Windows PowerShell, set this once in that terminal:</p>
+  <pre><code>$env:PYTHONUTF8="1"</code></pre>
+  <p>The project already has a <code>knowledge</code> folder. A placeholder file may be sitting there. Leave that file. You will add one new text file, and you will name that new file in the agent. The placeholder is not searched unless you name it.</p>
+
+  <h2>Step 1: Write the claims manual</h2>
+  <p>In this step you write the office manual as a plain text file. Save it inside the project's <code>knowledge</code> folder, not next to <code>desk.py</code>. Copy the words exactly, including <code>high-variance estimate</code> (the manual's name for a garage bill that is more than twice a typical surveyor figure). That phrase is the check. It is not in the database. If the opinion quotes it, the manual was searched.</p>
+  <div class="student-edit">
+    <div class="label label-green">Create knowledge/claims_manual.txt</div>
+    <p>Save the text below as <code>knowledge/claims_manual.txt</code>, inside the project folder. Do not put it next to <code>desk.py</code>. Do not change the words <code>high-variance estimate</code>.</p>
+  </div>
+  <pre><code>Suraksha General Insurance
+Claims manual, internal use
+This file is not a row in the policies table.
+
+Section 4.2. Garage estimate against a typical surveyor figure.
+When the garage estimate is more than twice a typical surveyor figure for the same description, the file is called a high-variance estimate. Record both figures and refer the variance to the senior examiner. The words high-variance estimate are defined only in this manual.
+
+Section 6.1. Photographs.
+A rear-impact file needs photographs of the rear panels before anyone recommends a payment. If the accident story is a rear impact and it does not mention photographs, the photographs are not on file. This photo rule does not apply to a bumper scrape that is not a rear impact.
+
+Section 9. What this manual does not do.
+This manual does not replace Policy Record. A licence that lapsed fewer than 30 days before the accident is still handled by circular CL-17 in the policy row. This manual is not a reason to pay a claim and not a reason to decline a claim.</code></pre>
+
+  <h2>Step 2: Let the coverage officer agent search that file</h2>
+  <div class="student-edit">
+    <div class="label label-green">Change agents/coverage_officer.jsonc</div>
+    <p>In this step you point only the coverage officer at that file. Open <code>agents/coverage_officer.jsonc</code>. After the <code>tools</code> list, add <code>knowledge_sources</code> as shown below. Leave the role, the goal, the backstory, the model, and <code>allow_delegation</code> as they are. Do not add this block to <code>agents/examiner_brief.jsonc</code>. The brief writer must not search the manual. Save the file.</p>
+  </div>
+  <pre><code>"tools": [
+  "custom:policy_record"
+],
+"knowledge_sources": [
+  {
+    "source_type": "text_file",
+    "file_paths": ["claims_manual.txt"]
+  }
+],</code></pre>
+  <p><code>source_type</code> must be <code>text_file</code>. <code>file_paths</code> is the file name only. CrewAI looks inside the <code>knowledge</code> folder for you. If you write <code>knowledge/claims_manual.txt</code> here, it looks for <code>knowledge/knowledge/claims_manual.txt</code> and the file is not found.</p>
+  <p>On the first question after you restart, the coverage officer agent reads the manual, splits it into passages, and stores those passages. The search uses the OpenAI key already in your <code>.env</code> file. You do not add another key. Before the coverage task is written, CrewAI turns the task into a short search, finds the closest passage, and adds it to the task under the words <code>Additional Information</code>. The examiner brief agent does not get that passage, because the source sits on the coverage officer agent only.</p>
+
+  <h2>Step 3: Tell both tasks how to use a manual passage</h2>
+  <p>In this step you tell each worker what a manual passage is, and what it is not. It is not a row from the database, and it is not a reason to pay. In <code>crew.jsonc</code>, paste the first block into the <strong>coverage opinion</strong> description, immediately above the line that starts <code>CONSTRAINTS:</code>. Do not delete the lines that are already there. Then paste the second block into the <strong>examiner brief</strong> description, in the same place. Save the file.</p>
+  <pre><code>MANUAL:
+- A passage from the Suraksha claims manual may appear as Additional Information. That passage was searched out of the claims manual. It is not a row from Policy Record or Earlier Claims.
+- If that passage contains the words high-variance estimate, quote the sentence and say it came from the claims manual.
+- Use the photo rule in that passage only when the accident story is a rear impact. If the story is a rear impact and it does not mention photographs, say the photographs are not on file.
+- Do not use the manual as a reason to pay or to decline.</code></pre>
+  <p>Paste this block into the <strong>examiner brief</strong> description, immediately above its <code>CONSTRAINTS:</code> line.</p>
+  <pre><code>MANUAL:
+- If the coverage opinion quotes the claims manual, repeat that quote and say the opinion took it from the claims manual.
+- If the opinion does not mention the claims manual, do not invent a manual sentence.</code></pre>
+  <p><code>desk.py</code> and <code>app.py</code> stay as they are. The crew is loaded from the JSON files. The chat still only calls <code>respond</code>.</p>
+
+  <div class="warning">
+    <strong>Restart the chat after this change.</strong> The desk loads the crew once and keeps that copy. A chat that is already open has not read the manual. Stop it with Ctrl+C, then start it again. The first question is slower, because the manual is stored before the opinion is written.
+  </div>
+
+  <h2>Step 4: Ask a question the database cannot finish alone</h2>
+  <p>In this step you ask about CLM-20481. The database can supply Exclusion 4 and circular CL-17. Only the manual contains the words <code>high-variance estimate</code>. The first question after a restart is slower, because the manual is stored before the opinion is written. Wait for both headings.</p>
+  <pre><code>uv run streamlit run app.py</code></pre>
+  <p>Select <strong>CLM-20481</strong>. Use the button <strong>Is this loss covered?</strong> or type that question. The story already has Highway Motors at ₹1,85,000 and a typical surveyor figure of about ₹75,000. The policy row has Exclusion 4 and circular CL-17. The words <code>high-variance estimate</code> are only in the manual.</p>
+  <p>A good coverage opinion still starts with <code>PRELIMINARY COVERAGE OPINION — NON-BINDING</code>. It still quotes Exclusion 4 and CL-17 and says those came from Policy Record. It also quotes the high-variance sentence and says that sentence came from the claims manual. The story is a rear impact and it does not mention photographs, so the opinion says the photographs are not on file. It does not mark the claim paid or declined. The 12-day licence lapse stays a referral under CL-17.</p>
+  <p>The brief starts with <code>EXAMINER BRIEF — NON-BINDING</code>. It repeats the high-variance quote only because the opinion used it, and it says the opinion took that quote from the claims manual. Records opened names Policy Record and Earlier Claims. It does not name the manual. The manual was searched, not opened as a tool.</p>
+  <p>Tracing is already on. After the answer appears, open the trace from the link in the terminal, or the Traces list at <code>https://app.crewai.com</code>. On the coverage opinion, the task input should contain <code>Additional Information</code> and the words <code>high-variance estimate</code>. The examiner brief's input is the opinion, not the manual file.</p>
+
+  <h2>Step 5: Check a file the manual rule does not fit</h2>
+  <p>In this step you check that the manual is not pasted onto every file. Select <strong>CLM-10021</strong>. The chat bubbles clear. Ask <strong>Is this loss covered?</strong> again. This is a bumper scrape (a small knock to the bumper) at City Shine Garage for ₹18,000. It is not a rear impact (a hit to the back of the car), and the estimate is not more than twice a typical surveyor figure.</p>
+  <p>A good opinion does not call this file a high-variance estimate. It does not demand rear-panel photographs. It may say a rules check could settle a simple complete claim, and it still must not mark it paid. City Shine Garage has no older-claim rows, so Earlier Claims may say nothing is on file for that garage. Policy Record is still opened.</p>
+
+  <h2>Step 6: Clear the stored manual and ask again</h2>
+  <p>In this step you prove the phrase came from the file, not from the model's general knowledge. Stop the chat with Ctrl+C first. From <code>suraksha_claims_desk</code> run:</p>
+  <pre><code>crewai reset-memories -akn</code></pre>
+  <p>That deletes the coverage officer agent's stored passages. It does not delete <code>knowledge/claims_manual.txt</code>. Rename that file to <code>claims_manual_away.txt</code> for a moment, start the chat, and ask the CLM-20481 question again. The opinion should no longer quote <code>high-variance estimate</code>. Put the file name back, stop the chat, and start it again. The next question stores the manual once more, and the phrase can return.</p>
+
+  <div class="tip">
+    <div class="label label-amber">Where the passages sit</div>
+    <p>You do not open the stored passages to finish this exercise. On Windows they live under your local application data, in a <code>CrewAI</code> folder, then a folder named <code>suraksha_claims_desk</code>. <code>crewai reset-memories -akn</code> clears the agent copy. Run it from the project folder, with the chat stopped. <code>-kn</code> clears a manual attached to the crew. This manual is on the agent, so use <code>-akn</code>.</p>
+  </div>
+
+  <h2>What just happened</h2>
+  <div class="file-tree">claims_manual.txt sits in knowledge/
+        │
+        ▼
+The coverage officer agent stores passages from that file
+        │
+        ▼
+The question searches for the closest passage
+        │
+        ▼
+That passage is added as Additional Information
+The brief writer sees it only if the opinion quotes it</div>
+  <ul>
+    <li><code>knowledge_sources</code> on the coverage officer agent points at <code>claims_manual.txt</code> inside the <code>knowledge</code> folder. <code>source_type</code> is <code>text_file</code>.</li>
+    <li>The search adds a passage. It does not add a tool. Records opened still means Policy Record and Earlier Claims.</li>
+    <li>The phrase <code>high-variance estimate</code> is the check. It is in the manual and not in the policy row. CLM-20481 should quote it. CLM-10021 should not wear that label.</li>
+    <li>The text file remains on disk after <code>crewai reset-memories -akn</code>. That command clears the stored passages only.</li>
+  </ul>
+
+  <h2>If something goes wrong</h2>
+  <table>
+    <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td><code>File not found</code>, or a path that contains <code>knowledge/knowledge</code></td><td><code>file_paths</code> must be <code>["claims_manual.txt"]</code>. The file must be <code>suraksha_claims_desk/knowledge/claims_manual.txt</code>.</td></tr>
+      <tr><td>The opinion never says high-variance estimate</td><td>Restart the chat after saving the agent file and <code>crew.jsonc</code>. In the trace, the coverage task input should show <code>Additional Information</code>. If that line is missing, stop the chat, run <code>crewai reset-memories -akn</code>, and start the chat again.</td></tr>
+      <tr><td>The opinion says Policy Record contained high-variance estimate</td><td>The MANUAL block is missing from the coverage task, or it is not above <code>CONSTRAINTS:</code>. Put it back and restart the chat.</td></tr>
+      <tr><td>CLM-10021 is called a high-variance estimate, or it demands rear photographs</td><td>The photo rule is only for a rear impact, and section 4.2 is only when the estimate is more than twice a typical surveyor figure. The MANUAL block has to say both limits.</td></tr>
+      <tr><td>The brief invents a manual sentence the opinion did not use</td><td>Add the MANUAL block to the examiner brief task. The brief writer has no knowledge source of its own.</td></tr>
+      <tr><td>An error about <code>OPENAI_API_KEY</code> or embeddings</td><td>The key in <code>.env</code> must be the same OpenAI key the crew already uses. Stop the chat, run <code>crewai reset-memories -akn</code>, and start the chat again.</td></tr>
+      <tr><td>Records opened lists the claims manual</td><td>That should not happen. The manual is not a tool. Policy Record stays on the coverage officer agent. Earlier Claims stays on the coverage task in <code>desk.py</code>.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="exercise">
+    <div class="exercise-title">Try this on your own</div>
+    <ol>
+      <li>On CLM-10044, ask whether the loss is covered. The police report is still not on file, because that is the policy row. The high-variance sentence should not be applied: the story is a car that left the scene, not a Highway Motors estimate at twice the surveyor figure.</li>
+      <li>Add one sentence to section 6.1 of the manual: "A bumper scrape under INR 25000 does not need photographs of the rear panels." Stop the chat, run <code>crewai reset-memories -akn</code>, start the chat, and ask CLM-10021 again. The opinion may now quote that sentence and must say it came from the claims manual.</li>
+      <li>Rename the manual away, reset the stored passages, and ask CLM-20481 again. Exclusion 4 and CL-17 should still appear, because those lines are in Policy Record. The high-variance sentence should be gone until you put the file back.</li>
+    </ol>
+  </div>
+
+  <h2>Add a second source: a PDF circular</h2>
+  <p>Do this only after Step 4 shows <code>high-variance estimate</code> on CLM-20481. The claims manual is a text file. CrewAI can also search a PDF (a document you open like a printed page, not a text file you edit). The file is already written. It is circular CL-22 (another short office note), about a third-party injury bill (a hospital bill for someone other than the customer) that sits beside an own-damage file (damage to the customer's own car). Open it here: <a href="knowledge/cl22_injury_bill_circular.pdf">cl22_injury_bill_circular.pdf</a>. It lives in the <code>knowledge</code> folder next to this page. You copy it into the project. You do not retype it.</p>
+  <div class="student-edit">
+    <div class="label label-green">Copy the PDF into the project</div>
+    <p>Stop the chat. From <code>suraksha_claims_desk</code> run:</p>
+  </div>
+  <pre><code>Copy-Item ..\knowledge\cl22_injury_bill_circular.pdf knowledge\</code></pre>
+  <p>The project folder should now contain both <code>knowledge/claims_manual.txt</code> and <code>knowledge/cl22_injury_bill_circular.pdf</code>. Leave the course copy where it is, so you can copy it again if the project copy is renamed.</p>
+
+  <h3>Point the coverage officer agent at the PDF</h3>
+  <p>In <code>agents/coverage_officer.jsonc</code>, add a second object inside <code>knowledge_sources</code>. Keep the text file. The brief writer still has no knowledge source.</p>
+  <pre><code>"knowledge_sources": [
+  {
+    "source_type": "text_file",
+    "file_paths": ["claims_manual.txt"]
+  },
+  {
+    "source_type": "pdf",
+    "file_paths": ["cl22_injury_bill_circular.pdf"]
+  }
+],</code></pre>
+  <p><code>source_type</code> for this file is <code>pdf</code>. <code>file_paths</code> is still the file name only. CrewAI looks in the project <code>knowledge</code> folder. Writing <code>knowledge/cl22_injury_bill_circular.pdf</code> here makes it look for a folder inside a folder, and the PDF is not found.</p>
+  <p>Then add these lines to the coverage opinion MANUAL block, above <code>CONSTRAINTS:</code>:</p>
+  <pre><code>- If a passage contains the words separate injury note, quote the sentence and say it came from circular CL-22, the PDF. The bill amount still comes from Policy Record. Do not add that amount to the garage estimate.
+- If this claim has no injury bill, do not call it a separate injury note.</code></pre>
+  <p>Add this line to the examiner brief MANUAL block:</p>
+  <pre><code>- If the coverage opinion quotes circular CL-22, repeat that quote and say the opinion took it from the PDF.</code></pre>
+
+  <h3>Ask about the whiplash bill</h3>
+  <p>The stored passages still describe the text manual only. Stop the chat, run <code>crewai reset-memories -akn</code>, and start the chat again. Select <strong>CLM-20481</strong> and type:</p>
+  <pre><code>Policy Record mentions a whiplash bill on claim CLM-20481. What should that bill be called, and should it be added to the garage estimate?</code></pre>
+  <p>A good opinion still quotes Exclusion 4 and CL-17 from Policy Record, and it can still quote <code>high-variance estimate</code> from the text manual. It also quotes <code>separate injury note</code> and says that name came from circular CL-22. The amount INR 42000 comes from the policy row. The opinion does not add 42000 to the Highway Motors estimate, and it does not pay or decline the claim. The 12-day lapse stays a referral under CL-17.</p>
+  <p>The brief repeats the CL-22 quote only when the opinion used it. Records opened still names Policy Record and Earlier Claims. The PDF is searched, the same way the text manual is searched.</p>
+  <p>Then select <strong>CLM-10021</strong>. The injury line on that policy row is none. Ask what the injury bill should be called. A good opinion says there is no injury bill on this file, so the separate-injury-note name does not apply. It does not invent a whiplash amount.</p>
+
+  <div class="tip">
+    <div class="label label-amber">Two sources, one agent</div>
+    <p>Both files are knowledge on the coverage officer agent. The text file and the PDF are chunked and searched the same way. A passage from either one can appear as Additional Information. The source type tells CrewAI how to read the file. It does not make the PDF a tool.</p>
+  </div>
+
+  <h2>Optional: store the files once, inside the app</h2>
+  <p>Skip this section until the text manual and the PDF both show up in an answer. It does not change what the officer is allowed to know. It only stops the app from reading those two files again on every restart. A <code>knowledge_sources</code> block on the agent means the knowledge sources will be reloaded during the app start or restart. An <strong>embedder</strong> (the model that turns a passage into numbers so a later question can search by meaning) is named in the code below. Leave that model name as written. <code>load_crew</code> reads <code>crew.jsonc</code> and the agent file, and it builds those sources while it creates the crew. A condition written after <code>load_crew</code> is too late: the files have already been loaded. For these two short files that cost is small. A large folder of manuals would repeat that work on every app start and every app restart. The same sentence is not stored twice, because its id is a hash (a fingerprint of the text) of the text, but the embedding call still runs.</p>
+  <p>This part takes the files off the agent JSON. Python decides the knowledge object first, during the app start/restart. If collection <code>suraksha_manuals</code> is already stored, that object has an empty source list, so the files are not read. The files are read only when the collection is missing. <code>load_crew</code> runs after that decision and creates a crew with no knowledge files of its own. The ready object is then handed to <code>coverage_agent</code>. A later question in the same running app does not read the files again. <code>app.py</code> stays as it is. The chat still calls <code>respond</code>. Stop the chat with Ctrl+C before you edit.</p>
+  <p>Both files must already be in the project <code>knowledge</code> folder: <code>claims_manual.txt</code> and <code>cl22_injury_bill_circular.pdf</code>. The first agent in <code>crew.jsonc</code> must stay the coverage officer.</p>
+
+  <h3>1. Take the knowledge block off the agent file</h3>
+  <p><code>load_crew</code> loads <code>agents/coverage_officer.jsonc</code> as part of creating the crew. Leave <code>knowledge_sources</code> in that file and the files are loaded there, before any condition in <code>desk.py</code> can run. Delete the whole <code>knowledge_sources</code> array, including the text file and the PDF. Leave the tools list. Do not add the block to the brief writer.</p>
+  <div class="student-edit">
+    <div class="label label-green">Change agents/coverage_officer.jsonc</div>
+    <p>The tools list should end like this, with no <code>knowledge_sources</code> after it.</p>
+  </div>
+  <pre><code>"tools": [
+  "custom:policy_record"
+],</code></pre>
+
+  <h3>2. Name the collection and the embedder</h3>
+  <p>The collection name is the store the app will open again on the next app start and the next app restart. The embedder must stay <code>text-embedding-3-small</code>. A later open with a different model cannot read vectors written by this one.</p>
+  <div class="student-edit">
+    <div class="label label-green">Add these lines to desk.py</div>
+    <p>Paste them immediately after <code>load_dotenv()</code>, and before <code>_crew = None</code>.</p>
+  </div>
+  <pre><code>ROOT = Path(__file__).resolve().parent
+KNOWLEDGE_COLLECTION = "suraksha_manuals"
+KNOWLEDGE_EMBEDDER = {
+    "provider": "openai",
+    "config": {"model_name": "text-embedding-3-small"},
+}</code></pre>
+
+  <h3>3. Check that both files are present</h3>
+  <p><code>_manual_files_present</code> looks in the project <code>knowledge</code> folder. It returns true only when the text manual and the PDF are both there. If either file is missing, the later function leaves the crew alone, and the chat still answers from Policy Record.</p>
+  <div class="student-edit">
+    <div class="label label-green">Add this function to desk.py</div>
+    <p>Paste it after <code>_defaults = None</code> and before <code>_get_crew</code>.</p>
+  </div>
+  <pre><code>def _manual_files_present() -&gt; bool:
+    knowledge = ROOT / "knowledge"
+    return (knowledge / "claims_manual.txt").is_file() and (
+        knowledge / "cl22_injury_bill_circular.pdf"
+    ).is_file()</code></pre>
+
+  <h3>4. See whether the passages are already stored</h3>
+  <p>CrewAI keeps this collection under the name <code>knowledge_suraksha_manuals</code>. <code>_stored_collection_names</code> asks the local store for the names it already has. The next function uses that list to decide whether this app start should embed the files.</p>
+  <div class="student-edit">
+    <div class="label label-green">Add this function under the previous one</div>
+  </div>
+  <pre><code>def _stored_collection_names(knowledge) -&gt; set[str]:
+    client = knowledge.storage._get_client().client
+    return {collection.name for collection in client.list_collections()}</code></pre>
+
+  <h3>5. Decide the knowledge object before the crew exists</h3>
+  <p><code>_open_manuals</code> does not call <code>load_crew</code> and does not touch an agent. It runs first, during the app start/restart. It opens collection <code>suraksha_manuals</code> with an empty source list. If <code>knowledge_suraksha_manuals</code> is already stored, it returns that object and the files stay unread. If the collection is missing, it builds the text file and the PDF, calls <code>add_sources()</code> once, and returns that loaded object. If either file is missing, it returns <code>None</code> and the chat still answers from Policy Record.</p>
+  <div class="student-edit">
+    <div class="label label-green">Add this function under the previous one</div>
+  </div>
+  <pre><code>def _open_manuals():
+    """Choose the knowledge object before load_crew reads crew.jsonc.
+
+    An empty source list means this app start does not read the files.
+    The files are read only when the collection is missing.
+    """
+    if not _manual_files_present():
+        print(
+            "Knowledge check: claims_manual.txt or cl22_injury_bill_circular.pdf "
+            "is missing from the knowledge folder. No knowledge sources were loaded.",
+            flush=True,
+        )
+        return None
+
+    from crewai.knowledge.knowledge import Knowledge
+    from crewai.knowledge.source.pdf_knowledge_source import PDFKnowledgeSource
+    from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
+
+    stored = Knowledge(
+        collection_name=KNOWLEDGE_COLLECTION,
+        sources=[],
+        embedder=KNOWLEDGE_EMBEDDER,
+    )
+    if f"knowledge_{KNOWLEDGE_COLLECTION}" in _stored_collection_names(stored):
+        print(
+            "Knowledge check: collection suraksha_manuals is already stored. "
+            "Knowledge sources were not loaded again on this app start.",
+            flush=True,
+        )
+        return stored
+
+    print(
+        "Knowledge check: collection suraksha_manuals is missing. "
+        "Loading knowledge sources claims_manual.txt and cl22_injury_bill_circular.pdf.",
+        flush=True,
+    )
+    loaded = Knowledge(
+        collection_name=KNOWLEDGE_COLLECTION,
+        sources=[
+            TextFileKnowledgeSource(file_paths=["claims_manual.txt"]),
+            PDFKnowledgeSource(file_paths=["cl22_injury_bill_circular.pdf"]),
+        ],
+        embedder=KNOWLEDGE_EMBEDDER,
+    )
+    loaded.add_sources()
+    return loaded</code></pre>
+
+  <h3>6. Hand that object to the coverage officer after the crew is created</h3>
+  <p><code>_get_crew</code> calls <code>_open_manuals()</code> first and keeps the result in <code>manuals</code>. Only then does it call <code>load_crew</code>. Because step 1 removed <code>knowledge_sources</code>, that call creates the crew without loading the manual or the PDF. After the crew exists, the first agent is named <code>coverage_agent</code>. Its <code>knowledge_sources</code> is set to an empty list, so a later question cannot embed the files from the JSON. <code>coverage_agent.knowledge</code> is the object <code>_open_manuals</code> already returned. The brief writer is the second agent and is left unchanged. Earlier Claims stays pinned to the coverage task.</p>
+  <div class="student-edit">
+    <div class="label label-green">Replace _get_crew in desk.py with this function</div>
+  </div>
+  <pre><code>def _get_crew():
+    global _crew, _defaults
+    if _crew is None:
+        manuals = _open_manuals()
+        _crew, _defaults = load_crew(Path(__file__).parent / "crew.jsonc")
+        coverage_task = _crew.tasks[0]
+        # This task keeps the policy tool and adds the garage tool.
+        # The agent's own list is left unchanged.
+        coverage_task.tools = list(coverage_task.tools or []) + [earlier_claims]
+        coverage_agent = _crew.agents[0]
+        # crew.jsonc must not list knowledge_sources. An empty list here
+        # keeps a later question from embedding the files again.
+        coverage_agent.knowledge_sources = []
+        if manuals is not None:
+            coverage_agent.knowledge = manuals
+    return _crew, _defaults</code></pre>
+  <p>Leave <code>respond</code> as it is. It already calls <code>_get_crew</code>. The <code>if _crew is None</code> block runs during the app start/restart, not on a later question in the same running app.</p>
+
+  <h3>7. Start the app</h3>
+  <p>From <code>suraksha_claims_desk</code>:</p>
+  <pre><code>uv run streamlit run app.py</code></pre>
+  <p>Select <strong>CLM-20481</strong> and ask <strong>Is this loss covered?</strong> The first question after app start is the one that prints the knowledge check. Look at the terminal where Streamlit is running, not at the chat page.</p>
+  <ul>
+    <li><code>Loading knowledge sources claims_manual.txt and cl22_injury_bill_circular.pdf.</code> means this app start loaded the files, because the collection was missing.</li>
+    <li><code>Knowledge sources were not loaded again on this app start.</code> means the collection was already stored. This is the line you want after an app restart.</li>
+    <li><code>No knowledge sources were loaded.</code> means one of the two files is missing from the project <code>knowledge</code> folder.</li>
+  </ul>
+  <p>A later question in the same running app does not print the line again. Stop the app and start it again, then ask the question once more. The terminal should now say the knowledge sources were not loaded again. The coverage officer still searches the stored collection. The brief writer does not. The coverage task should show <code>Additional Information</code> from the manual or from circular CL-22.</p>
+  <p>When you change <code>claims_manual.txt</code> or the PDF, the old passages stay in <code>suraksha_manuals</code> until that collection is cleared. <code>crewai reset-memories -akn</code> clears a collection built from <code>knowledge_sources</code> on the agent. It leaves <code>suraksha_manuals</code> in place. After you edit a file, stop the app, delete the <code>knowledge_suraksha_manuals</code> collection from the local CrewAI knowledge store, and start the app again. That next app start embeds the new text once.</p>
+</main>
+</body>
+</html>

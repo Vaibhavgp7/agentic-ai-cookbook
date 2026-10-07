@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Planner–Executor Pattern Lab: A Credit Memo When the File Is Incomplete</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 980px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.05rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.55rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 { font-size: 1.2rem; margin-top: 1.6rem; color: #0f172a; }
+    p { margin: 0.45rem 0 0.7rem; }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.92em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.86rem;
+      margin: 0.7rem 0 1.3rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+      line-height: 1.45;
+    }
+    pre code { background: none; padding: 0; color: inherit; }
+    .diagram pre, pre.mermaid {
+      background: #ffffff; color: #111827; border: none; margin: 0;
+      padding: 0.35rem 0.2rem 0.1rem; box-shadow: none;
+    }
+    .note, .exercise, .instructor, .predict, .case {
+      padding: 0.9rem 1.1rem; margin: 1rem 0 1.4rem; border-radius: 10px;
+      font-size: 0.95rem; border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .instructor {
+      border-left: 4px solid #d97706;
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: rgba(217, 119, 6, 0.35);
+    }
+    .predict {
+      border-left: 4px solid #9333ea;
+      background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+      border-color: rgba(147, 51, 234, 0.35);
+    }
+    .case {
+      border-left: 4px solid #b45309;
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: rgba(180, 83, 9, 0.35);
+    }
+    .exercise-title, .instructor-title, .predict-title, .case-title {
+      font-weight: 650; margin-bottom: 0.25rem; text-transform: uppercase;
+      letter-spacing: 0.06em; font-size: 0.8rem;
+    }
+    .exercise-title { color: #166534; }
+    .instructor-title { color: #92400e; }
+    .predict-title { color: #6b21a8; }
+    .case-title { color: #92400e; }
+    .glossary dt { font-weight: 650; margin-top: 0.75rem; }
+    .glossary dd { margin: 0.15rem 0 0.3rem 0; }
+    ol, ul { padding-left: 1.35rem; }
+    li { margin: 0.28rem 0; }
+    table { border-collapse: collapse; width: 100%; margin: 0.7rem 0 1.2rem; font-size: 0.92rem; }
+    th, td { border: 1px solid #e5e7eb; padding: 0.45rem 0.6rem; text-align: left; vertical-align: top; }
+    th { background: #eff6ff; }
+    .diagram {
+      background: #fafafa; border: 1px solid #e5e7eb; border-radius: 12px;
+      padding: 0.4rem 0.6rem 0.2rem; margin: 0.5rem 0 0.4rem; overflow-x: auto;
+    }
+    .caption { font-size: 0.85rem; color: #475569; margin: 0 0 1rem; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Planner–Executor Pattern Lab: A Credit Memo When the File Is Incomplete</h1>
+
+  <div class="note">
+    <strong>How to use this guide</strong>
+    <ol>
+      <li>Open this page beside a Jupyter notebook named <code>09b-planner-executor.ipynb</code> in the <code>03-langgraph</code> folder.</li>
+      <li>Use the <code>.env</code> already in that folder.</li>
+      <li>Whenever you see <strong>Your Task</strong>, paste the code into a <strong>new notebook cell</strong> and run it.</li>
+      <li>Watch two things in the printout: the step list, and the moment a step comes back <code>blocked</code>.</li>
+    </ol>
+    <p>Pattern 2 of 5. Overview: <code>09-more-multi-agent-patterns.html</code>.</p>
+  </div>
+
+  <h2>1. Why this lab exists</h2>
+  <p>
+    Some jobs do not have one checklist. A credit analyst (the person who recommends whether the bank should lend) has to decide the steps from the file in front of them. A factory and a company that sells software by subscription do not share one fixed list.
+  </p>
+  <p>
+    The planner writes the steps. The executor does <strong>one</strong> step, then either takes the next step, goes back because the step cannot be done, or finishes. The new steps have to follow what the executor just found. A fixed checklist would keep asking for a number the file cannot give.
+  </p>
+
+  <h3>What you will build</h3>
+  <ol>
+    <li>A <strong>planner</strong> that writes an ordered list of steps, and later rewrites only the steps that are not done yet.</li>
+    <li>An <strong>executor</strong> that does the current step against the file and returns <code>continue</code>, <code>blocked</code>, or <code>done</code>.</li>
+    <li>A <strong>Python router</strong> that turns that status into the next node. The model does not choose the arrow. It only judges the step.</li>
+  </ol>
+
+  <h2>2. The business story</h2>
+  <div class="case">
+    <div class="case-title">The file on the analyst’s desk</div>
+    <p>A private manufacturer (a factory company that is not listed on a stock exchange) wants working capital: money for day-to-day stock and bills, not for buying a new factory. The file has a short brief, two years of GST returns, and bank statements. There are no audited financials.</p>
+  </div>
+  <ul>
+    <li><code>planner</code> reads the file and writes the steps in order: rebuild sales from the GST returns, check that money coming into the bank matches those sales, see whether a few buyers make up most of the sales, then write the recommendation and list what is still missing.</li>
+    <li><code>executor</code> does one step. It writes what it found, then moves to the next step.</li>
+    <li>One step gets stuck: “To see if a few buyers make up most of the sales, I need buyer names. The bank statement only shows account numbers.” The executor stops and sends the case back to <code>planner</code>.</li>
+    <li>The planner drops that stuck step and rewrites what is left: say that customer concentration is unknown, and do not invent buyer names. The executor continues with the new remaining steps and writes the memo.</li>
+  </ul>
+
+  <h3>Words you need</h3>
+  <div class="note glossary">
+    <dl>
+      <dt>Credit memo</dt>
+      <dd>A short note that says yes or no to the loan, and why. It must also say what the file does not contain.</dd>
+      <dt>GST returns</dt>
+      <dd>The tax filings that list sales. Here they are the only sales numbers in the file.</dd>
+      <dt>Audited financials</dt>
+      <dd>Accounts checked and signed by an outside auditor. This file does not have them.</dd>
+      <dt>Customer concentration</dt>
+      <dd>How much of the sales sits with a few buyers. You cannot measure it without buyer names.</dd>
+      <dt>Cursor</dt>
+      <dd>The position of the step being done now. Step 0 is the first step.</dd>
+      <dt>Replan</dt>
+      <dd>The executor was blocked. The planner replaces the steps from the cursor onward. Finished steps stay.</dd>
+    </dl>
+  </div>
+
+  <h2>3. Why an agent has to do this</h2>
+  <ul>
+    <li>The right steps depend on the business. One hardcoded list would be wrong for the next file.</li>
+    <li>Noticing that an account number is not a buyer name is a judgment about the evidence. The executor has to say the step cannot be done.</li>
+    <li>The new steps have to follow that finding. A fixed checklist would keep asking for a percentage the file cannot give.</li>
+  </ul>
+  <p>
+    The router itself is ordinary Python. It does not “decide” in the way the handoff lab does. It turns <code>blocked</code> / <code>continue</code> / <code>done</code> into <code>replan</code> / <code>next_step</code> / <code>done</code>. The judgment stays inside the two model calls.
+  </p>
+
+  <h2>4. The graph</h2>
+  <div class="diagram">
+    <pre class="mermaid">
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	planner(planner)
+	executor(executor)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> planner;
+	planner --> executor;
+	executor -.-> executor;
+	executor -.-> planner;
+	executor -.-> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+    </pre>
+  </div>
+  <p class="caption">The planner always hands to the executor (solid arrow). The executor’s dotted arrows choose the next step, a new plan, or the end.</p>
+  <ul>
+    <li><code>planner</code> writes the list of steps and sets <code>cursor</code> to <code>0</code>. A solid arrow then goes to <code>executor</code>.</li>
+    <li>The executor reads <code>steps[cursor]</code>, does it, and appends a finding.</li>
+    <li><code>next_step</code> comes back to the same node. One executor node is enough, because the step text lives in state.</li>
+    <li><code>replan</code> goes back to <code>planner</code>. The planner replaces only the steps that are not done yet.</li>
+    <li><code>done</code> fires when the executor says the memo is written, when the cursor is past the last step, or when the replan limit is used up.</li>
+  </ul>
+
+  <div class="predict">
+    <div class="predict-title">Predict before you code</div>
+    <p>Which step number will come back <code>blocked</code>? What should the planner delete, and what two steps should replace it? You will check this against the printed plan and the replan.</p>
+  </div>
+
+  <h2>5. Setup</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Terminal, from <code>03-langgraph</code>, if these are not installed yet:</p>
+  </div>
+  <pre><code>pip install langgraph langchain langchain-openai python-dotenv</code></pre>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. It should print the model name.</p>
+  </div>
+  <pre><code>import os
+import operator
+from typing import Literal
+from typing_extensions import TypedDict, Annotated
+from pydantic import BaseModel, Field
+from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+
+load_dotenv()
+model_name = os.getenv("MODEL_NAME", "gpt-4.1-mini")
+llm = ChatOpenAI(model=model_name, temperature=0)
+print("Model:", model_name)</code></pre>
+
+  <h2>6. The credit file</h2>
+  <p>Read this file the way the analyst would. The trap is in the bank statement: account numbers, no buyer names. There are no audited financials.</p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. Scroll the printed file once before you continue.</p>
+  </div>
+  <pre><code>CREDIT_FILE = """
+BORROWER: Mehta Looms Pvt Ltd, Surat. Private manufacturer of cotton fabric.
+Not listed on a stock exchange.
+REQUEST: Working capital of ₹2.5 crore for stock and bills. Not for a new factory.
+ANALYST ASK: Write a credit memo. Say yes or no, with conditions, and list gaps.
+
+GST RETURNS (sales declared to the tax office)
+- FY 2024-25: taxable sales ₹4.20 crore
+- FY 2025-26: taxable sales ₹5.10 crore
+No other sales evidence is in the file.
+
+BANK STATEMENTS, current account CA-22911, last 12 months
+- Credits total ₹4.85 crore
+- Narrations are "NEFT CR" plus a masked account number, for example XX4412, XX9088, XX2201
+- Buyer legal names are NOT in the file. An account number is not a buyer name.
+
+NOT IN THE FILE
+- Audited financials
+- Buyer names, invoices by customer, or a customer-concentration percentage
+- Stock statement signed by the borrower
+"""
+
+print(CREDIT_FILE)</code></pre>
+
+  <h2>7. State</h2>
+  <p>
+    <code>findings</code> uses <code>operator.add</code>, so each step appends a line and earlier lines stay.
+    <code>steps</code>, <code>cursor</code>, <code>status</code>, <code>replan_count</code>, and <code>memo</code> are replaced, not appended.
+    If you put <code>operator.add</code> on <code>steps</code>, a replan would glue the new list onto the old one.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>class State(TypedDict):
+    file_text: str
+    steps: list
+    cursor: int
+    findings: Annotated[list, operator.add]
+    status: str
+    replan_count: int
+    memo: str
+
+print("State schema ready.")</code></pre>
+
+  <h2>8. What the two models must return</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>class Plan(BaseModel):
+    steps: list[str] = Field(description="Ordered steps. One short sentence each. 4 steps on the first plan.")
+    why: str = Field(description="One sentence on why this order fits this file.")
+
+class RemainingPlan(BaseModel):
+    remaining_steps: list[str] = Field(
+        description="Only the steps still to do. Do not repeat finished steps. Drop any step the file cannot support."
+    )
+    why: str = Field(description="One sentence: which step you dropped, and what replaced it.")
+
+class StepResult(BaseModel):
+    finding: str = Field(description="What this step found, using only numbers and names that are in the file.")
+    status: Literal["continue", "blocked", "done"] = Field(
+        description="blocked = this step cannot be done from the file. continue = step done, more remain. done = this finding is the credit memo."
+    )
+
+print("Schemas ready.")</code></pre>
+
+  <h2>9. Planner prompts</h2>
+  <p>
+    The first plan is constrained so the whole class hits the same stuck step. The lesson is the replan, not whether the model invents a clever checklist.
+    The replan prompt is the real planner behavior: keep what is done, drop what is impossible, do not invent buyer names.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>FIRST_PLAN_PROMPT = """You are a credit planner at Horizon Bank. You do not write the memo. You only list steps.
+
+The file is a private manufacturer asking for working capital. Write exactly these four steps, in this order, in your own words:
+1. Rebuild annual sales from the two GST years in the file.
+2. Check whether bank credits support those sales.
+3. Measure customer concentration: what share of sales sits with the named top buyers. This step needs buyer names.
+4. Write the credit memo: a yes or no with conditions, and list what is still missing, including audited financials.
+
+Do not add a step that needs stock, collateral, or a factory visit. Those documents are not in the file.
+"""
+
+REPLAN_PROMPT = """You are a credit planner. The executor is blocked. Finished steps must stay finished.
+You are given the finished findings and the stuck step.
+
+Rewrite ONLY the remaining work:
+- Drop the stuck step. Do not ask again for a percentage the file cannot give.
+- First remaining step: state that customer concentration is unknown because the file has account numbers, not buyer names. Do not invent buyer names.
+- Second remaining step: write the credit memo. Recommend or decline working capital with conditions, and list the gaps still open (no audited financials, concentration unknown).
+
+Return two remaining steps, not the full history.
+"""
+
+EXECUTOR_PROMPT = """You are the credit executor. Do the ONE current step. Use only the credit file and the findings so far.
+
+Status rules:
+- If the step asks for buyer names, customer names, or a concentration percentage, and the file has only masked account numbers, status=blocked. Say what is missing. Do not invent a name or a percentage. Do not write the memo in this finding.
+- If the step tells you to record that concentration is unknown and not to invent names, write that finding and status=continue.
+- If the step is to write the credit memo, status=done, and the finding IS the memo: 2 short paragraphs, a clear yes or no with conditions, GST sales, whether bank credits support them, concentration unknown, no audited financials.
+- Otherwise do the step with the numbers in the file and status=continue.
+
+Never treat an account number like XX4412 as a buyer name.
+"""
+
+first_plan_chain = ChatPromptTemplate.from_messages([
+    ("system", FIRST_PLAN_PROMPT),
+    ("human", "Credit file:\n{file_text}"),
+]) | llm.with_structured_output(Plan)
+
+replan_chain = ChatPromptTemplate.from_messages([
+    ("system", REPLAN_PROMPT),
+    ("human", "Stuck step:\n{stuck}\n\nFindings so far:\n{findings}\n\nCredit file:\n{file_text}"),
+]) | llm.with_structured_output(RemainingPlan)
+
+executor_chain = ChatPromptTemplate.from_messages([
+    ("system", EXECUTOR_PROMPT),
+    ("human", "Current step:\n{step}\n\nFindings so far:\n{findings}\n\nCredit file:\n{file_text}"),
+]) | llm.with_structured_output(StepResult)
+
+print("Chains ready.")</code></pre>
+
+  <h2>10. The planner node</h2>
+  <p>
+    On the first visit, <code>steps</code> is empty, so the planner writes the full list and sets <code>cursor</code> to 0.
+    On a later visit, it keeps <code>steps[:cursor]</code> and replaces everything from the cursor onward. <code>replan_count</code> goes up by one.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>def planner(state):
+    if not state["steps"]:
+        plan = first_plan_chain.invoke({"file_text": state["file_text"]})
+        print("\n[planner] first plan")
+        for i, step in enumerate(plan.steps, start=1):
+            print(f"  {i}. {step}")
+        print("   why:", plan.why)
+        return {
+            "steps": plan.steps,
+            "cursor": 0,
+            "status": "continue",
+            "replan_count": 0,
+            "memo": "",
+        }
+
+    stuck = state["steps"][state["cursor"]]
+    plan = replan_chain.invoke({
+        "stuck": stuck,
+        "findings": "\n".join(state["findings"]),
+        "file_text": state["file_text"],
+    })
+    kept = state["steps"][: state["cursor"]]
+    new_steps = kept + plan.remaining_steps
+    print("\n[planner] replan")
+    print("   dropped:", stuck)
+    print("   why:", plan.why)
+    for i, step in enumerate(new_steps, start=1):
+        mark = "done" if i - 1 &lt; state["cursor"] else "left"
+        print(f"  {i}. [{mark}] {step}")
+    return {
+        "steps": new_steps,
+        "status": "continue",
+        "replan_count": state["replan_count"] + 1,
+    }
+
+print("Planner node ready.")</code></pre>
+
+  <h2>11. The executor node</h2>
+  <p>
+    The executor does not increment the cursor when the step is <code>blocked</code>. The stuck step stays at <code>cursor</code>, so the planner can replace it.
+    On <code>continue</code> or <code>done</code>, the cursor moves forward by one.
+  </p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>def executor(state):
+    step = state["steps"][state["cursor"]]
+    print(f"\n[executor] step {state['cursor'] + 1} of {len(state['steps'])}")
+    print("   ", step)
+    result = executor_chain.invoke({
+        "step": step,
+        "findings": "\n".join(state["findings"]) or "(none yet)",
+        "file_text": state["file_text"],
+    })
+    print(f"   status={result.status}")
+    print(f"   {result.finding}")
+    update = {
+        "findings": [f"Step {state['cursor'] + 1} ({result.status}): {result.finding}"],
+        "status": result.status,
+    }
+    if result.status != "blocked":
+        update["cursor"] = state["cursor"] + 1
+    if result.status == "done":
+        update["memo"] = result.finding
+    return update
+
+print("Executor node ready.")</code></pre>
+
+  <h2>12. The router is Python</h2>
+  <p>
+    This function is the dotted arrows. It does not call the model.
+  </p>
+  <ul>
+    <li><code>blocked</code> and fewer than 2 replans: go back to the planner.</li>
+    <li><code>done</code>, or the cursor is past the last step: end.</li>
+    <li><code>blocked</code> after the replan limit: end anyway. Otherwise a step that stays impossible would spin until <code>recursion_limit</code>.</li>
+    <li>Anything else: the same executor node, next step.</li>
+  </ul>
+  <div class="note">
+    A first sketch of this router often forgets the third case. If the cursor does not move on <code>blocked</code>, and replans are used up, <code>cursor &gt;= len(steps)</code> is still false. The router would send the executor back to the same stuck step forever. The explicit stop is part of the lab.
+  </div>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. Then answer, on paper: if <code>status</code> is <code>blocked</code> and <code>replan_count</code> is already 2, which string does this return?</p>
+  </div>
+  <pre><code>def after_executor(state):
+    if state["status"] == "blocked" and state["replan_count"] &lt; 2:
+        return "replan"
+    if state["status"] == "done" or state["cursor"] &gt;= len(state["steps"]):
+        return "done"
+    if state["status"] == "blocked":
+        return "done"
+    return "next_step"
+
+print("Router ready.")</code></pre>
+
+  <h2>13. Wire the graph</h2>
+  <p>The only solid edge between the two workers is planner to executor. The executor’s three exits are conditional. <code>next_step</code> points at <code>executor</code> itself.</p>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell.</p>
+  </div>
+  <pre><code>from langgraph.graph import StateGraph, START, END
+
+g = StateGraph(State)
+g.add_node("planner", planner)
+g.add_node("executor", executor)
+g.add_edge(START, "planner")
+g.add_edge("planner", "executor")
+g.add_conditional_edges("executor", after_executor, {
+    "next_step": "executor",
+    "replan": "planner",
+    "done": END,
+})
+graph = g.compile()
+print("Graph compiled.")</code></pre>
+
+  <h2>14. Draw the graph</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. Skip it if drawing fails. Look for a dotted arrow from <code>executor</code> back to itself, one back to <code>planner</code>, and one to the end.</p>
+  </div>
+  <pre><code>from IPython.display import Image
+Image(graph.get_graph().draw_mermaid_png())</code></pre>
+
+  <h2>15. Run the file</h2>
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>New cell. This calls the model once per plan and once per step. Read the <code>status=</code> lines in order.</p>
+  </div>
+  <pre><code>def run_memo():
+    result = graph.invoke(
+        {
+            "file_text": CREDIT_FILE,
+            "steps": [],
+            "cursor": 0,
+            "findings": [],
+            "status": "",
+            "replan_count": 0,
+            "memo": "",
+        },
+        config={"recursion_limit": 20},
+    )
+    print("\n" + "=" * 70)
+    print("REPLANS:", result["replan_count"])
+    print("STEPS LEFT IN STATE:")
+    for i, step in enumerate(result["steps"], start=1):
+        print(f"  {i}. {step}")
+    print("\nFINDINGS:")
+    for line in result["findings"]:
+        print("-", line)
+    print("\nMEMO:\n")
+    print(result["memo"] or "(no memo — the run stopped on the replan limit)")
+    return result
+
+result = run_memo()</code></pre>
+
+  <h3>What you should see</h3>
+  <table>
+    <thead>
+      <tr><th>Order</th><th>Node</th><th>What happens</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>planner</td><td>Four steps. Step 3 needs buyer names. Cursor is 0.</td></tr>
+      <tr><td>2</td><td>executor</td><td>GST sales: ₹4.20 crore then ₹5.10 crore. Status <code>continue</code>. Cursor becomes 1.</td></tr>
+      <tr><td>3</td><td>executor</td><td>Bank credits ₹4.85 crore against those sales. Status <code>continue</code>. Cursor becomes 2.</td></tr>
+      <tr><td>4</td><td>executor</td><td>Concentration step. Status <code>blocked</code>. Cursor stays 2. No invented buyer name.</td></tr>
+      <tr><td>5</td><td>planner</td><td>Replan count becomes 1. Steps 1 and 2 stay. The stuck step is replaced by “concentration unknown” and “write the memo.”</td></tr>
+      <tr><td>6</td><td>executor</td><td>Records that concentration is unknown. Status <code>continue</code>.</td></tr>
+      <tr><td>7</td><td>executor</td><td>Writes the memo. Status <code>done</code>. The graph ends.</td></tr>
+    </tbody>
+  </table>
+  <p>
+    <code>replan_count</code> should be <strong>1</strong>. The memo should mention the GST figures, that bank credits are in the same range, that concentration is unknown, and that audited financials are missing. It must not name a buyer.
+  </p>
+
+  <h3>If the run looks wrong</h3>
+  <ul>
+    <li><strong>No <code>blocked</code> line.</strong> The executor invented a concentration percentage or treated XX4412 as a buyer. The finding is then unsupported. Tighten the executor prompt and run again.</li>
+    <li><strong>The replan repeats the concentration step.</strong> The remaining-plan prompt was ignored. The second time that step runs it should still be <code>blocked</code>, and a third replan is refused because <code>replan_count</code> is no longer below 2.</li>
+    <li><strong>The memo appears before the block.</strong> The executor wrote the memo on an early step. Only the step that says “write the credit memo” may return <code>done</code>.</li>
+    <li><strong><code>GraphRecursionError</code>.</strong> The router is sending <code>blocked</code> back to the executor. Check that the “replans used up” branch returns <code>done</code>.</li>
+  </ul>
+
+  <h2>16. Key takeaways</h2>
+  <ul>
+    <li><strong>The plan is data, not a drawing.</strong> The same executor node can run every step because the current step is <code>steps[cursor]</code>.</li>
+    <li><strong>The model judges the step. Python judges the arrow.</strong> <code>blocked</code> is a model status. <code>replan</code> is a router return value.</li>
+    <li><strong>A replan edits the tail of the list.</strong> Finished findings stay. The stuck step does not stay in the list.</li>
+    <li><strong>Do not advance the cursor on a blocked step.</strong> If you do, the planner will think that step is finished.</li>
+    <li><strong>Cap the replans.</strong> After the cap, force an ending that lists the gaps. A file that can never answer must still produce a memo.</li>
+  </ul>
+
+  <div class="instructor">
+    <div class="instructor-title">Try this on your own</div>
+    <ol>
+      <li>Add one line to the bank statement: “XX4412 is Arvind Buyers Pvt Ltd, about 70 percent of credits.” Run again. The concentration step should return <code>continue</code>, and <code>replan_count</code> should stay 0. Remove that line afterwards.</li>
+      <li>Change the replan limit from 2 to 0 in <code>after_executor</code>. The first block should end the graph with findings and no memo. Put the limit back.</li>
+      <li>Replace <code>FIRST_PLAN_PROMPT</code> with “List the steps you actually need for this file.” Compare the first plan with the four-step plan. The replan lesson is easier to see when the stuck step is guaranteed. A free planner is what you would ship after the lesson.</li>
+    </ol>
+  </div>
+</main>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: "base",
+    securityLevel: "loose",
+    flowchart: { curve: "linear", htmlLabels: true, padding: 14, nodeSpacing: 40, rankSpacing: 45 },
+    themeVariables: {
+      fontFamily: "system-ui, Segoe UI, sans-serif",
+      fontSize: "15px",
+      primaryColor: "#f2f0ff",
+      primaryTextColor: "#111827",
+      primaryBorderColor: "#a78bfa",
+      lineColor: "#64748b",
+    },
+  });
+</script>
+</body>
+</html>

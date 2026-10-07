@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LangGraph Parallelization – Hands-on Guide</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+      color: #0f172a;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .note, .exercise {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .exercise-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #166534;
+    }
+    .warning {
+      border-left: 4px solid #dc2626;
+      background: linear-gradient(135deg, #fef2f2, #fee2e2);
+      border-color: rgba(220, 38, 38, 0.4);
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+    }
+    .concept {
+      border-left: 4px solid #7c3aed;
+      background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+      border-color: rgba(124, 58, 237, 0.4);
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+    .output {
+      background: #f8f9fa;
+      border-left: 3px solid #6c757d;
+      padding: 0.75rem 1rem;
+      margin: 0.5rem 0 1rem;
+      border-radius: 6px;
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>LangGraph Parallelization – Hands-on Guide</h1>
+
+  <h2>Notebook file</h2>
+  <p>
+    Create a Jupyter notebook in this folder named <code>03_parallelization.ipynb</code>.
+    For each block labeled <strong>Your Task</strong>, add a new cell in that notebook, paste the code from that section, and run the cell.
+  </p>
+
+  <h2>1. Introduction to Parallel Node Execution</h2>
+  <p>
+    In LangGraph, you can execute multiple nodes in parallel to improve performance and efficiency. This is especially useful when you have independent operations that don't depend on each other's results. Parallel execution follows two main patterns:
+  </p>
+  <ul>
+    <li><strong>Fan-out:</strong> One node triggers multiple nodes simultaneously</li>
+    <li><strong>Fan-in:</strong> Multiple nodes converge into a single node</li>
+  </ul>
+  <p>
+    However, when nodes run in parallel and write to the same state key, you need to use <strong>reducers</strong> to properly merge their outputs. This guide will walk you through these concepts step by step.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>In a terminal, install the required packages by running the command below.</p>
+  </div>
+
+  <pre><code>pip install -U langgraph langchain_openai python-dotenv</code></pre>
+
+  <h3>1.1 Load Environment Variables</h3>
+  <p>
+    Use <code>python-dotenv</code> to load <code>OPENAI_API_KEY</code> from a
+    <code>.env</code> file in your project folder. Section 6 uses it only for the final answer node.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Add a new notebook cell, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>from dotenv import load_dotenv
+load_dotenv()</code></pre>
+
+  <h2>2. Understanding Sequential State Updates</h2>
+  <p>
+    Before diving into parallelization, let's first understand how state updates work in a sequential (linear) graph. In a linear graph, each node processes the state in order, and each subsequent node receives the updated state from the previous node.
+  </p>
+
+  <div class="concept">
+    <strong>Key Concept: State in LangGraph</strong>
+    <p>
+      The state in LangGraph is a dictionary that flows through the graph. Each node can read from and write to this state. By default, when a node writes to a state key, it <strong>overwrites</strong> the previous value. This is fine for sequential execution, but causes issues when multiple nodes try to write to the same key simultaneously.
+    </p>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Add a new notebook cell, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>from IPython.display import Image, display
+
+from typing import Any
+from typing_extensions import TypedDict
+
+from langgraph.graph import StateGraph, START, END
+
+class State(TypedDict):
+    state: list
+
+
+def create_node_fn(node_secret: str):
+    """Create a node function that adds its secret to the state."""
+    def node_function(state):
+        print(f"Adding {node_secret} to {state['state']}")
+        return {"state": [node_secret]}
+    return node_function
+
+
+# Add nodes
+builder = StateGraph(State)
+
+builder.add_node("a", create_node_fn("I'm A"))
+builder.add_node("b", create_node_fn("I'm B"))
+builder.add_node("c", create_node_fn("I'm C"))
+builder.add_node("d", create_node_fn("I'm D"))
+
+# Flow - linear sequence
+builder.add_edge(START, "a")
+builder.add_edge("a", "b")
+builder.add_edge("b", "c")
+builder.add_edge("c", "d")
+builder.add_edge("d", END)
+graph = builder.compile()
+
+display(Image(graph.get_graph().draw_mermaid_png()))</code></pre>
+
+  <p>
+    The graph visualization shows a linear flow: START → a → b → c → d → END. Each node processes the state sequentially.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Add a new notebook cell, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>result = graph.invoke({"state": []})
+
+print(f"Final state: {result['state']}")
+
+result</code></pre>
+
+  <div class="output">Adding I'm A to []
+Adding I'm B to ["I'm A"]
+Adding I'm C to ["I'm B"]
+Adding I'm D to ["I'm C"]
+Final state: ["I'm D"]
+
+{'state': ["I'm D"]}</div>
+
+  <div class="note">
+    <strong>Observation:</strong> Notice how each node receives the state from the previous node, but then <strong>overwrites</strong> it with its own value. This is the default behavior when nodes write to the same state key sequentially. The final state contains only the value from the most recent node: <code>["I'm D"]</code>.
+  </div>
+
+  <h2>3. Fan-Out and Fan-In Patterns</h2>
+  <p>
+    Now let's explore parallel execution. We want to run nodes <code>b</code> and <code>c</code> in parallel after node <code>a</code>, and then have both converge into node <code>d</code>. This creates a fan-out (from <code>a</code> to <code>b</code> and <code>c</code>) and fan-in (from <code>b</code> and <code>c</code> to <code>d</code>) pattern.
+  </p>
+
+  <div class="concept">
+    <strong>Key Concept: Fan-Out and Fan-In</strong>
+    <ul>
+      <li><strong>Fan-out:</strong> One node connects to multiple nodes, allowing parallel execution</li>
+      <li><strong>Fan-in:</strong> Multiple nodes connect to one node, requiring all parallel paths to complete before proceeding</li>
+      <li>State updates from parallel nodes are applied at the end of each step</li>
+    </ul>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Add a new notebook cell, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>builder = StateGraph(State)
+
+# Initialize each node with node_secret
+builder.add_node("a", create_node_fn("I'm A"))
+builder.add_node("b", create_node_fn("I'm B"))
+builder.add_node("c", create_node_fn("I'm C"))
+builder.add_node("d", create_node_fn("I'm D"))
+
+# Flow - fan-out from a to b and c, then fan-in to d
+builder.add_edge(START, "a")
+builder.add_edge("a", "b")
+builder.add_edge("a", "c")
+builder.add_edge("b", "d")
+builder.add_edge("c", "d")
+builder.add_edge("d", END)
+graph = builder.compile()
+
+display(Image(graph.get_graph().draw_mermaid_png()))</code></pre>
+
+  <p>
+    The graph visualization now shows: START → a → (b, c in parallel) → d → END. Nodes <code>b</code> and <code>c</code> will execute simultaneously.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Add a new notebook cell, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>from langgraph.errors import InvalidUpdateError
+try:
+    graph.invoke({"state": []})
+except InvalidUpdateError as e:
+    print(f"An error occurred: {e}")</code></pre>
+
+  <div class="output">Adding I'm A to []
+Adding I'm B to ["I'm A"]
+Adding I'm C to ["I'm A"]
+An error occurred: At key 'state': Can receive only one value per step. Use an Annotated key to handle multiple values.
+For troubleshooting, visit: https://python.langchain.com/docs/troubleshooting/errors/INVALID_CONCURRENT_GRAPH_UPDATE</div>
+
+  <div class="warning">
+    <strong>Error Explanation:</strong> When nodes <code>b</code> and <code>c</code> run in parallel, they both try to write to the same state key <code>state</code> in the same step. LangGraph doesn't allow multiple nodes to overwrite the same key simultaneously without a reducer function. This prevents data loss and ensures predictable state management.
+  </div>
+
+  <h2>4. Using Reducers for Parallel State Updates</h2>
+  <p>
+    To handle parallel state updates, we need to use a <strong>reducer function</strong>. A reducer specifies how to combine multiple values when they're written to the same state key in parallel. The most common reducer for lists is <code>operator.add</code>, which concatenates lists together.
+  </p>
+
+  <div class="concept">
+    <strong>Key Concept: Annotated State with Reducers</strong>
+    <p>
+      In Python's <code>typing</code> module, <code>Annotated</code> allows you to attach metadata to type hints. LangGraph uses this to specify reducer functions. When you annotate a state key with a reducer:
+    </p>
+    <ul>
+      <li>Multiple nodes can write to that key in parallel</li>
+      <li>The reducer function combines all the values</li>
+      <li><code>operator.add</code> for lists performs concatenation</li>
+    </ul>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Add a new notebook cell, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>import operator
+from typing import Annotated
+
+class State(TypedDict):
+    # The operator.add reducer fn makes this append-only
+    state: Annotated[list, operator.add]
+
+# Add nodes
+builder = StateGraph(State)
+
+# Initialize each node with node_secret
+builder.add_node("a", create_node_fn("I'm A"))
+builder.add_node("b", create_node_fn("I'm B"))
+builder.add_node("c", create_node_fn("I'm C"))
+builder.add_node("d", create_node_fn("I'm D"))
+
+# Flow
+builder.add_edge(START, "a")
+builder.add_edge("a", "b")
+builder.add_edge("a", "c")
+builder.add_edge("b", "d")
+builder.add_edge("c", "d")
+builder.add_edge("d", END)
+graph = builder.compile()
+
+display(Image(graph.get_graph().draw_mermaid_png()))</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Add a new notebook cell, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>graph.invoke({"state": []})</code></pre>
+
+  <div class="output">Adding I'm A to []
+Adding I'm B to ["I'm A"]
+Adding I'm C to ["I'm A"]
+Adding I'm D to ["I'm A", "I'm B", "I'm C"]</div>
+
+  <div class="note">
+    <strong>Success!</strong> Now the graph works correctly. Notice that:
+    <ul>
+      <li>Node <code>a</code> adds "I'm A" to the empty state</li>
+      <li>Nodes <code>b</code> and <code>c</code> run in parallel, both receiving ["I'm A"]</li>
+      <li>The reducer combines their outputs: ["I'm A", "I'm B", "I'm C"]</li>
+      <li>Node <code>d</code> receives the combined state from both parallel paths</li>
+    </ul>
+  </div>
+
+  <h2>5. Waiting for Parallel Paths to Complete</h2>
+  <p>
+    In real-world scenarios, parallel paths may have different lengths (different numbers of nodes). LangGraph automatically waits for all parallel paths to complete before proceeding to the next step. This ensures that all parallel work is finished before fan-in occurs.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Add a new notebook cell, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>builder = StateGraph(State)
+
+# Initialize each node with node_secret
+builder.add_node("a", create_node_fn("I'm A"))
+builder.add_node("b", create_node_fn("I'm B"))
+builder.add_node("b2", create_node_fn("I'm B2"))
+builder.add_node("c", create_node_fn("I'm C"))
+builder.add_node("d", create_node_fn("I'm D"))
+
+# Flow
+builder.add_edge(START, "a")
+builder.add_edge("a", "b")
+builder.add_edge("a", "c")
+builder.add_edge("b", "b2")
+builder.add_edge(["b2", "c"], "d")  # Both b2 and c must complete before d
+builder.add_edge("d", END)
+graph = builder.compile()
+
+display(Image(graph.get_graph().draw_mermaid_png()))</code></pre>
+
+  <div class="concept">
+    <strong>Key Concept: Synchronization in Parallel Paths</strong>
+    <p>
+      When you specify multiple source nodes for an edge (like <code>["b2", "c"]</code>), LangGraph ensures that <strong>all</strong> of these nodes complete before the target node (<code>d</code>) executes. This is crucial for ensuring data consistency and preventing race conditions.
+    </p>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Add a new notebook cell, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>graph.invoke({"state": []})</code></pre>
+
+  <div class="output">Adding I'm A to []
+Adding I'm B to ["I'm A"]
+Adding I'm C to ["I'm A"]
+Adding I'm B2 to ["I'm A", "I'm B", "I'm C"]
+Adding I'm D to ["I'm A", "I'm B", "I'm C", "I'm B2"]</div>
+
+  <div class="note">
+    <strong>Execution Flow:</strong>
+    <ol>
+      <li>Node <code>a</code> executes first</li>
+      <li>Nodes <code>b</code> and <code>c</code> execute in parallel (same step)</li>
+      <li>Node <code>b2</code> executes after <code>b</code> completes</li>
+      <li>Node <code>d</code> waits for <strong>both</strong> <code>b2</code> and <code>c</code> to complete before executing</li>
+      <li>Even though <code>c</code> finishes earlier, <code>d</code> waits for <code>b2</code> to complete</li>
+    </ol>
+  </div>
+
+  <h2>6. Practical Example: Parallel Order Lookup</h2>
+  <p>
+    Both lookups read a small local table. A short <code>time.sleep</code> stands in for a slow database call, so you can see the two nodes overlap.
+  </p>
+  <p>The graph:</p>
+  <ul>
+    <li>Looks up the order record and the shipping record in parallel</li>
+    <li>Combines both records with a reducer</li>
+    <li>Uses an LLM to write a short customer update from the combined context</li>
+  </ul>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Add a new notebook cell, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>from langchain_openai import ChatOpenAI
+llm = ChatOpenAI()</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Add a new notebook cell, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>class State(TypedDict):
+    order_id: str
+    answer: str
+    context: Annotated[list, operator.add]</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Add a new notebook cell, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>import time
+from langchain_core.messages import HumanMessage, SystemMessage
+
+ORDERS = {
+    "A1001": "Customer: Priya Shah. Item: TrailBlazer 30L backpack. Amount: Rs 4299. Payment: paid.",
+    "A1002": "Customer: Arjun Mehta. Item: Noise-cancelling headphones. Amount: Rs 7999. Payment: paid.",
+}
+
+SHIPMENTS = {
+    "A1001": "Carrier: BlueDart. Status: in transit. Last scan: Mumbai hub. ETA: 26 Sep 2026.",
+    "A1002": "Carrier: Delhivery. Status: delivered. Delivered on: 20 Sep 2026. Signed by: reception.",
+}
+
+def lookup_order(state):
+    """Read the order row. The sleep stands in for a slow database call."""
+    order_id = state["order_id"]
+    print(f"[{time.strftime('%H:%M:%S')}] lookup_order started for {order_id}")
+    time.sleep(2)
+    record = ORDERS.get(order_id, f"No order found for {order_id}.")
+    print(f"[{time.strftime('%H:%M:%S')}] lookup_order finished")
+    return {"context": [f"Order record: {record}"]}
+
+def lookup_shipping(state):
+    """Read the shipment row. Runs at the same time as lookup_order."""
+    order_id = state["order_id"]
+    print(f"[{time.strftime('%H:%M:%S')}] lookup_shipping started for {order_id}")
+    time.sleep(2)
+    record = SHIPMENTS.get(order_id, f"No shipment found for {order_id}.")
+    print(f"[{time.strftime('%H:%M:%S')}] lookup_shipping finished")
+    return {"context": [f"Shipping record: {record}"]}
+
+def generate_answer(state):
+    """Write a customer update after both lookups have finished."""
+    context = "\n\n".join(state["context"])
+    order_id = state["order_id"]
+    answer_instructions = (
+        f"Write a short customer-support update for order {order_id}. "
+        f"Use only this context:\n{context}"
+    )
+    answer = llm.invoke(
+        [SystemMessage(content=answer_instructions)]
+        + [HumanMessage(content="Write the update.")]
+    )
+    return {"answer": answer}</code></pre>
+
+  <div class="concept">
+    <strong>Key Concept: Node Functions in Parallel Execution</strong>
+    <p>
+      Each node function:
+    </p>
+    <ul>
+      <li><strong>Reads</strong> from the state (e.g., <code>state['order_id']</code>)</li>
+      <li><strong>Performs</strong> its operation (order lookup, shipping lookup, or LLM generation)</li>
+      <li><strong>Returns</strong> a dictionary with updates to the state</li>
+      <li>When multiple nodes return the same key, the reducer combines them</li>
+    </ul>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Add a new notebook cell, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code># Add nodes
+builder = StateGraph(State)
+
+builder.add_node("lookup_order", lookup_order)
+builder.add_node("lookup_shipping", lookup_shipping)
+builder.add_node("generate_answer", generate_answer)
+
+# Both lookups start together, then fan in to the answer node
+builder.add_edge(START, "lookup_order")
+builder.add_edge(START, "lookup_shipping")
+builder.add_edge("lookup_order", "generate_answer")
+builder.add_edge("lookup_shipping", "generate_answer")
+builder.add_edge("generate_answer", END)
+graph = builder.compile()
+
+display(Image(graph.get_graph().draw_mermaid_png()))</code></pre>
+
+  <div class="note">
+    <strong>Graph Structure:</strong>
+    <ul>
+      <li>Both <code>lookup_order</code> and <code>lookup_shipping</code> start from <code>START</code> (they run in parallel)</li>
+      <li>Both connect to <code>generate_answer</code> (fan-in pattern)</li>
+      <li>The <code>context</code> state key uses <code>operator.add</code>, so both records are combined</li>
+      <li><code>generate_answer</code> waits for both lookups to finish before it runs</li>
+    </ul>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Add a new notebook cell, paste the code below, and run it.</p>
+  </div>
+
+  <pre><code>started = time.perf_counter()
+result = graph.invoke({"order_id": "A1001", "context": []})
+print(f"Total seconds: {time.perf_counter() - started:.1f}")
+result["answer"].content</code></pre>
+
+  <div class="output">[14:02:01] lookup_order started for A1001
+[14:02:01] lookup_shipping started for A1001
+[14:02:03] lookup_order finished
+[14:02:03] lookup_shipping finished
+Total seconds: 4.2</div>
+
+  <div class="note">
+    <strong>What to look for:</strong> Both lookups print the same start time. Each one sleeps for 2 seconds, but the graph spends about 2 seconds on them, then a little more while the LLM writes the update. Run the same two functions one after another and the sleeps alone take about 4 seconds. Try <code>A1002</code> as well. The exact total depends on how long the model call takes.
+  </div>
+
+  <h2>7. Best Practices and Common Patterns</h2>
+  
+  <h3>7.1 When to Use Parallel Execution</h3>
+  <ul>
+    <li><strong>Independent operations:</strong> When nodes don't depend on each other's outputs</li>
+    <li><strong>I/O-bound tasks:</strong> Network requests, database queries, file operations</li>
+    <li><strong>Multiple data sources:</strong> Gathering information from different APIs or sources</li>
+    <li><strong>Performance optimization:</strong> Reducing total execution time</li>
+  </ul>
+
+  <h3>7.2 Reducer Functions</h3>
+  <p>Common reducer functions you can use:</p>
+  <ul>
+    <li><code>operator.add</code> - For lists (concatenation) or numbers (addition)</li>
+    <li><code>operator.mul</code> - For multiplication</li>
+    <li>Custom functions - Define your own logic for combining values</li>
+  </ul>
+
+  <div class="exercise">
+    <div class="exercise-title">Challenge Exercise</div>
+    <p>
+      Try modifying the order example to:
+    </p>
+    <ol>
+      <li>Add a third parallel lookup, such as a returns table for the same order id</li>
+      <li>Add error handling so that if one lookup fails, the others still proceed</li>
+      <li>Add a node that checks both records are present before the answer is written</li>
+    </ol>
+  </div>
+
+</main>
+</body>
+</html>
+

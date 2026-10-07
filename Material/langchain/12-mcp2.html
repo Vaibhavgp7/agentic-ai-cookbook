@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Creating MCP File System &amp; Database Servers</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+      color: #0f172a;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .note, .exercise {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .exercise-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #166534;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+    /* ── Copy-button wrapper ─────────────────────────────────────────────── */
+    .code-wrapper {
+      position: relative;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 0.45rem;
+      right: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.22rem 0.55rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 6px;
+      color: #9ca3af;
+      font-family: system-ui, sans-serif;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: #f9fafb;
+    }
+    .copy-btn.copied {
+      color: #4ade80;
+      border-color: rgba(74, 222, 128, 0.45);
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Creating MCP File System &amp; Database Servers</h1>
+  <p>
+    I wrote this lab for you. By the end of it, you will have built your own MCP servers,
+    connected them to VS Code, written Python clients, and handed those tools to a LangChain agent.
+    We will start with a <strong>Database Server</strong>, then add a <strong>File System Server</strong>,
+    then try Streamable HTTP, and finally wire everything into <strong>LangChain</strong>
+    with the built-in <code>MCPAdapter</code>.
+  </p>
+
+  <div class="note">
+    <strong>How I want you to use this guide</strong>
+    <ol>
+      <li>Keep this page open next to VS Code.</li>
+      <li>Whenever you see <strong>Your Task</strong>, pause and actually do it &mdash; do not just read past it.</li>
+      <li>Copy the code I give you into the filename I name. Run it. Look at the output before you move on.</li>
+      <li>If something fails, check the note boxes. I put the common gotchas there on purpose.</li>
+      <li>Stay in the <strong>same virtual environment</strong> you already use for this LangChain course. MCP servers, Python clients, and LangChain agents all run there.</li>
+    </ol>
+  </div>
+
+  <div class="note">
+    <strong>The two objects you will use throughout this lab</strong><br />
+    On the server side, you create an <code>MCPServer</code> and decorate Python functions with
+    <code>@mcp.tool()</code>. You start it with <code>mcp.run()</code> &mdash; that is where you pass
+    the transport (<code>stdio</code> by default, or Streamable HTTP with a port).<br />
+    On the client side, you use a single <code>Client</code> object. Pass it a transport, enter
+    <code>async with</code>, then call <code>list_tools()</code> and <code>call_tool()</code>.
+    The connection is ready as soon as you enter the context manager.
+    Official reference:
+    <a href="https://py.sdk.modelcontextprotocol.io/client/transports/" target="_blank" rel="noopener">Client transports</a>.
+  </div>
+
+  <h2>Step 1: Introduction to MCP</h2>
+  <p>
+    MCP (Model Context Protocol) is how a language model talks to tools you write.
+    You expose ordinary Python functions. The model can then call those functions to query a database,
+    read a file, or send mail through Gmail &mdash; instead of guessing.
+  </p>
+  <p>
+    Think of an MCP server as a small program that says: <em>&ldquo;Here are the tools I offer.
+    Call them with these arguments.&rdquo;</em> VS Code, a Python script, or a LangChain agent can all
+    be the client on the other side.
+  </p>
+
+  <h2>Step 2: Install the MCP SDK</h2>
+  <p>
+    The servers and Python clients in this lab use the official MCP SDK
+    (<code>from mcp.server import MCPServer</code>). LangChain talks to those same servers
+    through <code>langchain.mcp.MCPAdapter</code>, which needs
+    <code>langchain[mcp] &gt;= 1.4.0</code> (FastMCP 4, which itself uses MCP 2.x).
+    Those packages are compatible. Stay in the virtual environment you already use for this course.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task – Install MCP in your course venv</div>
+    <p>Activate your LangChain course virtual environment, then install the MCP package:</p>
+  </div>
+
+  <pre><code>pip install "mcp[cli]"</code></pre>
+
+  <div class="note">
+    <strong>One environment is enough.</strong>
+    The old <code>langchain-mcp-adapters</code> package pinned MCP 1.x, which fought the current SDK.
+    That is why older labs used a second venv. <code>langchain[mcp]</code> now requires FastMCP 4 /
+    MCP 2.x, so you can install <code>mcp[cli]</code> and <code>langchain[mcp]</code> side by side.
+    If you still have <code>langchain-mcp-adapters</code> installed, uninstall it
+    (<code>pip uninstall langchain-mcp-adapters</code>) so it cannot pull MCP 1.x back in.
+  </div>
+
+  <h2>Step 3: Creating the <code>03-DatabaseServer.py</code></h2>
+  <p>
+    We start with a <strong>Database MCP server</strong>. I want you to give the model four tools:
+    connect to SQLite, list tables, read a table schema, and run a query.
+  </p>
+  <p>
+    I have given you a SQLite file named <code>fintech.db</code>. Copy it to
+    <code>C:\database</code> before you continue &mdash; every example in this lab points there.
+  </p>
+  <p>
+    Create a file named <code>03-DatabaseServer.py</code> in your workspace and paste the code below into it.
+  </p>
+
+  <pre><code>from mcp.server import MCPServer
+import sqlite3
+from typing import List, Dict, Any, Optional
+from pathlib import Path
+
+# Create an MCP server
+mcp = MCPServer("DatabaseServer")
+
+@mcp.tool()
+def connect_database(db_path: str) -> str:
+    """Connect to a SQLite database"""
+    try:
+        # Ensure the directory exists
+        Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+        # Test connection
+        conn = sqlite3.connect(db_path)
+        conn.close()
+        return f"Successfully connected to database at {db_path}"
+    except Exception as e:
+        return f"Error connecting to database: {str(e)}"
+
+@mcp.tool()
+def list_tables(db_path: str) -> List[str]:
+    """List all tables in the database"""
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = [row[0] for row in cursor.fetchall()]
+        conn.close()
+        return tables
+    except Exception as e:
+        return [f"Error listing tables: {str(e)}"]
+
+@mcp.tool()
+def get_table_schema(db_path: str, table_name: str) -> str:
+    """Get schema information for a specific table as a CREATE TABLE string"""
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT sql FROM sqlite_master WHERE type='table' AND name=?;",
+            (table_name,),
+        )
+        row = cursor.fetchone()
+        conn.close()
+        if row and row[0]:
+            return row[0]
+        return f"Table '{table_name}' not found"
+    except Exception as e:
+        return f"Error getting schema: {str(e)}"
+
+@mcp.tool()
+def execute_query(db_path: str, query: str) -> List[Dict[str, Any]]:
+    """Execute a SQL query and return results"""
+    try:
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(query)
+        results = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return results
+    except Exception as e:
+        return [{"error": f"Error executing query: {str(e)}"}]
+
+if __name__ == "__main__":
+    mcp.run()</code></pre>
+
+  <h2>Step 4: Register the Database server in VS Code</h2>
+  <p>
+    VS Code finds MCP servers from an <code>mcp.json</code> file in your workspace.
+    Create that file yourself, then use the <strong>Add Server</strong> button so VS Code
+    writes the configuration. Do not type or paste the JSON yourself.
+  </p>
+  <ol>
+    <li>
+      <strong>Open your workspace folder</strong> in VS Code (the folder containing
+      <code>03-DatabaseServer.py</code>).
+    </li>
+    <li>
+      In the Explorer, <strong>create a folder named <code>.vscode</code></strong> in that
+      workspace folder, if it is not already there.
+    </li>
+    <li>
+      Inside <code>.vscode</code>, <strong>create a new file named <code>mcp.json</code></strong>.
+      Leave the file empty. Do not type any JSON.
+    </li>
+    <li>
+      <strong>Open <code>mcp.json</code>.</strong> At the top of the editor, click
+      <strong>Add Server</strong>.
+    </li>
+    <li>
+      Choose <strong>Command (stdio)</strong> as the server type.
+    </li>
+    <li>
+      When asked for the command, enter
+      <code>python ${workspaceFolder}/03-DatabaseServer.py</code>.
+      Use <code>python</code> from the same environment where you installed <code>mcp[cli]</code>.
+      <code>${workspaceFolder}</code> is the folder you have open, so the script path works on any machine.
+    </li>
+    <li>
+      When asked for the server name, enter <code>DatabaseServer</code>.
+    </li>
+    <li>
+      If VS Code asks where to install the server, choose <strong>Workspace</strong>
+      so it writes into the <code>.vscode/mcp.json</code> you just created.
+    </li>
+  </ol>
+  <p>
+    VS Code fills in <code>mcp.json</code> for you. Save the file if it is not already saved.
+    Then click the <strong>Start</strong> button above the <code>DatabaseServer</code> entry,
+    or run <strong>MCP: List Servers</strong> from the Command Palette, select
+    <code>DatabaseServer</code>, and choose <strong>Start</strong>. Confirm it shows as
+    running before you move on.
+  </p>
+
+  <h2>Step 5: Interact with the Database Server in VS Code</h2>
+  <p>
+    Your <code>DatabaseServer</code> is running. Now talk to it from GitHub Copilot Chat:
+  </p>
+  <ol>
+    <li>Open the <strong>Chat</strong> view (<code>Ctrl+Alt+I</code> or the chat icon in the Activity Bar).</li>
+    <li>Switch to <strong>Agent</strong> mode. MCP tools only appear in Agent mode, not in Ask mode.</li>
+    <li>Open the tools picker and confirm you see <code>DatabaseServer</code> tools
+      (<code>list_tables</code>, <code>get_table_schema</code>, <code>execute_query</code>, and so on).</li>
+    <li>Ask questions that need those tools. Copilot will call your server for you.</li>
+  </ol>
+  <p>Make sure <code>fintech.db</code> is at <code>C:\database</code>.</p>
+  <p>Try these prompts exactly as written:</p>
+  <ul>
+    <li>&ldquo;List the tables in the <code>c:\database\fintech.db</code> database.&rdquo;</li>
+    <li>&ldquo;What is the schema of the <code>customers</code> table in <code>c:\database\fintech.db</code>?&rdquo;</li>
+    <li>&ldquo;Get the first 5 customers from the <code>customers</code> table in <code>c:\database\fintech.db</code>.&rdquo;</li>
+    <li>&ldquo;How many rows are in the <code>customers</code> table in <code>c:\database\fintech.db</code>?&rdquo;</li>
+  </ul>
+  <p>Copilot will call the <code>DatabaseServer</code> you just built to answer these.</p>
+
+  <h2>Step 6: Creating the <code>01-FileSystemServer.py</code></h2>
+  <p>
+    Next I want you to build a <strong>File System Server</strong>. Same idea as the database server,
+    different tools: list files, read, write, create a directory, delete a file.
+  </p>
+  <p>
+    Create <code>01-FileSystemServer.py</code> in the same workspace and paste this in:
+  </p>
+
+  <pre><code>from mcp.server import MCPServer
+from pathlib import Path
+from typing import List
+
+# Create an MCP server
+mcp = MCPServer("FileSystemServer")
+
+@mcp.tool()
+def list_files(directory: str) -> List:
+    """List all files in a directory"""
+    try:
+        return [f.absolute() for f in Path(directory).iterdir() if f.is_file()]
+    
+    except Exception as e:
+        return [f"Error: {str(e)}"]
+
+@mcp.tool()
+def read_file(file_path: str) -> str:
+    """Read contents of a file"""
+    try:
+        with open(file_path, 'r') as f:
+            return f.read()
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+@mcp.tool()
+def write_file(file_path: str, content: str) -> str:
+    """Write content to a file"""
+    try:
+        with open(file_path, 'w') as f:
+            f.write(content)
+            return f"File written successfully to  {f.name}"
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+@mcp.tool()
+def create_directory(directory: str) -> str:
+    """Create a new directory"""
+    try:
+        Path(directory).mkdir(parents=True, exist_ok=True)
+        return "Directory created successfully"
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+@mcp.tool()
+def delete_file(file_path: str) -> str:
+    """Delete a file"""
+    try:
+        Path(file_path).unlink()
+        return "File deleted successfully"
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+if __name__ == "__main__": 
+    mcp.run()</code></pre>
+
+  <h2>Step 7: Creating a Stdio Client for the Database Server</h2>
+  <p>
+    Copilot Chat is one client. You can also write your own. I want you to do that next, so you
+    see exactly how a Python program talks to an MCP server.
+  </p>
+  <p>
+    Every client in this lab is a single <code>Client</code> object. For stdio, you pass
+    <code>stdio_client(StdioServerParameters(...))</code> into <code>Client</code>, then enter
+    <code>async with</code>. That opens the connection and negotiates for you. After that you call
+    <code>list_tools()</code> and <code>call_tool()</code>. See
+    <a href="https://py.sdk.modelcontextprotocol.io/client/transports/" target="_blank" rel="noopener">Client transports</a>
+    if you want the full list of options.
+  </p>
+  <p>
+    Save the code below as <code>04-DatabaseServerClient.py</code>.
+    Run it from the same course venv.
+  </p>
+
+  <pre><code>from mcp import Client, StdioServerParameters
+from mcp.client.stdio import stdio_client
+import asyncio
+
+# StdioServerParameters is configuration only — always wrap with stdio_client(...)
+server_params = StdioServerParameters(
+    command="python",  # Executable
+    args=["03-DatabaseServer.py"],  # Server script
+    env=None,  # Pass API keys here if needed; the child does not inherit your full env
+)
+
+
+async def run():
+    # Client takes the transport; async with opens the connection
+    async with Client(stdio_client(server_params)) as client:
+        # List available tools
+        tools = await client.list_tools()
+        print("Available tools:", [tool.name for tool in tools.tools])
+
+        db_path = "c:\\database\\fintech.db"
+
+        # call_tool returns CallToolResult — prefer structured_content for application code
+        tables = await client.call_tool("list_tables", {"db_path": db_path})
+        print("Tables in database:", tables.structured_content)
+
+        schema = await client.call_tool("get_table_schema", {
+            "db_path": db_path,
+            "table_name": "customers"
+        })
+        print("Table schema for customers:", schema.structured_content)
+
+        results = await client.call_tool("execute_query", {
+            "db_path": db_path,
+            "query": "SELECT * FROM customers LIMIT 5"
+        })
+        print("First 5 customers:", results.structured_content)
+
+if __name__ == "__main__":
+    asyncio.run(run())</code></pre>
+
+  <p>
+    Run it from the folder where your scripts live:
+  </p>
+
+  <pre><code>python 04-DatabaseServerClient.py</code></pre>
+
+  <p>
+    This client starts <code>DatabaseServer</code>, connects to <code>fintech.db</code>, lists tables,
+    fetches the schema of <code>customers</code>, and prints the first 5 rows.
+  </p>
+
+  <div class="note">
+    <strong>In-memory client (no subprocess).</strong><br />
+    When you are testing, you can skip launching a child process. Pass the server object itself:
+    <code>async with Client(mcp) as client:</code>.
+    Same <code>list_tools</code> / <code>call_tool</code> API &mdash; no port, no bytes on a wire.
+  </div>
+
+  <h2>Step 8: Creating a Database Server with Streamable HTTP</h2>
+  <p>
+    Stdio is great when the client starts the server as a child process. When the client and server
+    live in different processes (or on different machines), you serve MCP over HTTP instead.
+    <strong>Streamable HTTP</strong> is the HTTP transport to use for new work.
+    The older HTTP+SSE transport is deprecated in the MCP spec, so we will not use it here.
+  </p>
+  <p>
+    Name the server with <code>MCPServer(...)</code>.
+    Pass <code>transport</code>, <code>port</code>, <code>stateless_http</code>, and
+    <code>json_response</code> to <code>mcp.run()</code>.
+    Save this as <code>07-DatabaseServerStreamableHTTP.py</code>.
+  </p>
+
+  <pre><code>from mcp.server import MCPServer
+import sqlite3
+from typing import List, Dict, Any
+from pathlib import Path
+
+# Name the server here
+mcp = MCPServer("DatabaseServerStreamable")
+
+# Other run() options (examples):
+# mcp.run(transport="streamable-http", stateless_http=True)  # streaming responses
+# mcp.run(transport="streamable-http")  # Stateful with session persistence
+
+@mcp.tool()
+def list_tables(db_path: str) -> List[str]:
+    """List all tables in the database"""
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = [row[0] for row in cursor.fetchall()]
+        conn.close()
+        return tables
+    except Exception as e:
+        return [f"Error listing tables: {str(e)}"]
+
+@mcp.tool()
+def get_table_schema(db_path: str, table_name: str) -> str:
+    """Get schema information for a specific table as a CREATE TABLE string"""
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT sql FROM sqlite_master WHERE type='table' AND name=?;",
+            (table_name,),
+        )
+        row = cursor.fetchone()
+        conn.close()
+        if row and row[0]:
+            return row[0]
+        return f"Table '{table_name}' not found"
+    except Exception as e:
+        return f"Error getting schema: {str(e)}"
+
+@mcp.tool()
+def execute_query(db_path: str, query: str) -> List[Dict[str, Any]]:
+    """Execute a SQL query and return results"""
+    try:
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(query)
+        results = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return results
+    except Exception as e:
+        return [{"error": f"Error executing query: {str(e)}"}]
+
+if __name__ == "__main__":
+    mcp.run(
+        transport="streamable-http",
+        port=8000,
+        stateless_http=True,
+        json_response=True,
+    )</code></pre>
+
+  <p>
+    Start it from a terminal in your course venv:
+  </p>
+
+  <pre><code>python 07-DatabaseServerStreamableHTTP.py</code></pre>
+
+  <p>
+    The server listens at <code>http://localhost:8000/mcp</code> and exposes the same tools over
+    Streamable HTTP with JSON responses.
+  </p>
+
+  <h2>Step 9: Creating a Streamable HTTP Client</h2>
+  <p>
+    Pass a URL string to <code>Client</code> and you get Streamable HTTP automatically.
+    You only need <code>streamable_http_client</code> yourself if you want custom headers,
+    auth, or timeouts (then build an <code>httpx2.AsyncClient</code> and wrap it).
+    Save this as <code>08-DatabaseStreamableHTTPClient.py</code>.
+  </p>
+
+  <pre><code>from mcp import Client
+import asyncio
+
+
+async def run():
+    # A URL string uses Streamable HTTP
+    async with Client("http://localhost:8000/mcp") as client:
+        tools = await client.list_tools()
+        print(f"Available tools: {[tool.name for tool in tools.tools]}")
+
+        db_path = "c:\\database\\fintech.db"
+
+        tables = await client.call_tool("list_tables", {"db_path": db_path})
+        print("Tables in database:", tables.structured_content)
+
+        schema = await client.call_tool("get_table_schema", {
+            "db_path": db_path,
+            "table_name": "customers"
+        })
+        print("Table schema for customers:", schema.structured_content)
+
+        results = await client.call_tool("execute_query", {
+            "db_path": db_path,
+            "query": "SELECT * FROM customers LIMIT 5"
+        })
+        print("First 5 customers:", results.structured_content)
+
+
+if __name__ == "__main__":
+    asyncio.run(run())</code></pre>
+
+  <div class="note">
+    <strong>Custom HTTP client (auth / headers / timeouts).</strong>
+    Build your own <code>httpx2.AsyncClient</code> and pass it to
+    <code>streamable_http_client(url, http_client=...)</code>, then
+    <code>Client(transport)</code>. Headers, timeouts, and redirects all live on the httpx client.
+  </div>
+
+  <pre><code>import httpx2
+from mcp import Client
+from mcp.client.streamable_http import streamable_http_client
+import asyncio
+
+
+async def run():
+    async with httpx2.AsyncClient(
+        headers={"Authorization": "Bearer ..."},
+        timeout=httpx2.Timeout(30.0, read=300.0),
+        follow_redirects=True,
+    ) as http_client:
+        transport = streamable_http_client(
+            "http://localhost:8000/mcp",
+            http_client=http_client,
+        )
+        async with Client(transport) as client:
+            tools = await client.list_tools()
+            print([tool.name for tool in tools.tools])
+
+
+if __name__ == "__main__":
+    asyncio.run(run())</code></pre>
+
+  <p>
+    Keep <code>07-DatabaseServerStreamableHTTP.py</code> running.
+    In a second terminal (same course venv), run:
+  </p>
+
+  <pre><code>python 08-DatabaseStreamableHTTPClient.py</code></pre>
+
+  <p>
+    The client connects to the Streamable HTTP server, lists available tools, lists tables, shows the schema for
+    the <code>customers</code> table, and fetches the first 5 rows from <code>fintech.db</code>.
+  </p>
+
+  <h2>Step 10: Integrating MCP Database Server with LangChain</h2>
+  <p>
+    Stay in the same course venv. LangChain talks MCP through
+    <code>langchain.mcp.MCPAdapter</code> (requires <code>langchain[mcp] &gt;= 1.4.0</code>,
+    built on FastMCP 4). That extra sits next to the MCP SDK you already installed.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task – Install langchain[mcp]</div>
+    <p>
+      In the same venv, install the MCP extra. If you previously installed
+      <code>langchain-mcp-adapters</code>, uninstall it first so it cannot pin MCP 1.x:
+    </p>
+  </div>
+
+  <pre><code>pip uninstall langchain-mcp-adapters
+pip install "langchain[mcp]"</code></pre>
+
+  <div class="note">
+    <strong><code>MCPAdapter</code> replaces <code>MultiServerMCPClient</code>.</strong><br />
+    Discover tools with <code>await adapter.list_tools()</code> inside
+    <code>async with MCPAdapter(...)</code>, then pass those tools to
+    <code>create_agent</code>. Transport is inferred from the target you pass &mdash; you do not
+    set a <code>transport</code> key. The tools hold the client, so the agent stays usable after
+    the context exits. In this lab we keep <code>ainvoke</code> inside the same
+    <code>async with</code> so the script stays simple.
+    Official reference:
+    <a href="https://docs.langchain.com/oss/python/langchain/mcp" target="_blank" rel="noopener">LangChain MCP</a>.
+    The <code>langchain.mcp</code> namespace is in beta.
+  </div>
+
+  <p>
+    Create a LangChain agent that uses <code>DatabaseServer</code> over stdio.
+    Because the server script and LangChain share one Python, a <code>Path</code> target is enough.
+    Save it as <code>09-LangChainDatabaseAgent.py</code>.
+  </p>
+
+  <pre><code>from pathlib import Path
+from langchain.agents import create_agent
+from langchain.mcp import MCPAdapter
+import asyncio
+
+# Ensure you have OPENAI_API_KEY set in your environment
+# os.environ["OPENAI_API_KEY"] = "your-api-key-here"
+
+
+async def main():
+    # Path = local script over stdio (must be Path, not a string)
+    async with MCPAdapter(Path("03-DatabaseServer.py")) as adapter:
+        tools = await adapter.list_tools()
+        print(f"Available tools: {[tool.name for tool in tools]}")
+
+        agent = create_agent("openai:gpt-4o-mini", tools)
+
+        print("\n" + "=" * 80)
+        print("List all tables in the fintech database")
+        print("=" * 80)
+        result = await agent.ainvoke({
+            "messages": [{
+                "role": "user",
+                "content": "List all tables in the database located at c:\\database\\fintech.db",
+            }]
+        })
+        print(f"\nResult: {result['messages'][-1].content}\n")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())</code></pre>
+
+  <div class="note">
+    <strong>A single <code>Path</code> or URL is not prefixed.</strong>
+    You will see tool names such as <code>list_tables</code> and <code>execute_query</code>.
+    With an <code>MCPConfig</code> of several servers, FastMCP names each tool
+    <code>{server}_{tool}</code> (for example <code>database_list_tables</code>) so names never collide.
+  </div>
+
+  <p>
+    Before you run the script:
+  </p>
+  <ol>
+    <li>Set your OpenAI API key as an environment variable: <code>set OPENAI_API_KEY=your-api-key-here</code></li>
+    <li>Run it from the folder that contains <code>03-DatabaseServer.py</code>.</li>
+    <li>Ensure <code>fintech.db</code> is present at <code>c:\database\fintech.db</code>.</li>
+  </ol>
+
+  <p>
+    Run it:
+  </p>
+
+  <pre><code>python 09-LangChainDatabaseAgent.py</code></pre>
+
+  <p>
+    Watch the agent pick MCP tools and answer questions about the database. That reasoning trail is
+    the point of this step &mdash; you should see it call <code>list_tables</code> (or similar)
+    instead of inventing an answer.
+  </p>
+
+  <h3>Optional: other MCPAdapter targets</h3>
+  <p>
+    The only thing that changes between a remote URL, a local script, and several servers is the
+    target you hand <code>MCPAdapter</code>. You do not need these for the exercise above.
+    Use them when the shape of your app is different.
+  </p>
+
+  <pre><code>from pathlib import Path
+from langchain.mcp import MCPAdapter
+
+# 1) Streamable HTTP — a string must be an http(s) URL
+http = MCPAdapter("http://localhost:8000/mcp")
+
+# 2) Local script over stdio — must be Path, not a string
+#    (a string that looks like a file is rejected on purpose)
+stdio = MCPAdapter(Path("03-DatabaseServer.py"))
+
+# 3) Several servers in one adapter — mix stdio and HTTP
+config = {
+    "mcpServers": {
+        "filesystem": {
+            "command": "python",
+            "args": [r"C:\path\to\your\workspace\01-FileSystemServer.py"],
+        },
+        "database": {"url": "http://localhost:8000/mcp"},
+    }
+}
+fleet = MCPAdapter(config)</code></pre>
+
+  <div class="note">
+    <strong>When to use which</strong>
+    <ul>
+      <li><strong>URL string</strong> &mdash; the server is already running over Streamable HTTP (Step 8).</li>
+      <li><strong><code>Path</code></strong> &mdash; a local <code>.py</code> script over stdio. This is the form used in the example above.</li>
+      <li><strong><code>MCPConfig</code></strong> &mdash; a specific command, env vars, or more than one server. Step 11 uses this.</li>
+    </ul>
+  </div>
+
+  <p>
+    Need a bearer token on an HTTP server? Build a FastMCP client and pass it in. Skip this unless
+    the server actually requires auth:
+  </p>
+
+  <pre><code>from fastmcp.client import Client
+from langchain.mcp import MCPAdapter
+
+async def load_tools(url: str, token: str):
+    async with MCPAdapter(Client(url, auth=token)) as adapter:
+        return await adapter.list_tools()</code></pre>
+
+  <h2>Step 11: Using Multiple MCP Servers with LangChain</h2>
+  <p>
+    Stay in the same course venv. One agent can talk to more
+    than one MCP server. Pass an <code>MCPConfig</code> dict to <code>MCPAdapter</code> and it
+    collects tools from all of them, so the same agent can query the database <em>and</em> write a file.
+  </p>
+  <p>
+    The example below connects to <code>FileSystemServer</code> (stdio) and
+    <code>DatabaseServerStreamable</code> (Streamable HTTP &mdash; you start that server yourself
+    in another terminal). Save it as <code>10-LangChainMultiServerAgent.py</code>.
+  </p>
+
+  <pre><code>from langchain.agents import create_agent
+from langchain.mcp import MCPAdapter
+import asyncio
+
+# Ensure you have OPENAI_API_KEY set in your environment
+# os.environ["OPENAI_API_KEY"] = "your-api-key-here"
+
+config = {
+    "mcpServers": {
+        "filesystem": {
+            "command": "python",
+            "args": [r"C:\path\to\your\workspace\01-FileSystemServer.py"],
+        },
+        "database": {
+            # Make sure DatabaseServerStreamableHTTP is running on port 8000
+            "url": "http://localhost:8000/mcp",
+        },
+    }
+}
+
+
+async def main():
+    async with MCPAdapter(config) as adapter:
+        tools = await adapter.list_tools()
+        print(f"Available tools: {[tool.name for tool in tools]}")
+
+        agent = create_agent("openai:gpt-4o-mini", tools)
+
+        print("\n" + "=" * 80)
+        print("Multi-Server Task: Query database and save results to file")
+        print("=" * 80)
+        result = await agent.ainvoke({
+            "messages": [{"role": "user", "content": """First, get the first 5 customers from the customers table in c:\\database\\fintech.db.
+        Then, write these results to a file named c:\\database\\top5_customers.txt.
+        Finally, read and show me the contents of the file."""}]
+        })
+        print(f"\nResult: {result['messages'][-1].content}\n")
+
+        print("\n" + "=" * 80)
+        print("File System Task: List files in database directory")
+        print("=" * 80)
+        result = await agent.ainvoke({
+            "messages": [{"role": "user", "content": "List all files in the c:\\database directory"}]
+        })
+        print(f"\nResult: {result['messages'][-1].content}\n")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())</code></pre>
+
+  <p>
+    Before you run this one:
+  </p>
+  <ol>
+    <li>Ensure your OpenAI API key is set: <code>set OPENAI_API_KEY=your-api-key-here</code></li>
+    <li>Update the <code>args</code> path to your <code>01-FileSystemServer.py</code> file.</li>
+    <li>In a <strong>separate</strong> terminal, start the Streamable HTTP server:
+      <pre><code>python 07-DatabaseServerStreamableHTTP.py</code></pre>
+    </li>
+    <li>Ensure <code>fintech.db</code> is present at <code>c:\database\fintech.db</code>.</li>
+  </ol>
+
+  <p>
+    Then run the multi-server agent:
+  </p>
+
+  <pre><code>python 10-LangChainMultiServerAgent.py</code></pre>
+
+  <p>
+    You should see the agent query the database, write the result to a file, then read that file
+    back &mdash; all through one agent that has tools from two servers
+    (<code>database_*</code> and <code>filesystem_*</code>).
+  </p>
+
+  <h2>Step 12: Using a Gmail MCP Server with LangChain</h2>
+  <p>
+    Stay in the same course venv. You do not have
+    to write every MCP server yourself. In this last step I want you to connect to an existing
+    Gmail server and give its tools to a LangChain agent, so the agent can
+    <strong>create a draft</strong> and <strong>send an email</strong> in natural language.
+  </p>
+  <p>
+    Prefer Google's official Gmail MCP server when your project is in the
+    <a href="https://developers.google.com/workspace/gmail/api/guides/configure-mcp-server" target="_blank" rel="noopener">Workspace Developer Preview Program</a>.
+    That server lives at <code>https://gmailmcp.googleapis.com/mcp/v1</code>.
+    It searches mail and creates drafts with <code>create_draft</code>; you open Gmail and send the draft yourself.
+    This step uses a local Gmail MCP server so you can both create a draft and send a message
+    with the same Google Cloud OAuth file from the Gmail lab. It runs with <code>npx</code>.
+  </p>
+  <p>
+    We will use <strong><code>@gongrzhe/server-gmail-autoauth-mcp</code></strong>.
+    It talks to the Gmail API. You will not write SMTP code.
+  </p>
+
+  <div class="note">
+    <strong>This server can send real email.</strong><br />
+    The second demo in this step sends a message from your Gmail account.
+    Set the recipient to <em>your own address</em>. Do not point the agent at someone else's inbox,
+    and do not ask it to delete mail. The package also exposes <code>delete_email</code>; leave that alone.
+  </div>
+
+  <h3>Part A — Install Node.js (required for the Gmail MCP server)</h3>
+  <p>
+    This Gmail server is an npm package, so you need Node.js (v18 or later) on your machine.
+  </p>
+  <ol>
+    <li>Open <strong>nodejs.org</strong> in your browser and download the <em>LTS</em> installer for Windows.</li>
+    <li>Run the installer and accept all defaults — make sure <em>"Add to PATH"</em> is ticked.</li>
+    <li>Open a <strong>new</strong> terminal and verify the installation:</li>
+  </ol>
+
+  <pre><code>node --version   # should print v18.x or higher
+npx --version    # bundled with Node — prints a version number</code></pre>
+
+  <div class="note">
+    <strong>What is <code>npx</code>?</strong><br />
+    <code>npx</code> ships with Node.js. It runs an npm package on demand without installing it
+    globally. The <code>-y</code> flag skips the confirmation prompt, which you need when Python
+    launches the MCP server for you.
+  </div>
+
+  <h3>Part B — Create Gmail OAuth credentials</h3>
+  <p>
+    The Gmail MCP server signs in as you. If you already created
+    <code>credentials.json</code> in the Gmail agent lab, reuse that file and skip to Part B2.
+    Otherwise follow the same Google Cloud steps here.
+  </p>
+
+  <h3>Part B1 — Google Cloud project, Gmail API, and OAuth client</h3>
+
+  <p><strong>1. Create a Google Cloud project</strong></p>
+  <ol>
+    <li>Visit <a href="https://console.cloud.google.com" target="_blank" rel="noopener">https://console.cloud.google.com</a>.</li>
+    <li>Click the project dropdown at the top, then <strong>New Project</strong>.</li>
+    <li>Name it something like <code>gmail-langchain-agent</code> and click <strong>Create</strong>.</li>
+    <li>When the project exists, select it.</li>
+  </ol>
+
+  <p><strong>2. Enable the Gmail API</strong></p>
+  <ol>
+    <li>Go to <strong>APIs &amp; Services</strong> &gt; <strong>Library</strong>.</li>
+    <li>Search for <strong>Gmail API</strong>.</li>
+    <li>Open <strong>Gmail API</strong> and click <strong>Enable</strong>.</li>
+  </ol>
+
+  <p><strong>3. Set up the OAuth consent screen</strong></p>
+  <ol>
+    <li>Go to <strong>APIs &amp; Services</strong> &gt; <strong>OAuth consent screen</strong>.</li>
+    <li>Click <strong>Get started</strong>.</li>
+    <li>App name: <code>Gmail Agent</code>. User support email: your email. Click <strong>Next</strong>.</li>
+    <li>User type: <strong>External</strong>. Click <strong>Next</strong>.</li>
+    <li>Contact information: your email. Click <strong>Next</strong>, then <strong>Create</strong>.</li>
+  </ol>
+
+  <p><strong>4. Add the scopes this MCP server requests</strong></p>
+  <p>
+    On the first sign-in, the server asks Google for
+    <code>https://www.googleapis.com/auth/gmail.modify</code> (read, draft, and send)
+    and <code>https://www.googleapis.com/auth/gmail.settings.basic</code>.
+    Add both on the consent screen so the browser prompt can grant them:
+  </p>
+  <ol>
+    <li>Open <strong>Data Access</strong> (on older consoles this is <strong>Scopes</strong> on the OAuth consent screen).</li>
+    <li>Click <strong>Add or remove scopes</strong>.</li>
+    <li>
+      Under <strong>Manually add scopes</strong>, paste these two lines, then add them:
+      <ul>
+        <li><code>https://www.googleapis.com/auth/gmail.modify</code></li>
+        <li><code>https://www.googleapis.com/auth/gmail.settings.basic</code></li>
+      </ul>
+    </li>
+    <li>Click <strong>Update</strong>, then <strong>Save</strong>.</li>
+  </ol>
+
+  <p><strong>5. Create the OAuth client and download it</strong></p>
+  <ol>
+    <li>Go to <strong>APIs &amp; Services</strong> &gt; <strong>Credentials</strong>.</li>
+    <li>Click <strong>Create Credentials</strong> &gt; <strong>OAuth client ID</strong>.</li>
+    <li>Application type: <strong>Desktop app</strong>. Name it <code>Gmail Agent Desktop</code>. Click <strong>Create</strong>.</li>
+    <li>Click the download button next to that client and save the file as <code>credentials.json</code> in your project folder.</li>
+  </ol>
+
+  <p><strong>6. Add yourself as a test user</strong></p>
+  <ol>
+    <li>Go to <strong>APIs &amp; Services</strong> &gt; <strong>OAuth consent screen</strong>.</li>
+    <li>Open <strong>Audience</strong>.</li>
+    <li>Click <strong>Add users</strong> and add the Gmail address you will sign in with.</li>
+  </ol>
+
+  <div class="note">
+    <strong>If sign-in says <code>redirect_uri_mismatch</code>.</strong><br />
+    This server finishes OAuth at <code>http://localhost:3000/oauth2callback</code>.
+    A Desktop client usually accepts that. If Google rejects it, create a second OAuth client
+    of type <strong>Web application</strong>, add
+    <code>http://localhost:3000/oauth2callback</code> under <strong>Authorized redirect URIs</strong>,
+    download that JSON, and use it as <code>credentials.json</code> instead.
+    Port 3000 must be free while you run the auth command.
+  </div>
+
+  <h3>Part B2 — Put the key file where the server looks</h3>
+  <p>
+    The server reads <code>gcp-oauth.keys.json</code> from your user folder, under <code>.gmail-mcp</code>.
+    Copy the file you just downloaded (or the one from the Gmail lab):
+  </p>
+
+  <pre><code># Windows Command Prompt
+mkdir %USERPROFILE%\.gmail-mcp
+copy credentials.json %USERPROFILE%\.gmail-mcp\gcp-oauth.keys.json
+
+# Windows PowerShell
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.gmail-mcp"
+Copy-Item .\credentials.json "$env:USERPROFILE\.gmail-mcp\gcp-oauth.keys.json"</code></pre>
+
+  <div class="note">
+    <strong>Keep that file secret.</strong> It is an OAuth client for your Google project.
+    Do not commit <code>credentials.json</code>, <code>gcp-oauth.keys.json</code>, or the token
+    the next command writes. Treat them the way you treat a password.
+  </div>
+
+  <h3>Part B3 — Sign in once</h3>
+  <p>
+    Run the auth command. A browser window opens. Sign in with the Gmail account you added as a
+    test user and allow the requested access. The server saves a token as
+    <code>%USERPROFILE%\.gmail-mcp\credentials.json</code>. You only do this once.
+  </p>
+
+  <pre><code>npx -y @gongrzhe/server-gmail-autoauth-mcp auth</code></pre>
+
+  <p>
+    When it finishes, you should see a success message and the browser can be closed.
+    Later runs reuse the saved token and refresh it when it expires.
+  </p>
+
+  <h3>Part B4 — Verify the server starts (optional smoke test)</h3>
+  <p>
+    Start the server by hand once, to confirm the package downloads and the token is accepted:
+  </p>
+
+  <pre><code>npx -y @gongrzhe/server-gmail-autoauth-mcp</code></pre>
+
+  <p>
+    The server waits for MCP messages on stdin. If you see no error, the package and the token
+    are working. Press <code>Ctrl+C</code> to stop. Leave it stopped before you run the Python agent
+    &mdash; the agent starts its own copy.
+  </p>
+
+  <h3>Part C — Gmail MCP tools you will use</h3>
+  <p>
+    The package exposes many Gmail tools. For this lab, stay with draft and send.
+    You will call them in natural language. The agent receives them with a
+    <code>gmail_</code> prefix, because that is the name of the server in the config below.
+  </p>
+  <ul>
+    <li><code>draft_email</code> — create a draft. Arguments include <code>to</code> (a list of addresses), <code>subject</code>, and <code>body</code>. Nothing is sent.</li>
+    <li><code>send_email</code> — send immediately, with the same <code>to</code>, <code>subject</code>, and <code>body</code> arguments.</li>
+    <li><code>search_emails</code> — search with Gmail query syntax, for example <code>from:me newer_than:1d</code>.</li>
+    <li><code>read_email</code> — read one message by its id.</li>
+    <li><code>list_email_labels</code> — list labels such as INBOX and DRAFT.</li>
+  </ul>
+  <p>
+    Optional fields on draft and send include <code>cc</code>, <code>bcc</code>, <code>htmlBody</code>,
+    and <code>mimeType</code> (<code>text/plain</code>, <code>text/html</code>, or
+    <code>multipart/alternative</code>).
+  </p>
+
+  <div class="note">
+    <strong>Official server, when you have preview access.</strong><br />
+    Point an MCP client at <code>https://gmailmcp.googleapis.com/mcp/v1</code>
+    (Streamable HTTP, OAuth). Ask it to draft, for example
+    <em>&ldquo;Draft an email to me saying the lab is done.&rdquo;</em>
+    It calls <code>create_draft</code>. Open Gmail and send the draft yourself.
+    Setup for that hosted server is in Google's
+    <a href="https://developers.google.com/workspace/gmail/api/guides/configure-mcp-server" target="_blank" rel="noopener">configure the Gmail MCP server</a> guide.
+    The Python agent below uses the local <code>npx</code> server, which can draft and send
+    with the credentials from this step.
+  </div>
+
+  <h3>Part D — Gmail demo agent — <code>11-GmailAgent.py</code></h3>
+  <p>
+    Save the script below as <code>11-GmailAgent.py</code>. Change <code>MY_EMAIL</code> to your
+    own Gmail address before you run it. The first prompt creates a draft. The second sends a
+    short message to that same address.
+  </p>
+
+  <pre><code>import asyncio
+from pathlib import Path
+
+from dotenv import load_dotenv
+from langchain.agents import create_agent
+from langchain.mcp import MCPAdapter
+
+load_dotenv(Path(__file__).parent / ".env")
+
+# Send only to yourself in this lab.
+MY_EMAIL = "you@gmail.com"
+
+DEMOS = [
+    (
+        "Create a draft",
+        f"Create a Gmail draft, do not send it. "
+        f"To: {MY_EMAIL}. "
+        f"Subject: MCP draft test. "
+        f"Body: This draft was created by my LangChain agent through the Gmail MCP server. "
+        f"After the draft exists, tell me it was created and was not sent.",
+    ),
+    (
+        "Send an email",
+        f"Send an email now. "
+        f"To: {MY_EMAIL}. "
+        f"Subject: MCP send test. "
+        f"Body: This message was sent by my LangChain agent through the Gmail MCP server. "
+        f"After it is sent, tell me it was sent.",
+    ),
+]
+
+
+async def main():
+    config = {
+        "mcpServers": {
+            "gmail": {
+                "command": "npx",
+                "args": ["-y", "@gongrzhe/server-gmail-autoauth-mcp"],
+            },
+        }
+    }
+
+    async with MCPAdapter(config) as adapter:
+        tools = await adapter.list_tools()
+        print(f"Gmail MCP tools loaded ({len(tools)}): {[t.name for t in tools]}\n")
+
+        agent = create_agent("openai:gpt-4o-mini", tools)
+
+        for title, prompt in DEMOS:
+            print("=" * 70)
+            print(title)
+            print("=" * 70)
+            result = await agent.ainvoke(
+                {"messages": [{"role": "user", "content": prompt}]}
+            )
+            print(result["messages"][-1].content)
+            print()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())</code></pre>
+
+  <h3>Part E — Running the agent</h3>
+  <p>
+    Put <code>OPENAI_API_KEY</code> in your <code>.env</code> file (or set it as an environment
+    variable). Finish Part B3 so the Gmail token exists. Then run:
+  </p>
+
+  <pre><code>cd mcpdemo
+pip install -r requirements.txt   # first time only
+python 11-GmailAgent.py</code></pre>
+
+  <p>
+    The first run, <code>npx</code> downloads the Gmail MCP package (a few seconds). Later runs
+    use the local npm cache. Each demo prints which tool the agent chose &mdash; typically
+    <code>gmail_draft_email</code> and then <code>gmail_send_email</code>
+    (the <code>gmail_</code> prefix comes from the MCPConfig key).
+  </p>
+  <p>
+    Open Gmail when the script finishes. You should see a draft with subject
+    <strong>MCP draft test</strong> and a sent message with subject <strong>MCP send test</strong>
+    in Sent (and in your inbox, because you mailed yourself).
+  </p>
+
+  <div class="note">
+    <strong>Tools invoked in each demo.</strong>
+    <table style="width:100%;border-collapse:collapse;font-size:0.9rem;margin-top:0.5rem;">
+      <thead>
+        <tr style="background:#e0f2fe;">
+          <th style="text-align:left;padding:0.4rem 0.6rem;border:1px solid #bae6fd;">Demo</th>
+          <th style="text-align:left;padding:0.4rem 0.6rem;border:1px solid #bae6fd;">Typical tool</th>
+          <th style="text-align:left;padding:0.4rem 0.6rem;border:1px solid #bae6fd;">Example arguments</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:0.4rem 0.6rem;border:1px solid #bae6fd;">Create a draft</td>
+          <td style="padding:0.4rem 0.6rem;border:1px solid #bae6fd;"><code>gmail_draft_email</code></td>
+          <td style="padding:0.4rem 0.6rem;border:1px solid #bae6fd;"><code>to=["you@gmail.com"], subject="MCP draft test", body="..."</code></td>
+        </tr>
+        <tr style="background:#f8fafc;">
+          <td style="padding:0.4rem 0.6rem;border:1px solid #bae6fd;">Send an email</td>
+          <td style="padding:0.4rem 0.6rem;border:1px solid #bae6fd;"><code>gmail_send_email</code></td>
+          <td style="padding:0.4rem 0.6rem;border:1px solid #bae6fd;"><code>to=["you@gmail.com"], subject="MCP send test", body="..."</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Part F — Optional: Register with VS Code</h3>
+  <p>
+    You can also use this Gmail server in Copilot Chat without writing Python.
+    Finish the sign-in in Part B3 first. Then add this entry to <code>.vscode/mcp.json</code>:
+  </p>
+
+  <pre><code>{
+  "servers": {
+    "gmail": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@gongrzhe/server-gmail-autoauth-mcp"]
+    }
+  }
+}</code></pre>
+
+  <p>
+    Save, click <strong>Start</strong> on the server in <code>mcp.json</code>, open Copilot Chat in
+    <strong>Agent</strong> mode, and try prompts such as
+    <em>&ldquo;Create a Gmail draft to me with subject Lab check&rdquo;</em> or
+    <em>&ldquo;Send me a one-line email that says hello from MCP&rdquo;</em>.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Exercise — Try more Gmail MCP tools</div>
+    <ul>
+      <li>Ask the agent: <em>"Search my mailbox for the MCP send test message and show the subject and date."</em></li>
+      <li>Ask: <em>"List my Gmail labels."</em></li>
+      <li>Ask: <em>"Create a draft to me with subject Meeting notes and a two-sentence body. Do not send it."</em> Then open Drafts in Gmail and send it yourself.</li>
+      <li>Change <code>MY_EMAIL</code> only if the other address is an account you control.</li>
+    </ul>
+  </div>
+
+  <h2>Wrap-Up</h2>
+  <p>That is everything I wanted you to build in this lab. You:</p>
+  <ul>
+    <li>Installed the MCP SDK and created a Database MCP server with <code>MCPServer</code>.</li>
+    <li>Registered <code>DatabaseServer</code> in VS Code <code>mcp.json</code> and used Copilot Chat in Agent mode.</li>
+    <li>Created a File System MCP server.</li>
+    <li>Talked to the database server over stdio and Streamable HTTP using the same <code>Client</code> API.</li>
+    <li>Learned three ways to construct a client: <code>Client(mcp)</code> is in-memory,
+      <code>Client("http://...")</code> is Streamable HTTP, and wrappers such as
+      <code>stdio_client(...)</code> still go into that same <code>Client</code>.</li>
+    <li>Gave MCP tools to LangChain agents with <code>MCPAdapter</code>, including a multi-server agent.</li>
+    <li>Connected LangChain to a Gmail MCP server and used it to create a draft and send an email
+      in natural language, with the same Google Cloud OAuth credentials as the Gmail lab.</li>
+  </ul>
+  <p>
+    Take these same patterns into your own projects. When you need the reference, start here:
+    <a href="https://py.sdk.modelcontextprotocol.io/" target="_blank" rel="noopener">MCP Python SDK</a>,
+    <a href="https://py.sdk.modelcontextprotocol.io/client/transports/" target="_blank" rel="noopener">Client transports</a>,
+    and
+    <a href="https://docs.langchain.com/oss/python/langchain/mcp" target="_blank" rel="noopener">LangChain MCPAdapter</a>.
+  </p>
+
+</main>
+
+<script>
+  const COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+  </svg>`;
+  const CHECK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="20 6 9 17 4 12"></polyline>
+  </svg>`;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("pre").forEach(pre => {
+      // Wrap pre in a relative-positioned div
+      const wrapper = document.createElement("div");
+      wrapper.className = "code-wrapper";
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      // Create button
+      const btn = document.createElement("button");
+      btn.className = "copy-btn";
+      btn.innerHTML = COPY_ICON + " Copy";
+      wrapper.appendChild(btn);
+
+      btn.addEventListener("click", () => {
+        const code = pre.querySelector("code");
+        const text = (code ? code.innerText : pre.innerText).trimEnd();
+        navigator.clipboard.writeText(text).then(() => {
+          btn.innerHTML = CHECK_ICON + " Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.innerHTML = COPY_ICON + " Copy";
+            btn.classList.remove("copied");
+          }, 2000);
+        }).catch(() => {
+          // Fallback for older browsers
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          btn.innerHTML = CHECK_ICON + " Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.innerHTML = COPY_ICON + " Copy";
+            btn.classList.remove("copied");
+          }, 2000);
+        });
+      });
+    });
+  });
+</script>
+</body>
+</html>
+
+

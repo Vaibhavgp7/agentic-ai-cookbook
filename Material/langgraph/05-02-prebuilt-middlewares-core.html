@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LangChain Prebuilt Middleware – Hands-on Guide</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #eef2ff 0, #f9fafb 40%, #fdf2ff 100%);
+      color: #111827;
+    }
+    main {
+      max-width: 960px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(148, 163, 184, 0.12);
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: #0f172a;
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: #0f172a;
+    }
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 1.75rem;
+      color: #0f172a;
+    }
+    h4 {
+      font-size: 1.05rem;
+      margin-top: 1.25rem;
+      color: #0f172a;
+    }
+    p {
+      margin: 0.5rem 0 0.75rem;
+    }
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.95em;
+      color: #1d4ed8;
+    }
+    pre {
+      background: linear-gradient(145deg, #020617, #020617 50%, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+    .note, .exercise, .warning {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(191, 219, 254, 0.9);
+    }
+    .exercise {
+      border-left: 4px solid #16a34a;
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+    .warning {
+      border-left: 4px solid #d97706;
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: rgba(217, 119, 6, 0.4);
+    }
+    .exercise-title {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.8rem;
+      color: #166534;
+    }
+    ol, ul {
+      padding-left: 1.4rem;
+    }
+    li {
+      margin: 0.25rem 0;
+    }
+    .sample-output-title {
+      font-weight: 600;
+      margin-top: 0.75rem;
+      margin-bottom: 0.25rem;
+      color: #0f172a;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      padding: 0.55rem 0.75rem;
+      text-align: left;
+    }
+    th {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>LangChain Prebuilt Middleware – Hands-on Lab</h1>
+
+  <div class="note">
+    <strong>About this guide</strong>
+    <p>
+      This lab continues from <code>05using-agents-part2.html</code>, where you learned custom middleware patterns
+      (logging, dynamic models, error handling, guardrails). Here we focus on <strong>production-ready prebuilt middleware</strong>
+      from LangChain.
+    </p>
+    <p>
+      Official reference:
+      <a href="https://docs.langchain.com/oss/python/langchain/middleware/built-in" target="_blank" rel="noopener">
+        Prebuilt middleware documentation
+      </a>
+    </p>
+    <p>
+      Each section below pairs one middleware with a <strong>practical use case</strong> and the tools that make that scenario realistic.
+      Copy each code block into a notebook cell and run it in order.
+    </p>
+  </div>
+
+  <h2>Overview: Middleware Covered in This Lab</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Middleware</th>
+        <th>What it adds</th>
+        <th>Use case in this lab</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>ToolRetryMiddleware</code></td>
+        <td>Automatic retries with exponential backoff on failed tool calls</td>
+        <td>Resilient financial data agent calling a flaky stock-price API</td>
+      </tr>
+      <tr>
+        <td><code>ShellToolMiddleware</code></td>
+        <td>A persistent shell session for running commands</td>
+        <td>Build, test, and deploy a real <code>uv</code> Python project via shell commands</td>
+      </tr>
+      <tr>
+        <td><code>TodoListMiddleware</code></td>
+        <td>A <code>write_todos</code> planning tool and task-tracking prompts</td>
+        <td>LLM-planned release checklist — each todo executed via shell on <code>invoice-utils</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>1. Shared Setup</h2>
+  <p>
+    Import the core libraries, load environment variables, and initialize a chat model.
+    Most examples reuse <code>TavilySearch</code> for web research (same as Part 2).
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Run the setup cell below before working through the middleware sections.</p>
+  </div>
+
+  <pre><code>import warnings
+warnings.filterwarnings("ignore")
+
+from pathlib import Path
+from dotenv import load_dotenv
+from langchain.agents import create_agent
+from langchain.chat_models import init_chat_model
+from langchain_core.tools import tool
+from langchain_tavily import TavilySearch
+
+load_dotenv()
+
+model = init_chat_model("gpt-4.1-mini")
+
+tavily_tool = TavilySearch(
+    max_results=3,
+    search_depth="advanced",
+    include_answer=True,
+)
+
+print("Setup complete — model and Tavily tool ready.")</code></pre>
+
+  <div class="note">
+    <strong>Dependencies</strong>
+    <ul>
+      <li><code>pip install langchain langchain-openai langchain-tavily python-dotenv</code></li>
+      <li>For Section 3 (Shell): install <strong>uv</strong> — follow the steps at the start of Section 3, then confirm with <code>uv --version</code>.</li>
+      <li>For Section 3 (Shell) on Windows: install <strong>Git Bash</strong> — follow the steps in Section 3.4.</li>
+      <li>Set <code>OPENAI_API_KEY</code> and <code>TAVILY_API_KEY</code> in your <code>.env</code> file.</li>
+    </ul>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2>2. Tool Retry Middleware</h2>
+
+  <h3>2.1 What It Does</h3>
+  <p>
+    <code>ToolRetryMiddleware</code> wraps tool execution and automatically retries when a tool raises an exception.
+    It supports exponential backoff, jitter, per-tool filtering, and custom failure handling — ideal for
+    <strong>transient network failures</strong> on external APIs.
+  </p>
+
+  <h3>2.2 Use Case: Resilient Financial Research Agent</h3>
+  <p>
+    A financial analyst agent needs live stock quotes from an external market-data API.
+    That API occasionally returns connection errors during peak hours.
+    Without retry middleware, a single timeout kills the agent run; with it, the agent transparently retries
+    and completes the user's request.
+  </p>
+  <p><strong>Relevant tools:</strong></p>
+  <ul>
+    <li><code>fetch_stock_quote</code> — simulates a flaky REST API (fails twice, then succeeds).</li>
+    <li><code>tavily_tool</code> — web search for company news (does not need retry).</li>
+  </ul>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Define the flaky stock-quote tool, attach <code>ToolRetryMiddleware</code> only to that tool,
+      and create the agent.
+    </p>
+  </div>
+
+  <pre><code>from langchain.agents.middleware import ToolRetryMiddleware
+
+# Demo counter — first two calls fail to simulate transient API failures
+_quote_attempts = 0
+
+@tool
+def fetch_stock_quote(symbol: str) -&gt; str:
+    """Fetch the latest stock price for a ticker symbol (e.g. AAPL, MSFT).
+
+    Use this when the user asks for current or live stock prices.
+    """
+    global _quote_attempts
+    ticker = symbol.upper().strip()
+    _quote_attempts += 1
+    attempt = _quote_attempts
+
+    # Demo: first two calls fail with a transient network error
+    if attempt &lt;= 2:
+        raise ConnectionError(
+            f"Market data API unreachable for {ticker} (attempt {attempt}/3). "
+            "This is a simulated transient failure."
+        )
+
+    return (
+        f"{ticker}: $187.42 (+1.3%) — last updated at market close. "
+        f"Succeeded on attempt {attempt}."
+    )
+
+retry_agent = create_agent(
+    model=model,
+    tools=[fetch_stock_quote, tavily_tool],
+    middleware=[
+        ToolRetryMiddleware(
+            max_retries=3,
+            initial_delay=0.5,
+            backoff_factor=2.0,
+            jitter=True,
+            tools=["fetch_stock_quote"],          # Only retry the flaky API tool
+            retry_on=(ConnectionError, TimeoutError),
+            on_failure="return_message",          # Let the model explain failure if all retries fail
+        ),
+    ],
+    system_prompt=(
+        "You are a financial research assistant. "
+        "Use fetch_stock_quote for live stock prices and Tavily search for recent company news. "
+        "If a tool reports repeated failures, explain the situation clearly."
+    ),
+)
+
+print("Tool-retry agent ready.")</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Invoke the agent with a request that needs both a stock quote and news.
+      Watch the console — the middleware retries the failing API call before succeeding.
+    </p>
+  </div>
+
+  <pre><code>print("=== Tool Retry Demo: Flaky Stock API ===")
+
+result = retry_agent.invoke({
+    "messages": [{
+        "role": "user",
+        "content": (
+            "What is Apple's current stock price, and summarize one recent headline about Apple?"
+        ),
+    }]
+})
+
+print("\nFinal response:")
+print(result["messages"][-1].content)</code></pre>
+
+  <div class="note">
+    <strong>Key configuration options</strong>
+    <ul>
+      <li><code>max_retries</code> — retry attempts after the initial call (default: 2).</li>
+      <li><code>tools</code> — restrict retries to specific tools; omit to retry all tools.</li>
+      <li><code>retry_on</code> — exception types or a callable filter.</li>
+      <li><code>on_failure</code> — <code>"return_message"</code>, <code>"raise"</code>, or a custom formatter.</li>
+    </ul>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2>3. Shell Tool Middleware</h2>
+
+  <h3>Install uv</h3>
+  <p>
+    This section uses <strong>uv</strong> (a fast Python package manager) to sync dependencies, run tests, and build
+    the sample project. Install it on your machine <em>before</em> you run the cells below.
+  </p>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>Install uv, then close and reopen your terminal (and Jupyter / Cursor) so <code>PATH</code> is updated.</p>
+  </div>
+
+  <p><strong>Windows (PowerShell):</strong></p>
+  <pre><code>powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"</code></pre>
+
+  <p><strong>macOS / Linux:</strong></p>
+  <pre><code>curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
+
+  <p>Confirm the install:</p>
+  <pre><code>uv --version</code></pre>
+
+  <p>
+    Official guide:
+    <a href="https://docs.astral.sh/uv/getting-started/installation/" target="_blank" rel="noopener">
+      uv installation docs
+    </a>
+  </p>
+
+  <h3>3.1 What It Does</h3>
+  <p>
+    <code>ShellToolMiddleware</code> exposes a <strong>persistent shell session</strong> to the agent.
+    Commands run sequentially in the same environment (variables and working directory persist),
+    which is ideal for development automation, testing, and DevOps workflows.
+  </p>
+
+  <div class="warning">
+    <strong>Security</strong>
+    Shell middleware executes real commands on the host (by default via <code>HostExecutionPolicy</code>).
+    Use only in trusted environments. For production, consider <code>DockerExecutionPolicy</code> or
+    <code>CodexSandboxExecutionPolicy</code> for isolation.
+  </div>
+
+  <h3>3.2 Prebuilt Project: <code>invoice-utils</code></h3>
+  <p>
+    I provide an <code>invoice-utils</code> folder — a small Python package with source under
+    <code>src/</code>, pytest tests, and a <code>pyproject.toml</code> managed by <strong>uv</strong>
+    (sync, test, build, deploy). Place the folder in your notebook working directory before running this section.
+  </p>
+
+  <pre><code>invoice-utils/
+├── pyproject.toml          # uv / hatchling project config
+├── README.md
+├── src/invoice_utils/
+│   ├── __init__.py
+│   ├── calculator.py       # line_total, apply_discount
+│   └── formatter.py        # format_currency
+├── tests/
+│   ├── test_calculator.py
+│   └── test_formatter.py
+└── scripts/
+    ├── deploy.sh           # simulated staging deploy (Linux/macOS)
+    └── deploy.ps1          # same script for Windows PowerShell</code></pre>
+
+  <p>
+    There are <strong>no custom @tool functions</strong> in this demo — the agent relies entirely on the
+    shell tool injected by the middleware and runs real <code>uv</code> commands against this folder.
+  </p>
+
+  <h3>3.3 Use Case: Release Readiness with uv</h3>
+  <p>
+    A team lead asks: "Is <code>invoice-utils</code> ready to ship?"
+    The agent should sync dependencies, run tests, build the package, and run the deploy script —
+    the same steps a human engineer would run locally before a release.
+  </p>
+  <p><strong>Typical shell commands the agent discovers:</strong></p>
+  <ul>
+    <li><code>uv --version</code> — confirm uv is available.</li>
+    <li><code>uv sync --extra dev</code> — install the package and dev dependencies (pytest).</li>
+    <li><code>uv run pytest -v</code> — run the test suite.</li>
+    <li><code>uv build</code> — produce wheel/sdist artifacts in <code>dist/</code>.</li>
+    <li><code>bash scripts/deploy.sh</code> — simulated staging deploy on Linux/macOS (fails if <code>dist/</code> is missing).</li>
+    <li><code>powershell -File scripts/deploy.ps1</code> — same deploy script on Windows.</li>
+  </ul>
+
+  <div class="warning">
+    <strong>Shell middleware on Windows</strong>
+    <p>
+      <code>ShellToolMiddleware</code> defaults to <code>/bin/bash</code>, which does not exist on Windows.
+      Install <strong>Git Bash</strong> first (Section 3.4). This lab points the middleware at
+      <code>C:\Program Files\Git\bin\bash.exe</code>.
+    </p>
+  </div>
+
+  <h3>3.4 Windows shell helpers</h3>
+
+  <p>
+    <code>ShellToolMiddleware</code> spawns a persistent shell subprocess. On Windows, pass Git Bash
+    directly as <code>shell_command</code>. The helper below prepends <code>~/.local/bin</code> to
+    <code>PATH</code> so <code>uv</code> is visible inside that shell session.
+  </p>
+
+  <h4>Download and install Git Bash</h4>
+  <p>
+    Git Bash is included with <strong>Git for Windows</strong>. You need it once on this machine before
+    the shell-middleware cells will work.
+  </p>
+  <ol>
+    <li>
+      Download the installer from the official page:
+      <a href="https://git-scm.com/download/win" target="_blank" rel="noopener">https://git-scm.com/download/win</a>.
+      The 64-bit setup should start automatically. If it does not, click
+      <strong>64-bit Git for Windows Setup</strong> on that page.
+    </li>
+    <li>Run the downloaded <code>.exe</code>.</li>
+    <li>
+      Click <strong>Next</strong> through the wizard and keep the defaults. In particular:
+      <ul>
+        <li>Leave the install location as <code>C:\Program Files\Git</code> (do not change this folder).</li>
+        <li>Leave <strong>Git Bash</strong> selected.</li>
+      </ul>
+    </li>
+    <li>Click <strong>Install</strong>, then <strong>Finish</strong>.</li>
+    <li>
+      Close and reopen your terminal, Jupyter notebook, and Cursor / VS Code so the new install is picked up.
+    </li>
+  </ol>
+  <p>
+    After a default install, Git Bash is at <code>C:\Program Files\Git\bin\bash.exe</code>.
+    This lab assumes that exact path.
+  </p>
+  <p>Optional check in PowerShell:</p>
+  <pre><code>&amp; "C:\Program Files\Git\bin\bash.exe" --version</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      After Git Bash is installed, copy the helper cell below into your notebook and run it.
+      It puts <code>uv</code> on the shell <code>PATH</code>.
+    </p>
+  </div>
+
+  <pre><code>import os
+
+def _shell_environment() -&gt; dict[str, str]:
+    env = dict(os.environ)
+    local_bin = Path.home() / ".local" / "bin"
+    env["PATH"] = str(local_bin) + os.pathsep + env.get("PATH", "")
+    return env</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Copy the <code>invoice-utils</code> folder into your working directory, then point the shell middleware
+      at it and create an agent with <strong>no extra tools</strong> — only the auto-injected shell tool.
+    </p>
+  </div>
+
+  <pre><code>from langchain.agents.middleware import ShellToolMiddleware, HostExecutionPolicy
+
+# Folder name I provide — adjust only if you renamed it
+PROJECT_DIR = "invoice-utils"
+project_root = Path(PROJECT_DIR).resolve()
+
+assert (project_root / "pyproject.toml").exists(), (
+    f"'{PROJECT_DIR}' not found in the current working directory. "
+    "Place the invoice-utils folder next to your notebook and try again."
+)
+
+print(f"Using project: {project_root}")
+
+shell_agent = create_agent(
+    model=model,
+    tools=[],  # shell only — no custom tools
+    middleware=[
+        ShellToolMiddleware(
+            workspace_root=str(project_root),
+            execution_policy=HostExecutionPolicy(),
+            shell_command=r"C:\Program Files\Git\bin\bash.exe",
+            env=_shell_environment(),
+            startup_commands=[
+                "uv --version",
+                "ls -la",
+            ],
+        ),
+    ],
+    system_prompt=(
+        "You are a release engineer with shell access to a Python project that uses uv. "
+        "The project root is your working directory. "
+        "Use the shell tool to run uv commands: sync dependencies, run pytest, build the package, "
+        "and execute scripts/deploy.sh. "
+        "Report pass/fail for each step and a final release-ready verdict."
+    ),
+)
+
+print("Shell-tool agent ready (uv + invoice-utils).")</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Ask the agent to validate release readiness end-to-end using uv and the deploy script.
+    </p>
+  </div>
+
+  <pre><code>print("=== Shell Tool Demo: uv Build &amp; Deploy Pipeline ===")
+
+result = shell_agent.invoke({
+    "messages": [{
+        "role": "user",
+        "content": (
+            "Check whether invoice-utils v0.1.0 is ready to release. "
+            "1) Sync dev dependencies with uv, "
+            "2) run all tests with pytest, "
+            "3) build the package, "
+            "4) run scripts/deploy.sh, "
+            "5) summarize pass/fail for each step and give a final go/no-go."
+        ),
+    }]
+})
+
+print("\nFinal response:")
+print(result["messages"][-1].content)</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task (optional)</div>
+    <p>
+      Break a test on purpose, then ask the agent to run the pipeline again and explain what failed.
+    </p>
+  </div>
+
+  <pre><code># Optional: introduce a failing test to see the agent diagnose pytest output
+# (Revert the change afterward.)
+# (project_root / "tests/test_calculator.py").read_text()  # inspect first
+
+print("=== Shell Tool Demo: Diagnose Test Failure ===")
+# After manually breaking a test assertion, re-run:
+# result = shell_agent.invoke({"messages": [{"role": "user", "content": "Run uv run pytest and tell me what failed."}]})</code></pre>
+
+  <div class="note">
+    <strong>Why shell instead of custom tools?</strong>
+    Real DevOps work is open-ended — flags change, scripts evolve, and engineers run ad-hoc commands.
+    Wrapping every operation in a <code>@tool</code> function does not scale.
+    Shell middleware lets the agent use the same CLI you would (<code>uv</code>, <code>pytest</code>, <code>bash</code>)
+    while keeping a persistent session so earlier steps (like <code>uv sync</code>) benefit later ones (like <code>uv run pytest</code>).
+  </div>
+
+  <!-- ============================================================ -->
+  <h2>4. To-Do List Middleware</h2>
+
+  <h3>4.1 What It Does</h3>
+  <p>
+    <code>TodoListMiddleware</code> equips agents with a built-in <code>write_todos</code> tool and system prompts
+    that encourage structured task planning. The agent can create, update, and mark tasks complete —
+    essential for <strong>multi-step workflows</strong> where progress visibility matters.
+  </p>
+
+  <h3>4.2 Use Case: Planned Release with Shell Execution</h3>
+  <p>
+    Section 3 ran shell commands directly against <code>invoice-utils</code>. Here we add
+    <code>TodoListMiddleware</code> on top of the same shell setup — but with <strong>no extra custom tools</strong>.
+    You give a high-level goal; the LLM decides what todos to create, then runs the appropriate
+    <code>uv</code> / shell commands for each one.
+  </p>
+  <p><strong>Tools available to the agent (all from middleware):</strong></p>
+  <ul>
+    <li><code>write_todos</code> — plan and track steps (added by <code>TodoListMiddleware</code>).</li>
+    <li>Shell tool — execute commands like <code>uv sync</code>, <code>uv run pytest</code>, <code>uv build</code>, deploy scripts (added by <code>ShellToolMiddleware</code>).</li>
+  </ul>
+
+  <div class="note">
+    <strong>Section 3 vs Section 4</strong>
+    Section 3: you tell the agent exactly what commands to run.
+    Section 4: you describe the outcome — the agent plans its own todo list and picks the shell commands.
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Reuse the <code>invoice-utils</code> folder, <code>project_root</code>, and Windows shell helpers
+      from Section 3. Stack <code>TodoListMiddleware</code> with <code>ShellToolMiddleware</code> —
+      no custom <code>@tool</code> functions.
+    </p>
+  </div>
+
+  <pre><code>from langchain.agents.middleware import TodoListMiddleware, ShellToolMiddleware, HostExecutionPolicy
+
+todo_shell_agent = create_agent(
+    model=model,
+    tools=[],  # write_todos + shell only — no dummy tools
+    middleware=[
+        TodoListMiddleware(),
+        ShellToolMiddleware(
+            workspace_root=str(project_root),
+            execution_policy=HostExecutionPolicy(),
+            shell_command=r"C:\Program Files\Git\bin\bash.exe",
+            env=_shell_environment(),
+            startup_commands=["uv --version"],
+        ),
+    ],
+    system_prompt=(
+        "You are a release engineer with shell access to a uv-managed Python project. "
+        "When given a multi-step goal, first use write_todos to break the work into ordered steps — "
+        "you decide what steps are needed. "
+        "Execute each todo by running the appropriate shell commands (uv sync, uv run pytest, uv build, "
+        "deploy scripts, etc.). "
+        "Update todos as you progress and give a final pass/fail summary."
+    ),
+)
+
+print("Todo + shell agent ready.")</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task</div>
+    <p>
+      Give a high-level release goal — do <em>not</em> list individual commands.
+      Watch the agent create its own todo list, run shell commands for each item, and mark tasks complete.
+    </p>
+  </div>
+
+  <pre><code>print("=== To-Do List Demo: LLM-Planned Release ===")
+
+result = todo_shell_agent.invoke({
+    "messages": [{
+        "role": "user",
+        "content": (
+            "Prepare the invoice-utils package for a v0.1.0 release to staging. "
+            "Make sure everything is in good shape before we ship."
+        ),
+    }]
+})
+
+print("\nFinal response:")
+print(result["messages"][-1].content)
+
+# Inspect planning vs execution
+print("\n--- Tool calls in conversation ---")
+for msg in result["messages"]:
+    if hasattr(msg, "tool_calls") and msg.tool_calls:
+        for tc in msg.tool_calls:
+            print(f"  → {tc['name']}")</code></pre>
+
+  <div class="exercise">
+    <div class="exercise-title">Your Task (optional)</div>
+    <p>
+      Try a different open-ended prompt and compare the todos the agent chooses — e.g. onboarding a new developer
+      to the project, or investigating why a release might fail.
+    </p>
+  </div>
+
+  <pre><code>print("=== To-Do List Demo: Agent Chooses Its Own Steps ===")
+
+result = todo_shell_agent.invoke({
+    "messages": [{
+        "role": "user",
+        "content": (
+            "A new developer just cloned invoice-utils. "
+            "Walk them through getting the project running and verifying it works."
+        ),
+    }]
+})
+
+print("\nFinal response:")
+print(result["messages"][-1].content)</code></pre>
+
+  <div class="note">
+    <strong>Why combine todos with shell?</strong>
+    Release and onboarding workflows have many steps in a strict order.
+    <code>write_todos</code> keeps the agent from skipping steps or losing track mid-run, while shell commands
+    do the real work — no need to wrap every CLI operation in a custom tool.
+  </div>
+
+  <!-- ============================================================ -->
+  <h2>5. Combining Middleware (Optional)</h2>
+  <p>
+    Section 4 already stacks <code>TodoListMiddleware</code> with <code>ShellToolMiddleware</code>.
+    In production you often add more layers. Order matters — middleware runs in the order listed.
+    A fuller stack for a release-engineer agent might also include:
+  </p>
+  <ul>
+    <li><code>ShellToolMiddleware</code> — run tests, builds, and deploy scripts.</li>
+    <li><code>TodoListMiddleware</code> — plan multi-step release work.</li>
+    <li><code>ToolRetryMiddleware</code> — retry flaky CI API calls.</li>
+  </ul>
+
+  <pre><code># Example: stacked middleware for a release engineer (illustrative)
+from langchain.agents.middleware import (
+    ToolRetryMiddleware,
+    TodoListMiddleware,
+    ShellToolMiddleware,
+    HostExecutionPolicy,
+)
+
+release_assistant = create_agent(
+    model=model,
+    tools=[],  # shell middleware injects its own tool
+    middleware=[
+        ShellToolMiddleware(
+            workspace_root=str(project_root),
+            execution_policy=HostExecutionPolicy(),
+            shell_command=r"C:\Program Files\Git\bin\bash.exe",
+            env=_shell_environment(),
+        ),
+        TodoListMiddleware(),
+        ToolRetryMiddleware(max_retries=2, retry_on=(ConnectionError,)),
+    ],
+    system_prompt=(
+        "You are a senior release engineer. "
+        "Run uv/pytest via shell and plan multi-step work with todos."
+    ),
+)
+
+print("Combined middleware agent configured.")</code></pre>
+
+  <h2>6. Summary</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Middleware</th>
+        <th>Best for</th>
+        <th>Tools in this lab</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Tool Retry</td>
+        <td>Transient API / network failures</td>
+        <td><code>fetch_stock_quote</code>, <code>tavily_tool</code></td>
+      </tr>
+      <tr>
+        <td>Shell Tool</td>
+        <td>Real CLI workflows (uv sync, test, build, deploy)</td>
+        <td>Shell tool only — <code>invoice-utils/</code> folder</td>
+      </tr>
+      <tr>
+        <td>To-Do List</td>
+        <td>LLM-planned multi-step workflows</td>
+        <td><code>write_todos</code> + shell on <code>invoice-utils/</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>Next steps</strong>
+    <p>
+      Return to <code>05using-agents-part2.html</code> for custom middleware patterns, or explore
+      <code>06-00-summarization-middleware.html</code> for long-conversation context management.
+      Full API details for every option are in the
+      <a href="https://docs.langchain.com/oss/python/langchain/middleware/built-in" target="_blank" rel="noopener">
+        official prebuilt middleware docs
+      </a>.
+    </p>
+  </div>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Two Agents, One After the Other</title>
+  <style>
+    :root {
+      --bg-gradient-start: #eef2ff;
+      --bg-gradient-mid: #f9fafb;
+      --bg-gradient-end: #fdf2ff;
+      --text-primary: #111827;
+      --text-heading: #0f172a;
+      --accent-blue: #2563eb;
+      --accent-green: #16a34a;
+      --accent-amber: #d97706;
+      --accent-red: #dc2626;
+      --card-bg: #ffffff;
+      --border-subtle: rgba(148, 163, 184, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, var(--bg-gradient-start) 0, var(--bg-gradient-mid) 40%, var(--bg-gradient-end) 100%);
+      color: var(--text-primary);
+    }
+
+    main {
+      max-width: 980px;
+      margin: 2rem auto 3rem;
+      padding: 2.5rem 2rem 3rem;
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08), 0 0 0 1px var(--border-subtle);
+    }
+
+    h1 {
+      font-size: 2.05rem;
+      margin: 0 0 1rem;
+      letter-spacing: -0.03em;
+      text-align: center;
+      color: var(--text-heading);
+      padding: 1rem 1.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12), 0 0 0 1px var(--border-subtle);
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-top: 2.25rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37, 99, 235, 0.18);
+      padding-bottom: 0.35rem;
+      color: var(--text-heading);
+    }
+
+    h3 { font-size: 1.18rem; margin-top: 1.75rem; color: var(--text-heading); }
+
+    p { margin: 0.5rem 0 0.75rem; }
+
+    a { color: var(--accent-blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    code {
+      font-family: "Fira Code", Menlo, Monaco, Consolas, "Courier New", monospace;
+      background-color: #f3f4ff;
+      padding: 0.12rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.93em;
+      color: #1d4ed8;
+    }
+
+    pre {
+      background: linear-gradient(145deg, #020617, #0b1120);
+      color: #e5e7eb;
+      padding: 1rem 1.1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.86rem;
+      line-height: 1.5;
+      margin: 0.75rem 0 1.5rem;
+      border: 1px solid rgba(15, 23, 42, 0.6);
+    }
+
+    pre code { background: none; padding: 0; color: inherit; }
+
+    .note, .exercise, .warning, .tip, .student-edit {
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+    }
+
+    .note {
+      border-left: 4px solid var(--accent-blue);
+      background: radial-gradient(circle at top left, #eff6ff 0, #e0f2fe 45%, #eef2ff 100%);
+      border-color: rgba(37, 99, 235, 0.4);
+    }
+
+    .exercise {
+      border-left: 4px solid var(--accent-green);
+      background: linear-gradient(135deg, #ecfdf3, #f0fdf4);
+      border-color: rgba(22, 163, 74, 0.4);
+    }
+
+    .warning {
+      border-left: 4px solid var(--accent-red);
+      background: linear-gradient(135deg, #fef2f2, #fee2e2);
+      border-color: rgba(220, 38, 38, 0.4);
+    }
+
+    .tip {
+      border-left: 4px solid var(--accent-amber);
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: rgba(217, 119, 6, 0.4);
+    }
+
+    .student-edit {
+      border-left: 4px solid var(--accent-green);
+      background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+      border-color: rgba(22, 163, 74, 0.45);
+    }
+
+    .exercise-title, .label {
+      font-weight: 650;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.78rem;
+    }
+
+    .exercise-title { color: #166534; }
+    .label-amber { color: #92400e; }
+    .label-green { color: #166534; }
+
+    ol, ul { padding-left: 1.4rem; }
+    li { margin: 0.3rem 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.93rem;
+    }
+
+    table th {
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      color: var(--text-heading);
+      font-weight: 600;
+      padding: 0.7rem 0.9rem;
+      text-align: left;
+      border-bottom: 2px solid var(--accent-blue);
+    }
+
+    table td {
+      padding: 0.7rem 0.9rem;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+
+    table tr:hover { background-color: #f8fafc; }
+
+    .subtitle {
+      text-align: center;
+      color: #64748b;
+      margin-bottom: 1.5rem;
+      font-size: 1.05rem;
+    }
+
+    .file-tree {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      margin: 0.75rem 0 1.5rem;
+      font-family: "Fira Code", Menlo, Monaco, Consolas, monospace;
+      font-size: 0.86rem;
+      white-space: pre;
+      overflow-x: auto;
+      line-height: 1.55;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Two Agents, One After the Other</h1>
+  <p class="subtitle">The same Suraksha chat. The coverage officer still writes the opinion. A second AI worker then writes the short note a senior person will read.</p>
+
+  <div class="note">
+    <strong>How to follow this page.</strong>
+    You already have one coverage officer agent, two lookups (Policy Record and Earlier Claims), and a chat. Do the steps in order. Copy every code block exactly. The code has already been tested. Do not rewrite it. After a step, check what you should see before you continue. New words are explained in parentheses the first time they appear.
+  </div>
+
+  <h2>The story, in plain words</h2>
+  <p>You are still the <strong>claims officer</strong> (the human at the keyboard). The <strong>coverage officer agent</strong> (the AI worker that reads the file) already writes a <strong>coverage opinion</strong> (a first reading of whether the contract seems to cover the accident). That opinion is <strong>preliminary</strong> (a first draft) and <strong>non-binding</strong> (it does not pay anyone). A <strong>senior examiner</strong> (a more senior human, not in this chat) is still the only person who can pay or refuse.</p>
+  <p>Right now one agent does two kinds of writing. It opens the records, decides what the contract sentences mean, and also prepares the note a senior examiner would pick up. At a real desk those are two people in a line. The first person finishes the opinion. The second person starts only after that opinion exists, and writes a short <strong>brief</strong> (a one-page summary for the meeting). The second person does not walk back to the records room.</p>
+  <p>We will add that second person as a second agent, the <strong>examiner brief agent</strong>. It is not the senior examiner. It only writes the brief. The <strong>crew</strong> (the team of agents and tasks, run together) will run two tasks, in order. CrewAI calls that order a <strong>sequential</strong> process (the first task runs to the end, then the second task starts). The second task is handed the first task's answer through a field named <code>context</code> (the list of earlier answers this task is allowed to read).</p>
+
+  <div class="note">
+    <strong>The brief writer is not the senior examiner.</strong>
+    You are still the human at the chat. The coverage officer agent reads the file. The examiner brief agent turns that opinion into a short brief. A senior examiner, a person, still decides every payment and every denial. Neither agent may say the claim is paid or rejected.
+  </div>
+
+  <h2>Who does which task</h2>
+  <table>
+    <thead>
+      <tr><th></th><th>Coverage officer agent</th><th>Examiner brief agent</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>File</td><td><code>agents/coverage_officer.jsonc</code>, already written</td><td><code>agents/examiner_brief.jsonc</code>, new</td></tr>
+      <tr><td>Task</td><td><code>coverage_opinion</code>, first in the crew</td><td><code>examiner_brief</code>, second in the crew</td></tr>
+      <tr><td>Tools</td><td>Policy Record on the agent. Earlier Claims on this task only.</td><td>None. This agent reads the finished opinion.</td></tr>
+      <tr><td>What it writes</td><td>The preliminary coverage opinion</td><td>A short brief for the senior examiner</td></tr>
+    </tbody>
+  </table>
+  <p><code>context</code> on a task is the list of finished tasks that this task is allowed to read. On the brief task that list is <code>["coverage_opinion"]</code>. The brief agent therefore sees the opinion, and it does not see the database. Leave <code>allow_delegation</code> false on both agents. They do not hand the claim to each other. The crew is what puts them in order.</p>
+
+  <div class="warning">
+    <strong>Keep the coverage task first.</strong>
+    <code>desk.py</code> adds Earlier Claims to <code>_crew.tasks[0]</code>, which is the first task in <code>crew.jsonc</code>. That first task must stay <code>coverage_opinion</code>. If the brief task is first, the garage tool lands on the wrong task.
+  </div>
+
+  <h2>Where you are working</h2>
+  <p>Stay inside <code>suraksha_claims_desk</code>. If the chat is running, stop it with Ctrl+C. We will start it again after the crew has two tasks. On Windows PowerShell, set this once in that terminal:</p>
+  <pre><code>$env:PYTHONUTF8="1"</code></pre>
+
+  <h2>Step 1: Describe the examiner brief agent</h2>
+  <p>In this step you write the second worker's job description. Create <code>agents/examiner_brief.jsonc</code> and paste the block below exactly. There is no <code>tools</code> list. With no tools, this agent cannot open <code>suraksha_claims.db</code>. Its whole world is the coverage opinion the crew passes in. When this step works, that file exists beside <code>coverage_officer.jsonc</code>.</p>
+  <pre><code>{
+  "role": "Examiner brief writer for claim {claim_id}",
+  "goal": "Turn the finished coverage opinion for {claim_id} into a short brief a senior examiner can read. Use only that opinion.",
+  "backstory": "You prepare the note a senior examiner reads before a claims meeting at Suraksha General Insurance in India. You do not open policy tables or older-claim tables. You do not add a clause, an amount, a date, or an older claim that is absent from the coverage opinion. You never mark a claim paid or declined. The senior examiner decides every payment and every denial.",
+  "llm": "openai/gpt-4o-mini",
+  "settings": {
+    "verbose": true,
+    "allow_delegation": false,
+    "max_iter": 6
+  }
+}</code></pre>
+
+  <h2>Step 2: Give the crew a second task</h2>
+  <div class="student-edit">
+    <div class="label label-green">Replace crew.jsonc</div>
+    <p>In this step you add the second job to the crew. Replace the whole of <code>crew.jsonc</code> with the block below. The coverage officer agent and the coverage task stay as they are. Two things are new: <code>examiner_brief</code> in the agent list, and a second task whose <code>context</code> names <code>coverage_opinion</code>. <code>"process": "sequential"</code> is the line that runs those tasks one after the other, in the order written here. Keep the coverage task first. <code>desk.py</code> attaches Earlier Claims to the first task, so if you put the brief first, the garage lookup lands on the wrong job. Save the file.</p>
+  </div>
+  <pre><code>{
+  "name": "Suraksha Coverage Desk",
+  "agents": ["coverage_officer", "examiner_brief"],
+  "tasks": [
+    {
+      "name": "coverage_opinion",
+      "description": "A claims officer asked: {officer_question}\n\nClaim id: {claim_id}\n\nAccident story:\n{narrative}\n\nThe policy wording, the papers on file, and any older claims are NOT in this message.\n\nBefore you answer:\n1. Call Policy Record with this claim id.\n2. If the story names a garage, call Earlier Claims with that garage name.\n\nThen write a preliminary coverage opinion.\n1. Restate what the accident story says.\n2. Quote the clause or circular that matters, using only the Policy Record text.\n3. If you opened Earlier Claims, say what that record contained.\n4. Say whether cover looks available, partly unclear, or should be referred.\n5. If Policy Record shows a simple complete claim under the simple-pay limit, say a rules check could settle it. Do not mark it paid.\n6. If the question asks for a fact that is in neither the story nor the records, say it is not on file.\n\nCONSTRAINTS:\n- Amounts in INR.\n- Do not say the claim is paid, approved, or declined.\n- Label the opinion PRELIMINARY and NON-BINDING.",
+      "expected_output": "Markdown, no code fences, with these sections:\n- File as stated\n- Records opened\n- Clause that matters\n- Preliminary opinion\n- Not on file\n- What a human examiner should check next\nMax 450 words. First line must be: PRELIMINARY COVERAGE OPINION — NON-BINDING.",
+      "agent": "coverage_officer",
+      "markdown": true,
+      "output_file": "output/coverage_{claim_id}.md"
+    },
+    {
+      "name": "examiner_brief",
+      "description": "A claims officer asked: {officer_question}\n\nClaim id: {claim_id}\n\nYou are given the finished coverage opinion in your context. That opinion is the only source you may use.\n\nWrite a brief for the senior examiner.\n1. In one short paragraph, restate what the opinion says happened.\n2. Quote the clause or circular the opinion relied on. If the opinion names none, say so.\n3. Say whether the opinion treats cover as available, partly unclear, or a referral.\n4. List three checks the senior examiner should do next. Take them from the opinion. Do not invent a new investigation.\n5. If the opinion says a fact is not on file, repeat that it is not on file.\n\nCONSTRAINTS:\n- Do not call a tool. You have none.\n- Do not add facts that are absent from the coverage opinion.\n- Amounts in INR, and only amounts the opinion already stated.\n- Do not say the claim is paid, approved, or declined.\n- Label the brief NON-BINDING.",
+      "expected_output": "Markdown, no code fences, with these sections:\n- What the opinion says\n- Clause the opinion used\n- Reading\n- Three checks for the examiner\n- Still not on file\nMax 250 words. First line must be: EXAMINER BRIEF — NON-BINDING.",
+      "agent": "examiner_brief",
+      "context": ["coverage_opinion"],
+      "markdown": true,
+      "output_file": "output/brief_{claim_id}.md"
+    }
+  ],
+  "process": "sequential",
+  "verbose": true,
+  "tracing": true,
+  "inputs": {
+    "claim_id": "CLM-20481",
+    "officer_question": "Is this loss covered?",
+    "narrative": "Date of loss: 12 March 2026. Place: Outer Ring Road, Hyderabad. The customer's report: the insured says a truck swerved and struck the rear of the private car. Police report: the insured struck a divider. Garage estimate from Highway Motors: INR 185000 for side and rear panels. A typical surveyor figure for this description is about INR 75000. Driving licence expired on 28 February 2026, which is 12 days before the accident."
+  }
+}</code></pre>
+
+  <div class="tip">
+    <div class="label label-amber">How the names connect</div>
+    <p><code>"agents"</code> loads both agent files. Each task has its own <code>"agent"</code>. <code>"context": ["coverage_opinion"]</code> works only because the first task is named <code>coverage_opinion</code> and is written above the brief task. CrewAI refuses a context name it has not seen yet. The coverage opinion is saved to <code>output/coverage_{claim_id}.md</code>. The brief is saved to <code>output/brief_{claim_id}.md</code>. <code>"tracing": true</code> records the run so you can open it afterwards. The steps for signing in and reading that record are after you have seen the crew run once.</p>
+  </div>
+
+  <h2>Step 3: Show both answers in the chat</h2>
+  <p>In this step you make the chat show both notes, not only the last one. Open <code>desk.py</code>. Leave the imports and <code>_get_crew</code> as they are. Earlier Claims must stay on the first task only. The brief agent has no tools, and we do not add any in Python.</p>
+  <p>After <code>kickoff</code>, <code>result.raw</code> is only the last task, which will now be the brief. The coverage opinion is still there, on <code>result.tasks_output</code>, one entry per task, in the order the crew ran them. Each entry has <code>.name</code> and <code>.raw</code>. Replace <code>respond</code> so the chat prints both.</p>
+  <div class="student-edit">
+    <div class="label label-green">Replace respond</div>
+    <p>Keep <code>_get_crew</code> and <code>claim_to_inputs</code>. Replace <code>respond</code> with this.</p>
+  </div>
+  <pre><code>def respond(user_message: str, claim: dict) -&gt; str:
+    """Run both tasks. The brief agent reads the coverage opinion, not the database."""
+    crew, defaults = _get_crew()
+    inputs = {**defaults, **claim_to_inputs(claim, user_message)}
+    result = crew.kickoff(inputs=inputs)
+    labels = {
+        "coverage_opinion": "Coverage opinion",
+        "examiner_brief": "Examiner brief",
+    }
+    parts = []
+    for task_output in result.tasks_output:
+        heading = labels.get(task_output.name, task_output.name or "Task")
+        parts.append(f"## {heading}\n\n{task_output.raw}")
+    return "\n\n".join(parts)</code></pre>
+  <p><code>app.py</code> stays as it is. It still only draws the page and calls <code>respond</code>. One question now waits for two tasks, so the first answer takes longer than before.</p>
+
+  <div class="warning">
+    <strong>Restart the chat after this change.</strong> The desk loads the crew once and keeps that copy. If the chat was already open, it still has the crew with one task. Stop it with Ctrl+C, then start it again.
+  </div>
+
+  <h2>Step 4: Run it from the terminal first</h2>
+  <p>In this step you watch the two workers in the terminal before you open the chat. Stay inside <code>suraksha_claims_desk</code>. This asks "Is this loss covered?" about CLM-20481. It takes longer than one agent did, because the second worker starts only after the first has finished.</p>
+  <pre><code>uv run python desk.py</code></pre>
+  <p>In the terminal you should see the coverage officer agent start, call Policy Record and Earlier Claims, finish, and only then see the examiner brief agent start. You should not see the brief agent call a tool. A <strong>referral</strong> (sending the file to a senior person instead of paying or rejecting it on the spot) is what the 12-day licence gap should be called.</p>
+  <p>Open <code>output/coverage_CLM-20481.md</code> and <code>output/brief_CLM-20481.md</code>. The opinion quotes Exclusion 4 and circular CL-17, mentions the 12-day lapse as a referral, mentions the older Highway Motors claims, and does not pay or reject the claim. The brief's first line is <code>EXAMINER BRIEF — NON-BINDING</code>. It repeats that referral and those older claims, and it does not add a clause the opinion never used. The opinion's Records opened section names Policy Record and Earlier Claims.</p>
+
+  <h2>Step 5: Ask the same questions in the chat</h2>
+  <p>In this step you ask in the browser. Each answer should have two headings, Coverage opinion and Examiner brief. Changing the claim in the sidebar starts a fresh chat. Wait for both headings before you judge the answer.</p>
+  <pre><code>uv run streamlit run app.py</code></pre>
+  <table>
+    <thead>
+      <tr><th>What to do</th><th>A good answer</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Select <strong>CLM-20481</strong>. Click <strong>Is this loss covered?</strong></td><td>The opinion starts <code>PRELIMINARY COVERAGE OPINION — NON-BINDING</code> and quotes Exclusion 4 and circular CL-17. The brief starts <code>EXAMINER BRIEF — NON-BINDING</code> and treats the 12-day lapse as a referral. Records opened names Policy Record and Earlier Claims. Neither part pays or rejects the claim.</td></tr>
+      <tr><td>Same claim. Ask <strong>What is the chassis number?</strong></td><td>Both parts say the chassis number is not on file. The brief does not invent one that the opinion refused to invent.</td></tr>
+      <tr><td>Select <strong>CLM-10044</strong>. Click <strong>Is this loss covered?</strong></td><td>The opinion says the police report is not on file, because that sentence is in the policy record. The brief repeats that gap. Records opened names Policy Record.</td></tr>
+      <tr><td>Select <strong>CLM-10021</strong>. Click <strong>Should we pay this claim now?</strong></td><td>The opinion says a rules check could settle this small complete file, and does not mark it paid. The brief says the same. Earlier Claims may report that City Shine Garage has no older claims. That empty result is correct.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Step 6: Sign in, then open the trace</h2>
+  <p>In this step you open a saved record of the run, so you can see who worked and which lookup ran after the terminal text has scrolled away. A <strong>trace</strong> (that saved record: which agent ran, which tool was called, and what each task wrote) is kept on CrewAI's site, at <a href="https://app.crewai.com">app.crewai.com</a>. You need a free account to see your own runs. Follow the small steps below in order. Use the terminal for the traced run, not the chat. The chat has no place to answer a yes-or-no question.</p>
+
+  <h3>Create the account and sign the terminal in</h3>
+  <ol>
+    <li>Open <a href="https://app.crewai.com">app.crewai.com</a> and create a free account. Use an email you can open. Stay logged in in that browser.</li>
+    <li>From <code>suraksha_claims_desk</code>, in the same PowerShell window where <code>PYTHONUTF8</code> is set, run:</li>
+  </ol>
+  <pre><code>crewai login</code></pre>
+  <ol start="3">
+    <li>The terminal prints a web address and a short code, and it tries to open that address in the browser. If the browser does not open, copy the address and open it yourself.</li>
+    <li>On that page, sign in with the account you just created, and enter the code from the terminal.</li>
+    <li>Leave the terminal alone until it says the sign-in succeeded. It may then say it is also signing in to a tool repository. If that second part prints a warning, your account sign-in still stands. Traces use the account sign-in.</li>
+  </ol>
+  <p>You sign in once on this computer. Later runs reuse it. <code>crewai logout</code> is how you sign the terminal out, if you ever need to.</p>
+
+  <h3>Confirm tracing is on</h3>
+  <p>In <code>crew.jsonc</code>, next to <code>"verbose": true</code>, the file from Step 2 has:</p>
+  <pre><code>"tracing": true</code></pre>
+  <p>That line tells this crew to record the run. Save the file if you added the line by hand. Then run:</p>
+  <pre><code>crewai traces enable</code></pre>
+  <p>That saves a yes on this computer, so later runs keep recording. Check with:</p>
+  <pre><code>crewai traces status</code></pre>
+  <p>You want the overall status to say enabled.</p>
+
+  <h3>Run the crew where you can answer a question</h3>
+  <p>Use the terminal, not the chat, for this first traced run. The chat has no place to answer a yes-or-no question.</p>
+  <pre><code>uv run python desk.py</code></pre>
+  <p>When the two tasks finish, the terminal may show a panel titled Execution Traces and ask:</p>
+  <pre><code>Share this execution trace with CrewAI? [y/N] (20s timeout):</code></pre>
+  <p>Type <code>y</code> and press Enter before those 20 seconds run out. Waiting, or typing <code>n</code>, throws the record away and nothing new appears on the site. The trace contains the accident story, the rows the tools returned, and both answers. That is acceptable here, because these claims are made up for class. Do not type a real customer's file into this crew while tracing is on.</p>
+  <p>If a green panel prints a link titled Execution Trace Generated, open that link. A first-run link of that kind expires in 24 hours. After you have signed in, the lasting copy is on your account, which is the next step.</p>
+
+  <h3>Read the trace on the site</h3>
+  <ol>
+    <li>Go to <a href="https://app.crewai.com">app.crewai.com</a> and sign in with the same account.</li>
+    <li>Open your project. The crew name on the run is Suraksha Coverage Desk.</li>
+    <li>Open the <strong>Traces</strong> tab. You get a list of runs, newest first.</li>
+    <li>Click the run you just finished. If several are listed, match the time to the terminal run.</li>
+  </ol>
+  <p>On that run, look for these parts:</p>
+  <table>
+    <thead>
+      <tr><th>On the trace</th><th>What you should find for CLM-20481</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Execution summary</td><td>Token counts, how many model calls were made, how long the whole crew took, and an estimated cost. Two tasks cost more than one task did.</td></tr>
+      <tr><td>Tasks and agents</td><td>Two tasks, both completed. <code>coverage_opinion</code> is assigned to the coverage officer agent. <code>examiner_brief</code> is assigned to the examiner brief agent. The brief's start time is after the opinion's end time.</td></tr>
+      <tr><td>Execution timeline</td><td>The coverage bar finishes, then the brief bar starts. They do not overlap. That is the sequential order.</td></tr>
+      <tr><td>Coverage task, opened</td><td>Tool calls for Policy Record, with claim id CLM-20481, and Earlier Claims, with Highway Motors. The output starts <code>PRELIMINARY COVERAGE OPINION — NON-BINDING</code> and quotes Exclusion 4 and circular CL-17.</td></tr>
+      <tr><td>Brief task, opened</td><td>No tool call. Its input contains the coverage opinion, because <code>context</code> passed that answer in. Its output starts <code>EXAMINER BRIEF — NON-BINDING</code>.</td></tr>
+      <tr><td>Final output</td><td>The brief, which is the last task. The opinion is still on the coverage task above it.</td></tr>
+    </tbody>
+  </table>
+  <p>Click each task in the timeline or the task list. The detail shows the task description, the expected output, the agent, the model, the start and end, the input that task received, and the output it wrote. That is how you check that the brief agent read the opinion and did not open the database itself.</p>
+
+  <div class="warning">
+    <strong>If the Traces tab is empty.</strong>
+    Run <code>crewai traces status</code>. If it says disabled, run <code>crewai traces enable</code>, confirm <code>"tracing": true</code> is saved in <code>crew.jsonc</code>, and run <code>uv run python desk.py</code> again from the project folder. Answer <code>y</code> if the share question appears. A run made from the chat before you signed in does not leave a record you can open.
+  </div>
+
+  <h2>What just happened</h2>
+  <div class="file-tree">You pick a claim and ask a question
+        │
+        ▼
+Task 1: coverage officer agent
+        calls Policy Record and, if needed, Earlier Claims
+        writes the coverage opinion
+        │
+        ▼
+The crew passes that opinion as context
+        │
+        ▼
+Task 2: examiner brief agent
+        reads only that opinion
+        writes the examiner brief
+        │
+        ▼
+The chat shows both</div>
+  <ul>
+    <li>A crew can hold more than one agent. Each task names the agent who does it.</li>
+    <li>Sequential means the tasks run in the order written in <code>crew.jsonc</code>. The brief task waits until the coverage task has finished.</li>
+    <li><code>context</code> is how the second task receives the first task's answer. The brief agent has no tools, so that answer is the only file it can read.</li>
+    <li><code>result.raw</code> is only the last task. <code>result.tasks_output</code> is the full line of answers.</li>
+    <li>The tools did not move. Policy Record is still on the coverage officer agent. Earlier Claims is still on the coverage task alone.</li>
+    <li><code>"tracing": true</code> sends that same run to your CrewAI account. The Traces tab is where you see the two tasks, the tool calls, and the opinion being passed into the brief.</li>
+  </ul>
+
+  <h2>If something goes wrong</h2>
+  <table>
+    <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td><code>context reference 'coverage_opinion'</code> has not been defined yet</td><td>In <code>crew.jsonc</code>, the coverage task must be named <code>coverage_opinion</code> and must appear above the brief task.</td></tr>
+      <tr><td>The agent file <code>examiner_brief</code> cannot be found</td><td>The file must be <code>agents/examiner_brief.jsonc</code>, and <code>crew.jsonc</code> must list <code>examiner_brief</code>.</td></tr>
+      <tr><td>The chat shows only the brief</td><td><code>respond</code> is still returning <code>result.raw</code>. Return every item in <code>result.tasks_output</code>, as in Step 3.</td></tr>
+      <tr><td>The brief agent calls Policy Record or Earlier Claims</td><td>The brief task must say <code>"agent": "examiner_brief"</code>. If it says <code>coverage_officer</code>, it inherits Policy Record, because that tool sits on the coverage officer agent. The brief agent file must not have a <code>tools</code> list.</td></tr>
+      <tr><td>Earlier Claims runs during the brief</td><td><code>_get_crew</code> must add <code>earlier_claims</code> only to <code>_crew.tasks[0]</code>, and that first task must be the coverage opinion.</td></tr>
+      <tr><td>The brief invents a clause or an older claim</td><td>Check that the brief task still has <code>"context": ["coverage_opinion"]</code>, and that its constraints still forbid facts absent from the opinion. Restart the chat.</td></tr>
+      <tr><td>The chat still answers with one task</td><td>Stop Streamlit and start it again. The first load of the crew is kept until you restart.</td></tr>
+      <tr><td>The Traces tab has no new run</td><td>Sign in with <code>crewai login</code>, set <code>"tracing": true</code>, run <code>crewai traces enable</code>, then <code>uv run python desk.py</code>. Type <code>y</code> within 20 seconds if asked to share the trace. Refresh the Traces tab.</td></tr>
+      <tr><td><code>crewai login</code> waits, then fails</td><td>Run it again from <code>suraksha_claims_desk</code>. Open the printed address yourself, enter the new code, and wait until the terminal finishes.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="exercise">
+    <div class="exercise-title">Try these on your own</div>
+    <ol>
+      <li>On CLM-20481, ask “Has Highway Motors appeared before?” The opinion and the brief should both mention the bumper claim from five months ago. Records opened should name Earlier Claims. The brief should not add a third older claim.</li>
+      <li>On CLM-10044, ask “What is the chassis number?” The opinion should say it is not on file. The brief should repeat that, and should not describe a police report that the policy record says is missing.</li>
+      <li>In <code>agents/examiner_brief.jsonc</code>, add one sentence to the backstory: “Do not repeat rupee amounts.” Restart the chat and ask the coverage question on CLM-10021. The opinion should still show INR 18000. The brief should leave the amount out. Put the original backstory back when you are done, and restart the chat again.</li>
+    </ol>
+  </div>
+</main>
+</body>
+</html>
